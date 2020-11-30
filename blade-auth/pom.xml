@@ -87,7 +87,7 @@
             <artifactId>blade-starter-trace</artifactId>
         </dependency>-->
         <!-- 解决Java11无法运行的问题 -->
-        <!--<dependency>
+        <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.2.11</version>
@@ -106,7 +106,7 @@
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
-        </dependency>-->
+        </dependency>
     </dependencies>
 
     <build>
