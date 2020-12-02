@@ -28,6 +28,11 @@ import static org.springblade.core.launch.constant.AppConstant.APPLICATION_NAME_
 public interface LauncherConstant {
 
 	/**
+	 * demo
+	 */
+	String APPLICATION_DEMO_NAME = APPLICATION_NAME_PREFIX + "demo";
+
+	/**
 	 * xxljob
 	 */
 	String APPLICATION_XXLJOB_NAME = APPLICATION_NAME_PREFIX + "xxljob";
