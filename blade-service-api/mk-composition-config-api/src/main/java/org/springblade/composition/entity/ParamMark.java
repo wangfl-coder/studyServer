@@ -14,7 +14,7 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.system.entity;
+package org.springblade.composition.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -29,12 +29,18 @@ import org.springblade.core.mp.base.BaseEntity;
  * @author Chill
  */
 @Data
-@TableName("blade_param_mark")
+@TableName("mk_param_mark")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "ParamMark对象", description = "ParamMark对象")
 public class ParamMark extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 租户ID
+	 */
+	@ApiModelProperty(value = "租户ID")
+	private String tenantId;
 
 	/**
 	 * 参数名

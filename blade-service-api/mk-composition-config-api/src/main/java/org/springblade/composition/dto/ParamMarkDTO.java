@@ -14,11 +14,11 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.system.dto;
+package org.springblade.composition.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springblade.system.entity.ParamMark;
+import org.springblade.composition.entity.ParamMark;
 
 /**
  * 数据传输对象实体类

@@ -14,26 +14,24 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.demo;
+package org.springblade.composition.service;
 
-import org.springblade.core.cloud.feign.EnableBladeFeign;
-import org.springblade.core.launch.BladeApplication;
-import org.springblade.core.launch.constant.AppConstant;
-import org.springframework.cloud.client.SpringCloudApplication;
+import org.springblade.composition.entity.ParamMark;
+import org.springblade.core.mp.base.BaseService;
 
 /**
- * Desk启动器
+ * 服务类
  *
  * @author Chill
  */
-@EnableBladeFeign
-@SpringCloudApplication
-// @SeataCloudApplication
-public class DemoApplication {
+public interface IParamMarkService extends BaseService<ParamMark> {
 
-	public static void main(String[] args) {
-		BladeApplication.run(AppConstant.APPLICATION_DEMO_NAME, DemoApplication.class, args);
-	}
+	/**
+	 * 获取参数值
+	 *
+	 * @param paramKey 参数key
+	 * @return String
+	 */
+	String getValue(String paramKey);
 
 }
-

@@ -14,22 +14,27 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.system.vo;
+package org.springblade.composition.service.impl;
 
-import io.swagger.annotations.ApiModel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.springblade.system.entity.ParamMark;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.springblade.composition.entity.ParamMark;
+import org.springblade.composition.mapper.ParamMarkMapper;
+import org.springblade.composition.service.IParamMarkService;
+import org.springblade.core.mp.base.BaseServiceImpl;
+import org.springframework.stereotype.Service;
 
 /**
- * 视图实体类
+ * 服务实现类
  *
  * @author Chill
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "ParamMarkVO对象", description = "ParamMarkVO对象")
-public class ParamMarkVO extends ParamMark {
-	private static final long serialVersionUID = 1L;
+@Service
+public class ParamMarkServiceImpl extends BaseServiceImpl<ParamMarkMapper, ParamMark> implements IParamMarkService {
+
+	@Override
+	public String getValue(String paramKey) {
+		ParamMark param = this.getOne(Wrappers.<ParamMark>query().lambda().eq(ParamMark::getParamKey, paramKey));
+		return param.getParamValue();
+	}
 
 }

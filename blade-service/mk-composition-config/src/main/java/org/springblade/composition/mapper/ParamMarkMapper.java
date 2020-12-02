@@ -14,11 +14,10 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.system.mapper;
+package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.springblade.system.entity.Param;
-import org.springblade.system.entity.ParamMark;
+import org.springblade.composition.entity.ParamMark;
 
 /**
  * Mapper 接口
