@@ -29,10 +29,10 @@ import org.springblade.core.mp.base.BaseEntity;
  * @author Chill
  */
 @Data
-@TableName("blade_param")
+@TableName("blade_param_mark")
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Param对象", description = "Param对象")
-public class Param extends BaseEntity {
+@ApiModel(value = "ParamMark对象", description = "ParamMark对象")
+public class ParamMark extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

@@ -17,14 +17,14 @@
 package org.springblade.system.service;
 
 import org.springblade.core.mp.base.BaseService;
-import org.springblade.system.entity.Param;
+import org.springblade.system.entity.ParamMark;
 
 /**
  * 服务类
  *
  * @author Chill
  */
-public interface IParamService extends BaseService<Param> {
+public interface IParamMarkService extends BaseService<ParamMark> {
 
 	/**
 	 * 获取参数值

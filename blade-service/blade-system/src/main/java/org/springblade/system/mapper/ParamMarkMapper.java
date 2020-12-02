@@ -18,12 +18,13 @@ package org.springblade.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springblade.system.entity.Param;
+import org.springblade.system.entity.ParamMark;
 
 /**
  * Mapper 接口
  *
  * @author Chill
  */
-public interface ParamMapper extends BaseMapper<Param> {
+public interface ParamMarkMapper extends BaseMapper<ParamMark> {
 
 }

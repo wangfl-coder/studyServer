@@ -19,8 +19,9 @@ package org.springblade.system.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.system.entity.Param;
-import org.springblade.system.mapper.ParamMapper;
-import org.springblade.system.service.IParamService;
+import org.springblade.system.entity.ParamMark;
+import org.springblade.system.mapper.ParamMarkMapper;
+import org.springblade.system.service.IParamMarkService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,11 +30,11 @@ import org.springframework.stereotype.Service;
  * @author Chill
  */
 @Service
-public class ParamServiceImpl extends BaseServiceImpl<ParamMapper, Param> implements IParamService {
+public class ParamMarkServiceImpl extends BaseServiceImpl<ParamMarkMapper, ParamMark> implements IParamMarkService {
 
 	@Override
 	public String getValue(String paramKey) {
-		Param param = this.getOne(Wrappers.<Param>query().lambda().eq(Param::getParamKey, paramKey));
+		ParamMark param = this.getOne(Wrappers.<ParamMark>query().lambda().eq(ParamMark::getParamKey, paramKey));
 		return param.getParamValue();
 	}
 

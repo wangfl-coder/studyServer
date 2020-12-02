@@ -19,7 +19,7 @@ package org.springblade.system.vo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springblade.system.entity.Param;
+import org.springblade.system.entity.ParamMark;
 
 /**
  * 视图实体类
@@ -28,8 +28,8 @@ import org.springblade.system.entity.Param;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "ParamVO对象", description = "ParamVO对象")
-public class ParamVO extends Param {
+@ApiModel(value = "ParamMarkVO对象", description = "ParamMarkVO对象")
+public class ParamMarkVO extends ParamMark {
 	private static final long serialVersionUID = 1L;
 
 }
