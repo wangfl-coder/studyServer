@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.or
+g/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.composition.mapper.CompositionMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
+        <result column="is_delete" property="isDeleted"/>
+        <result column="tenent_id" property="tenentId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="create_dept" property="createDept"/>
+    </resultMap>
+</mapper>
