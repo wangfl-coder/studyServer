@@ -40,7 +40,7 @@ public class CompositionController extends BladeController {
 
 	@GetMapping("/list")
 	@ApiOperation(value = "查询全部组合")
-	public R<List<Composition>> list(@RequestParam(value = "name") String name){
+	public R<List<Composition>> list(@RequestParam(value = "name",required = false) String name){
 		QueryWrapper<Composition> compositionQueryWrapper = new QueryWrapper<>();
 		compositionQueryWrapper.eq("name",name);
 		List<Composition> list = compositionService.list(compositionQueryWrapper);
