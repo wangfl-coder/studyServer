@@ -24,11 +24,7 @@ public class CompositionController extends BladeController {
 
 	@PostMapping("/save")
 	@ApiOperation(value = "添加组合")
-	public R add(@RequestParam(value = "name") String name,@RequestParam(value = "field") String field,@RequestParam(value = "description") String description){
-		Composition composition = new Composition();
-		composition.setName(name);
-		composition.setField(field);
-		composition.setDescription(description);
+	public R add(@RequestBody Composition composition){
 		return R.status(compositionService.save(composition));
 	}
 

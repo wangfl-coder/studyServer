@@ -21,13 +21,7 @@ public class TaskController {
 
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加任务")
-	public R save(@RequestParam(value = "ebId") Long ebId,@RequestParam(value = "taskName") String taskName,@RequestParam(value = "taskType") int taskType,@RequestParam(value = "templateId") Long templateId,@RequestParam(value = "description") String description){
-		Task task = new Task();
-		task.setEbId(ebId);
-		task.setTaskName(taskName);
-		task.setTaskType(taskType);
-		task.setTemplateId(templateId);
-		task.setDescription(description);
+	public R save(@RequestBody Task task){
 		boolean save = taskService.save(task);
 		return R.status(save);
 	}
