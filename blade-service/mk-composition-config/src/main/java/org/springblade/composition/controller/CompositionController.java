@@ -2,17 +2,26 @@ package org.springblade.composition.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.mapper.CompositionMapper;
 import org.springblade.composition.service.CompositionService;
 import org.springblade.core.boot.ctrl.BladeController;
+import org.springblade.core.mp.support.Condition;
+import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping(value = "composition")
@@ -35,17 +44,23 @@ public class CompositionController extends BladeController {
 	}
 
 	@GetMapping("/list")
-	@ApiOperation(value = "查询全部组合")
-	public R<List<Composition>> list(@RequestParam(value = "name",required = false) String name){
-		List<Composition> list;
-		if(name != null){
-			QueryWrapper<Composition> compositionQueryWrapper = new QueryWrapper<>();
-			compositionQueryWrapper.eq("name",name);
-			list = compositionService.list(compositionQueryWrapper);
-		}else {
-			list = compositionService.list();
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "paramName", value = "参数名称", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "paramKey", value = "参数键名", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "paramValue", value = "参数键值", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string")
+	})
+	@ApiOperation(value = "分页查询全部组合")
+	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,Query query) {
+		QueryWrapper<Composition> compositionQueryWrapper;
+		if(name != null) {
+			compositionQueryWrapper = new QueryWrapper<>();
+			compositionQueryWrapper.like("name", "%"+name+"%");
+		} else{
+			compositionQueryWrapper = null;
 		}
-		return R.data(list);
+		IPage<Composition> pages = compositionService.page(Condition.getPage(query), compositionQueryWrapper);
+		return R.data(pages);
 	}
 
 	@PostMapping(value = "/update")
