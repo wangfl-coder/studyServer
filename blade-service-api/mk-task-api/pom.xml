@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mk-composition-config-api</artifactId>
+    <artifactId>mk-task-api</artifactId>
     <name>${project.artifactId}</name>
     <version>${bladex.project.version}</version>
     <packaging>jar</packaging>
@@ -19,7 +19,6 @@
             <artifactId>blade-common</artifactId>
         </dependency>
     </dependencies>
-
 
 
 </project>

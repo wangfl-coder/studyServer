@@ -29,7 +29,6 @@ import org.springframework.cloud.client.SpringCloudApplication;
  */
 @EnableBladeFeign
 @SpringCloudApplication
-// @SeataCloudApplication
 //@EnableHystrix
 public class CompositionConfigApplication {
 

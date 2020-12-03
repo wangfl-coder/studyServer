@@ -9,8 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mk-composition-config</artifactId>
-
+    <artifactId>mk-task</artifactId>
     <name>${project.artifactId}</name>
     <version>${bladex.project.version}</version>
     <packaging>jar</packaging>
@@ -31,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.springblade</groupId>
-            <artifactId>mk-composition-config-api</artifactId>
+            <artifactId>mk-task-api</artifactId>
             <version>2.7.0.RELEASE</version>
         </dependency>
 
@@ -60,6 +59,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
