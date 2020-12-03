@@ -40,8 +40,7 @@
         <module>blade-service-api</module>
         <module>blade-common</module>
         <module>blade-ops-api</module>
-        <module>blade-service-api/mk-composition-config-api</module>
-        <module>blade-service/mk-composition-config</module>
+
     </modules>
 
     <dependencyManagement>
