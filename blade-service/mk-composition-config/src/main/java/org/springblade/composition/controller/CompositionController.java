@@ -3,24 +3,20 @@ package org.springblade.composition.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
-import org.springblade.composition.mapper.CompositionMapper;
 import org.springblade.composition.service.CompositionService;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.Func;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -71,7 +67,7 @@ public class CompositionController extends BladeController {
 
 	@PostMapping(value = "/remove")
 	@ApiOperation(value = "删除组合")
-	public R delete(@RequestParam Long id){
-		return R.status(compositionService.removeById(id));
+	public R delete(@RequestParam String ids){
+		return R.status(compositionService.deleteLogic(Func.toLongList(ids)));
 	}
 }

@@ -10,11 +10,11 @@ import lombok.AllArgsConstructor;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -65,8 +65,8 @@ public class TaskController {
 
 	@PostMapping(value = "/remove")
 	@ApiOperation(value = "删除任务")
-	public R delete(@RequestParam Long id){
-		return R.status(taskService.removeById(id));
+	public R delete(@RequestParam String ids){
+		return R.status(taskService.deleteLogic(Func.toLongList(ids)));
 	}
 
 
