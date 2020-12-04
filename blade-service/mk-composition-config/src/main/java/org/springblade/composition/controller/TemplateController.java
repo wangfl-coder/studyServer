@@ -76,7 +76,7 @@ public class TemplateController extends BladeController {
 	@GetMapping("/compositions")
 	@ApiOperationSupport(order = 6)
 	@ApiOperation(value = "模板的所有组合", notes = "传入template")
-	public R<Template> compositions(Template template) {
+	public R<TemplateVO> compositions(Template template) {
 		Template detail = templateService.getOne(Condition.getQueryWrapper(template));
 		TemplateVO templateVO = Objects.requireNonNull(BeanUtil.copy(detail, TemplateVO.class));
 		List<TemplateComposition> templateCompositions = templateCompositionService.list(Wrappers.<TemplateComposition>query().lambda().in(TemplateComposition::getTemplateId, template.getId()));
