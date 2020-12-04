@@ -14,27 +14,16 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service.impl;
+package org.springblade.composition.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.springblade.composition.entity.ParamMark;
-import org.springblade.composition.mapper.ParamMarkMapper;
-import org.springblade.composition.service.IParamMarkService;
-import org.springblade.core.mp.base.BaseServiceImpl;
-import org.springframework.stereotype.Service;
+import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.core.mp.base.BaseService;
 
 /**
- * 服务实现类
+ * 服务类
  *
  * @author KaiLun
  */
-@Service
-public class ParamMarkServiceImpl extends BaseServiceImpl<ParamMarkMapper, ParamMark> implements IParamMarkService {
-
-	@Override
-	public String getValue(String paramKey) {
-		ParamMark param = this.getOne(Wrappers.<ParamMark>query().lambda().eq(ParamMark::getParamKey, paramKey));
-		return param.getParamValue();
-	}
+public interface ITemplateCompositionService extends BaseService<TemplateComposition> {
 
 }

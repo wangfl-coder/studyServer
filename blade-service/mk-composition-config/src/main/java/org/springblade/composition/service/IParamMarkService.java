@@ -22,7 +22,7 @@ import org.springblade.core.mp.base.BaseService;
 /**
  * 服务类
  *
- * @author Chill
+ * @author KaiLun
  */
 public interface IParamMarkService extends BaseService<ParamMark> {
 

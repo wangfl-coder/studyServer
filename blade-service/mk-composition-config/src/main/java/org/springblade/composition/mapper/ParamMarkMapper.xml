@@ -6,12 +6,6 @@
     <resultMap id="paramResultMap" type="org.springblade.composition.entity.ParamMark">
         <result column="id" property="id"/>
         <result column="tenant_id" property="tenantId"/>
-        <result column="create_user" property="createUser"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_user" property="updateUser"/>
-        <result column="update_time" property="updateTime"/>
-        <result column="status" property="status"/>
-        <result column="is_deleted" property="isDeleted"/>
         <result column="param_name" property="paramName"/>
         <result column="param_key" property="paramKey"/>
         <result column="param_value" property="paramValue"/>

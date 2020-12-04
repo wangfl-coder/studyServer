@@ -22,7 +22,7 @@ import org.springblade.composition.entity.ParamMark;
 /**
  * Mapper 接口
  *
- * @author Chill
+ * @author KaiLun
  */
 public interface ParamMarkMapper extends BaseMapper<ParamMark> {
 

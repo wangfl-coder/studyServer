@@ -16,10 +16,9 @@
  */
 package org.springblade.composition.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.springblade.composition.entity.ParamMark;
-import org.springblade.composition.mapper.ParamMarkMapper;
-import org.springblade.composition.service.IParamMarkService;
+import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.composition.mapper.TemplateCompositionMapper;
+import org.springblade.composition.service.ITemplateCompositionService;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +28,6 @@ import org.springframework.stereotype.Service;
  * @author KaiLun
  */
 @Service
-public class ParamMarkServiceImpl extends BaseServiceImpl<ParamMarkMapper, ParamMark> implements IParamMarkService {
-
-	@Override
-	public String getValue(String paramKey) {
-		ParamMark param = this.getOne(Wrappers.<ParamMark>query().lambda().eq(ParamMark::getParamKey, paramKey));
-		return param.getParamValue();
-	}
+public class TemplateCompositionServiceImpl extends BaseServiceImpl<TemplateCompositionMapper, TemplateComposition> implements ITemplateCompositionService {
 
 }
