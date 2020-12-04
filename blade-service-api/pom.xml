@@ -22,6 +22,7 @@
         <module>blade-system-api</module>
         <module>blade-user-api</module>
         <module>mk-composition-config-api</module>
+        <module>mk-task-api</module>
     </modules>
 
     <dependencies>
