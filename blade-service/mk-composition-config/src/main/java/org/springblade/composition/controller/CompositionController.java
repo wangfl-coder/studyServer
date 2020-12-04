@@ -41,9 +41,6 @@ public class CompositionController extends BladeController {
 
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "paramName", value = "参数名称", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "paramKey", value = "参数键名", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "paramValue", value = "参数键值", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询全部组合")

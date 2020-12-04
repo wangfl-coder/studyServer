@@ -38,7 +38,7 @@ public interface LauncherConstant {
 	String APPLICATION_XXLJOB_NAME = APPLICATION_NAME_PREFIX + "xxljob";
 	String APPLICATION_COMPOSITION_CONFIG_NAME = APPLICATION_NAME_PREFIX + "composition-config";
 	String APPLICATION_TASK_NAME = APPLICATION_NAME_PREFIX + "task";
-
+	String APPLICATION_SUBTASK_NAME = APPLICATION_NAME_PREFIX + "subtask";
 	/**
 	 * xxljob
 	 */
