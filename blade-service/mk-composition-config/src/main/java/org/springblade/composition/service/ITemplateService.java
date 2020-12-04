@@ -14,27 +14,35 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service.impl;
+package org.springblade.composition.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.springblade.composition.entity.ParamMark;
-import org.springblade.composition.mapper.ParamMarkMapper;
-import org.springblade.composition.service.IParamMarkService;
-import org.springblade.core.mp.base.BaseServiceImpl;
-import org.springframework.stereotype.Service;
+import org.springblade.composition.entity.Template;
+import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.core.mp.base.BaseService;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
 
 /**
- * 服务实现类
+ * 服务类
  *
- * @author KaiLun
+ * @author Kailun
  */
-@Service
-public class ParamMarkServiceImpl extends BaseServiceImpl<ParamMarkMapper, ParamMark> implements IParamMarkService {
+public interface ITemplateService extends BaseService<Template> {
+	/**
+	 * 构建模板下的组合
+	 *
+	 * @param templateCompositions templateComposition集合
+	 * @return 是否成功
+	 */
+	boolean compose(@NotEmpty List<TemplateComposition> templateCompositions);
 
-	@Override
-	public String getValue(String paramKey) {
-		ParamMark param = this.getOne(Wrappers.<ParamMark>query().lambda().eq(ParamMark::getParamKey, paramKey));
-		return param.getParamValue();
-	}
+	/**
+	 * 删除模板
+	 * @param ids
+	 * @return
+	 */
+	boolean remove(String ids);
 
 }
