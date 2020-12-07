@@ -18,7 +18,7 @@ import org.springblade.core.mp.base.BaseEntity;
 public class Composition extends BaseEntity {
 
 	@ApiModelProperty("租户id")
-	private String tenentId;
+	private String tenantId;
 	@ApiModelProperty("组合名字")
 	private String name;
 	@ApiModelProperty("组合字段")
@@ -27,6 +27,8 @@ public class Composition extends BaseEntity {
 //	private Integer status;
 	@ApiModelProperty("组合描述")
 	private String description;
+	@ApiModelProperty("标注类型")
+	private Integer annotationType;
 //	@TableLogic
 //	private Integer isDel;
 //	private Date createTime;
