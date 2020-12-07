@@ -8,6 +8,7 @@
         <result column="template_name" property="templateName"/>
         <result column="tenant_id" property="tenantId"/>
         <result column="remark" property="remark"/>
+        <result column="more_message_position_id" property="moreMessagePositionId"/>
     </resultMap>
 
 </mapper>

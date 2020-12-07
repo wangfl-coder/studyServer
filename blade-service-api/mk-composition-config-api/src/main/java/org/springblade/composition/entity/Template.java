@@ -70,4 +70,10 @@ public class Template extends BaseEntity {
 	@ApiModelProperty(value = "备注")
 	private String remark;
 
+	/**
+	 * 做补充信息的岗位Id
+	 */
+	@ApiModelProperty(value = "做补充信息的岗位Id")
+	private String moreMessagePositionId;
+
 }
