@@ -39,19 +39,15 @@ public class TaskController {
 
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "paramName", value = "参数名称", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "paramKey", value = "参数键名", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "paramValue", value = "参数键值", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<Task>> list(@RequestParam(value = "taskName",required = false) String taskName, Query query) {
-		QueryWrapper<Task> compositionQueryWrapper;
+		QueryWrapper<Task> compositionQueryWrapper = new QueryWrapper<>();
 		if(taskName != null) {
-			compositionQueryWrapper = new QueryWrapper<>();
-			compositionQueryWrapper.like("task_name", "%"+taskName+"%");
+			compositionQueryWrapper.like("task_name", "%"+taskName+"%").orderByDesc("create_time");
 		} else{
-			compositionQueryWrapper = null;
+			compositionQueryWrapper.orderByDesc("create_time");
 		}
 		IPage<Task> pages = taskService.page(Condition.getPage(query), compositionQueryWrapper);
 		return R.data(pages);

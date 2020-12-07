@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
 
+import java.util.Date;
+
 @Data
 @TableName(value = "mk_task")
 @AllArgsConstructor
@@ -27,5 +29,13 @@ public class Task extends BaseEntity {
 	private String code;
 	@ApiModelProperty(value = "任务描述")
 	private String description;
+	@ApiModelProperty(value = "开始时间")
+	private Date startTime;
+	@ApiModelProperty(value = "完成时间")
+	private Date finish_time;
+	@ApiModelProperty(value = "截止时间")
+	private Date deadline;
+	@ApiModelProperty(value = "优先级")
+	private Integer priority;
 
 }

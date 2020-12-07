@@ -5,7 +5,8 @@ g/dtd/mybatis-3-mapper.dtd">
     <!-- 通用查询映射结果 -->
     <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
         <result column="is_delete" property="isDeleted"/>
-        <result column="tenent_id" property="tenentId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="annotation_type" property="annotationType"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="create_user" property="createUser"/>

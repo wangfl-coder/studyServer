@@ -2,5 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.or
 g/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.task.mapper.TaskMapper">
-
+    <resultMap id="taskMap" type="org.springblade.task.entity.Task">
+        <result column="is_delete" property="isDeleted"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="task_type" property="taskType"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="create_dept" property="createDept"/>
+        <result column="start_time" property="startTime"/>
+        <result column="finish_time" property="finishTime"/>
+    </resultMap>
 </mapper>
