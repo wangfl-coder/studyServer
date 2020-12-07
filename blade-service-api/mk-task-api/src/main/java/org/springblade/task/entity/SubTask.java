@@ -1,4 +1,4 @@
-package org.springblade.subtask.entity;
+package org.springblade.task.entity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

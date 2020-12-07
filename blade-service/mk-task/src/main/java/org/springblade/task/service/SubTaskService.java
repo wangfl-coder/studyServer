@@ -1,7 +1,7 @@
-package org.springblade.subtask.service;
+package org.springblade.task.service;
 
 import org.springblade.core.mp.base.BaseService;
-import org.springblade.subtask.entity.SubTask;
+import org.springblade.task.entity.SubTask;
 
 
 public interface SubTaskService extends BaseService<SubTask>{

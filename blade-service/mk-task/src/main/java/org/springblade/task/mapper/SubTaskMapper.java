@@ -1,7 +1,7 @@
-package org.springblade.subtask.mapper;
+package org.springblade.task.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.springblade.subtask.entity.SubTask;
+import org.springblade.task.entity.SubTask;
 
 
 public interface SubTaskMapper extends BaseMapper<SubTask> {

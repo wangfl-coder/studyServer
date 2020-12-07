@@ -23,7 +23,6 @@
         <module>blade-user</module>
         <module>mk-composition-config</module>
         <module>mk-task</module>
-        <module>mk-subtask</module>
     </modules>
 
     <dependencies>

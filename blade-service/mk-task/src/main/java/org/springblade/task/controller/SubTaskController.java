@@ -1,4 +1,4 @@
-package org.springblade.subtask.controller;
+package org.springblade.task.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -11,9 +11,11 @@ import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.Func;
-import org.springblade.subtask.entity.SubTask;
-import org.springblade.subtask.service.SubTaskService;
+import org.springblade.task.entity.SubTask;
+import org.springblade.task.entity.Task;
+import org.springblade.task.service.SubTaskService;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @AllArgsConstructor
@@ -25,8 +27,8 @@ public class SubTaskController {
 
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加子任务")
-	public R save(@RequestBody SubTask subTask){
-		boolean save = subTaskService.save(subTask);
+	public R save(@RequestBody SubTask subtask){
+		boolean save = subTaskService.save(subtask);
 		return R.status(save);
 	}
 
@@ -41,10 +43,10 @@ public class SubTaskController {
 		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询全部子任务")
-	public R<IPage<SubTask>> list(@RequestParam(value = "targetId",required = false) String targetId, Query query) {
+	public R<IPage<SubTask>> list(@RequestParam(value = "targetType",required = false) String targetType, Query query) {
 		QueryWrapper<SubTask> compositionQueryWrapper = new QueryWrapper<>();
-		if(targetId != null) {
-			compositionQueryWrapper.like("target_id", "%"+targetId+"%").orderByDesc("create_time");
+		if(targetType != null) {
+			compositionQueryWrapper.like("targetType", "%"+targetType+"%").orderByDesc("create_time");
 		} else{
 			compositionQueryWrapper.orderByDesc("create_time");
 		}
@@ -54,8 +56,8 @@ public class SubTaskController {
 
 	@PostMapping(value = "/update")
 	@ApiOperation(value = "更新子任务")
-	public R update(@RequestBody SubTask subTask){
-		return R.status(subTaskService.updateById(subTask));
+	public R update(@RequestBody SubTask subtask){
+		return R.status(subTaskService.updateById(subtask));
 	}
 
 	@PostMapping(value = "/remove")
@@ -63,4 +65,6 @@ public class SubTaskController {
 	public R delete(@RequestParam String ids){
 		return R.status(subTaskService.deleteLogic(Func.toLongList(ids)));
 	}
+
+
 }

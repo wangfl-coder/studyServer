@@ -38,7 +38,6 @@ public interface LauncherConstant {
 	String APPLICATION_XXLJOB_NAME = APPLICATION_NAME_PREFIX + "xxljob";
 	String APPLICATION_COMPOSITION_CONFIG_NAME = APPLICATION_NAME_PREFIX + "composition-config";
 	String APPLICATION_TASK_NAME = APPLICATION_NAME_PREFIX + "task";
-	String APPLICATION_SUBTASK_NAME = APPLICATION_NAME_PREFIX + "subtask";
 	/**
 	 * xxljob
 	 */
@@ -47,7 +46,7 @@ public interface LauncherConstant {
 	/**
 	 * nacos dev 地址
 	 */
-	String NACOS_DEV_ADDR = "127.0.0.1:8848";
+	String NACOS_DEV_ADDR = "192.168.6.202:8848";
 
 	/**
 	 * nacos prod 地址
