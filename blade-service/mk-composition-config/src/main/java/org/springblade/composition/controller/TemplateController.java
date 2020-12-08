@@ -34,6 +34,7 @@ import org.springblade.core.tool.api.R;
 
 
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -117,6 +118,7 @@ public class TemplateController extends BladeController {
 	 */
 	@PostMapping("/create")
 	@ApiOperationSupport(order = 6)
+	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "新增或修改模板，同时构建组合", notes = "传入templateVO")
 	public R submit(@Valid @RequestBody TemplateVO templateVO) {
 		Template template = templateVO;
