@@ -18,17 +18,13 @@ package org.springblade.composition.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
-
-import java.io.Serializable;
 
 /**
  * 实体类
@@ -36,10 +32,9 @@ import java.io.Serializable;
  * @author Chill
  */
 @Data
-@TableName("mk_template")
-@EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Template对象", description = "Template对象")
-public class Template extends BaseEntity {
+@TableName("mk_annotation_data")
+@ApiModel(value = "annotationData对象", description = "annotationData对象")
+public class AnnotationData extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -57,23 +52,29 @@ public class Template extends BaseEntity {
 	@ApiModelProperty(value = "租户ID")
 	private String tenantId;
 
+	/**
+	 * 子任务id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
 
 	/**
-	 * 模板名
+	 * 标注字段
 	 */
-	@ApiModelProperty(value = "模板名")
-	private String templateName;
+	@ApiModelProperty(value = "标注字段")
+	private String field;
+
+	/**
+	 * 标注值
+	 */
+	@ApiModelProperty(value = "标注值")
+	private String value;
 
 	/**
 	 * 备注
 	 */
 	@ApiModelProperty(value = "备注")
 	private String remark;
-
-	/**
-	 * 做补充信息的岗位Id
-	 */
-	@ApiModelProperty(value = "做补充信息的岗位Id")
-	private String moreMessagePositionId;
 
 }

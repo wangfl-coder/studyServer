@@ -59,28 +59,28 @@ public class TemplateComposition extends BaseEntity {
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模板id")
-	private Long TemplateId;
+	private Long templateId;
 
 	/**
 	 * 组合id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "组合id")
-	private Long CompositionId;
+	private Long compositionId;
 
 	/**
 	 * 岗位id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "岗位id")
-	private Long PositionId;
+	private Long positionId;
 
 	/**
 	 * 重复标注次数
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "重复标注次数")
-	private Integer RepeatMarkTimes;
+	private Integer repeatMarkTimes;
 
 	/**
 	 * 备注

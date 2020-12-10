@@ -34,11 +34,13 @@ import org.springblade.core.tool.api.R;
 
 
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +78,7 @@ public class TemplateController extends BladeController {
 	@GetMapping("/compositions")
 	@ApiOperationSupport(order = 6)
 	@ApiOperation(value = "模板的所有组合", notes = "传入template")
-	public R<Template> compositions(Template template) {
+	public R<TemplateVO> compositions(Template template) {
 		Template detail = templateService.getOne(Condition.getQueryWrapper(template));
 		TemplateVO templateVO = Objects.requireNonNull(BeanUtil.copy(detail, TemplateVO.class));
 		List<TemplateComposition> templateCompositions = templateCompositionService.list(Wrappers.<TemplateComposition>query().lambda().in(TemplateComposition::getTemplateId, template.getId()));
@@ -100,13 +102,34 @@ public class TemplateController extends BladeController {
 	}
 
 	/**
-	 * 新增或修改
+	 * 新增或修改模板
 	 * 新增一个没有组合的新模板，修改名字或者备注
 	 */
 	@PostMapping("/submit")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "新增或修改", notes = "传入template")
 	public R submit(@Valid @RequestBody Template template) {
+		return R.status(templateService.saveOrUpdate(template));
+	}
+
+	/**
+	 * 新增或修改模板
+	 * 同时构建组合
+	 */
+	@PostMapping("/create")
+	@ApiOperationSupport(order = 6)
+	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "新增或修改模板，同时构建组合", notes = "传入templateVO")
+	public R submit(@Valid @RequestBody TemplateVO templateVO) {
+		Template template = templateVO;
+		boolean tmp = templateService.saveOrUpdate(template);
+		if(tmp) {
+			List<TemplateComposition> templateCompositions = templateVO.getTemplateCompositions();
+			templateCompositions.forEach(templateComposition -> templateComposition.setTemplateId(template.getId()));
+			return R.status(templateService.compose(templateCompositions));
+		} else {
+			R.fail("新建模板失败");
+		}
 		return R.status(templateService.saveOrUpdate(template));
 	}
 
