@@ -10,6 +10,8 @@ import org.springblade.core.tool.api.R;
 import org.springblade.desk.entity.Task;
 import org.springblade.desk.service.TaskService;
 import org.springblade.system.user.cache.UserCache;
+import org.springblade.system.user.entity.User;
+import org.springblade.system.user.feign.IUserClient;
 import org.springframework.web.bind.annotation.*;
 
 @NonDS
@@ -20,12 +22,15 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController extends BladeController implements CacheNames {
 
 	private TaskService taskService;
+	private IUserClient userClient;
 
 	@GetMapping(value = "/detail")
 	@ApiOperation(value = "详情")
 	public R<Task> detail(@RequestParam("businessId") Long businessId) {
 		Task detail = taskService.getById(businessId);
-		//detail.getFlow().setAssigneeName(UserCache.getUser(detail.getCreateUser()).getName());
+		User user = UserCache.getUser(detail.getCreateUser());
+//		User user = userClient.userInfoById(detail.getCreateUser()).getData();
+		detail.getFlow().setAssigneeName(user.getName());
 		return R.data(detail);
 	}
 
