@@ -60,6 +60,13 @@ public class AnnotationData extends BaseEntity {
 	private Long subTaskId;
 
 	/**
+	 * 学者id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "学者id")
+	private Long expertId;
+
+	/**
 	 * 标注字段
 	 */
 	@ApiModelProperty(value = "标注字段")

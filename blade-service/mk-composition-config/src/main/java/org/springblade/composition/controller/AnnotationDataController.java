@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
+import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.service.IAnnotationDataService;
@@ -29,6 +30,7 @@ import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.BeanUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -92,11 +94,13 @@ public class AnnotationDataController extends BladeController {
 	public R submit(@Valid @RequestBody List<AnnotationData> annotationDataList) {
 		// 删除原来的标注数据
 		List<Long> annotationDataIds = new ArrayList<>();
-
+		Expert expert = new Expert();
+		expert.setId(annotationDataList.get(0).getExpertId());
 		annotationDataList.forEach(annotationData -> {
 			annotationDataIds.add(annotationData.getId());
-
+			BeanUtil.setProperty(expert,annotationData.getField(),annotationData.getValue());
 		});
+		expertClient.saveExpert(expert);
 		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().in(AnnotationData::getId, annotationDataIds));
 		annotationDataList.forEach(annotationData -> {
 			annotationData.setId(null);

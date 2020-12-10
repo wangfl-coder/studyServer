@@ -1,10 +1,8 @@
 package org.springblade.adata.vo;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.adata.entity.Expert;
-import org.springblade.adata.entity.Notice;
 
 /**
  * 通知公告视图类
