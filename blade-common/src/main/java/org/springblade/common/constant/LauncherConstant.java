@@ -27,6 +27,16 @@ import static org.springblade.core.launch.constant.AppConstant.APPLICATION_NAME_
  */
 public interface LauncherConstant {
 
+	String MKAPP_NAME_PREFIX = "mk-";
+
+	/**
+	 * marking line
+	 */
+	String MKAPP_COMPOSITION_CONFIG_NAME = MKAPP_NAME_PREFIX + "composition-config";
+	String MKAPP_TASK_NAME = MKAPP_NAME_PREFIX + "task";
+	String MKAPP_ADATA_NAME = MKAPP_NAME_PREFIX + "adata";
+	String MKAPP_ADATA_SIDECAR_NAME = MKAPP_NAME_PREFIX + "adata-sidecar";
+
 	/**
 	 * demo
 	 */
@@ -36,8 +46,7 @@ public interface LauncherConstant {
 	 * xxljob
 	 */
 	String APPLICATION_XXLJOB_NAME = APPLICATION_NAME_PREFIX + "xxljob";
-	String APPLICATION_COMPOSITION_CONFIG_NAME = APPLICATION_NAME_PREFIX + "composition-config";
-	String APPLICATION_TASK_NAME = APPLICATION_NAME_PREFIX + "task";
+
 	/**
 	 * xxljob
 	 */
@@ -47,6 +56,8 @@ public interface LauncherConstant {
 	 * nacos dev 地址
 	 */
 	String NACOS_DEV_ADDR = "192.168.6.202:8848";
+//	String NACOS_DEV_ADDR = "127.0.0.1:8848";
+//	String NACOS_DEV_ADDR = "192.168.12.133:8848";
 
 	/**
 	 * nacos prod 地址

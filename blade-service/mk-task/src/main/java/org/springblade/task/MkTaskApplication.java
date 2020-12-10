@@ -6,8 +6,8 @@ import org.springframework.cloud.client.SpringCloudApplication;
 
 
 @SpringCloudApplication
-public class TaskApplication {
+public class MkTaskApplication {
 	public static void main(String[] args) {
-		BladeApplication.run(LauncherConstant.APPLICATION_TASK_NAME, TaskApplication.class, args);
+		BladeApplication.run(LauncherConstant.MKAPP_TASK_NAME, MkTaskApplication.class, args);
 	}
 }

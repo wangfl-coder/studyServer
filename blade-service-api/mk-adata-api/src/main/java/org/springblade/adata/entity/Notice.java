@@ -14,27 +14,51 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition;
+package org.springblade.adata.entity;
 
-import org.springblade.common.constant.LauncherConstant;
-import org.springblade.core.cloud.feign.EnableBladeFeign;
-import org.springblade.core.launch.BladeApplication;
-import org.springframework.cloud.client.SpringCloudApplication;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springblade.core.tenant.mp.TenantEntity;
 
+import java.util.Date;
 
 /**
- * Desk启动器
+ * 实体类
  *
  * @author Chill
  */
-@EnableBladeFeign
-@SpringCloudApplication
-//@EnableHystrix
-public class CompositionConfigApplication {
+@Data
+@TableName("blade_notice")
+@EqualsAndHashCode(callSuper = true)
+public class Notice extends TenantEntity {
 
-	public static void main(String[] args) {
-		BladeApplication.run(LauncherConstant.APPLICATION_COMPOSITION_CONFIG_NAME, CompositionConfigApplication.class, args);
-	}
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 标题
+	 */
+	@ApiModelProperty(value = "标题")
+	private String title;
+
+	/**
+	 * 通知类型
+	 */
+	@ApiModelProperty(value = "通知类型")
+	private Integer category;
+
+	/**
+	 * 发布日期
+	 */
+	@ApiModelProperty(value = "发布日期")
+	private Date releaseTime;
+
+	/**
+	 * 内容
+	 */
+	@ApiModelProperty(value = "内容")
+	private String content;
+
 
 }
-
