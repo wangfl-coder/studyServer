@@ -32,12 +32,12 @@
         <dependency>
             <groupId>org.springblade</groupId>
             <artifactId>mk-composition-config-api</artifactId>
-            <version>2.7.0.RELEASE</version>
+            <version>${bladex.project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springblade</groupId>
             <artifactId>mk-adata-api</artifactId>
-            <version>2.7.0.RELEASE</version>
+            <version>${bladex.project.version}</version>
         </dependency>
 
     </dependencies>

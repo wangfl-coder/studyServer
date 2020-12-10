@@ -58,7 +58,7 @@ public class ExpertClient implements IExpertClient {
 
 	@Override
 	@PostMapping(SAVE_EXPERT)
-	public R<Boolean> saveExpert(@RequestBody Expert expert) {
+	public R saveExpert(@RequestBody Expert expert) {
 		return R.status(service.saveOrUpdate(expert));
 	}
 
