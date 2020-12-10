@@ -32,9 +32,7 @@ public class Task extends BaseEntity {
 	@ApiModelProperty(value = "开始时间")
 	private Date startTime;
 	@ApiModelProperty(value = "完成时间")
-	private Date finish_time;
-	@ApiModelProperty(value = "截止时间")
-	private Date deadline;
+	private Date endTime;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
 
