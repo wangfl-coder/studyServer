@@ -47,4 +47,10 @@ public interface IExpertService extends BaseService<Expert> {
 	 */
 	R<String> fetchList(Map<String, Object> params, Query query);
 
+	/**
+	 * 导入
+	 * @param id
+	 * @return
+	 */
+	R<String> importDetail(String id);
 }
