@@ -29,7 +29,7 @@ import org.springblade.core.mp.base.BaseEntity;
  * @author Chill
  */
 @Data
-@TableName("mk_expert")
+@TableName("mk_adata_expert")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "Expert对象", description = "Expert对象")
 public class Expert extends BaseEntity {
@@ -118,7 +118,7 @@ public class Expert extends BaseEntity {
 	 * 性别
 	 */
 	@ApiModelProperty(value = "性别")
-	private Integer gender;
+	private String gender;
 
 	/**
 	 * 语言

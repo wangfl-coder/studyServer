@@ -161,4 +161,14 @@ public class ExpertController extends BladeController {
 	public R<String> fetchList(@ApiIgnore @RequestParam Map<String, Object> params, Query query) {
 		return expertService.fetchList(params, query);
 	}
+
+	/**
+	 * 导入
+	 */
+	@GetMapping("/import")
+	@ApiOperationSupport(order = 1)
+	@ApiOperation(value = "导入", notes = "传入学者id")
+	public R<String> importDetail(String id) {
+		return expertService.importDetail(id);
+	}
 }
