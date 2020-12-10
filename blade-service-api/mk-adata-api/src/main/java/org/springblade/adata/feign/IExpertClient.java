@@ -54,7 +54,7 @@ public interface IExpertClient {
 	 * @param expert 学者实体
 	 * @return
 	 */
-	@GetMapping(SAVE_EXPERT)
-	R<Boolean> saveExpert(@RequestBody Expert expert);
+	@PostMapping(SAVE_EXPERT)
+	R saveExpert(@RequestBody Expert expert);
 
 }
