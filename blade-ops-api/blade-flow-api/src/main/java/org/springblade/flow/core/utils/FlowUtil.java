@@ -36,7 +36,7 @@ public class FlowUtil {
 	private final static Map<String, String> BUSINESS_TABLE = new HashMap<>();
 
 	static {
-		BUSINESS_TABLE.put(ProcessConstant.LEAVE_KEY, "blade_process_leave");
+		BUSINESS_TABLE.put(ProcessConstant.LEAVE_KEY, "mk_task");
 	}
 
 	/**
