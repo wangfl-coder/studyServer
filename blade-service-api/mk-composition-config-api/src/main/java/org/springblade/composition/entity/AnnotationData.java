@@ -26,17 +26,15 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springblade.core.mp.base.BaseEntity;
 
-import java.io.Serializable;
-
 /**
  * 实体类
  *
  * @author Chill
  */
 @Data
-@TableName("mk_template_composition")
-@ApiModel(value = "TemplateComposition对象", description = "TemplateComposition对象")
-public class TemplateComposition extends BaseEntity {
+@TableName("mk_annotation_data")
+@ApiModel(value = "annotationData对象", description = "annotationData对象")
+public class AnnotationData extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -55,32 +53,23 @@ public class TemplateComposition extends BaseEntity {
 	private String tenantId;
 
 	/**
-	 * 模板id
+	 * 子任务id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "模板id")
-	private Long templateId;
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
 
 	/**
-	 * 组合id
+	 * 标注字段
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "组合id")
-	private Long compositionId;
+	@ApiModelProperty(value = "标注字段")
+	private String field;
 
 	/**
-	 * 岗位id
+	 * 标注值
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "岗位id")
-	private Long positionId;
-
-	/**
-	 * 重复标注次数
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "重复标注次数")
-	private Integer repeatMarkTimes;
+	@ApiModelProperty(value = "标注值")
+	private String value;
 
 	/**
 	 * 备注
