@@ -7,11 +7,13 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
+import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.desk.feign.ISubTaskClient;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +26,15 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController extends BladeController {
 
 	private TaskService taskService;
+	private IExpertClient iExpertClient;
+	private ISubTaskClient iSubTaskClient;
 
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加任务")
 	public R save(@RequestBody Task task){
 		boolean save = taskService.save(task);
+		iExpertClient.importExpertBase(task.getEbId(), task.getId());
+		iSubTaskClient.startProcess(task.getTemplateId(),compositionId);
 		return R.status(save);
 	}
 

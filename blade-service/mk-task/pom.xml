@@ -33,6 +33,11 @@
             <artifactId>mk-task-api</artifactId>
             <version>2.7.0.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-adata-api</artifactId>
+            <version>${bladex.project.version}</version>
+        </dependency>
 
     </dependencies>
 

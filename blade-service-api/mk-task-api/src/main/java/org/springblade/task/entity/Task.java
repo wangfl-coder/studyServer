@@ -18,7 +18,7 @@ import java.util.Date;
 public class Task extends BaseEntity {
 
 	@ApiModelProperty(value = "智库id")
-	private Long ebId;
+	private String ebId;
 	@ApiModelProperty(value = "任务名字")
 	private String taskName;
 	@ApiModelProperty(value = "任务类型")
