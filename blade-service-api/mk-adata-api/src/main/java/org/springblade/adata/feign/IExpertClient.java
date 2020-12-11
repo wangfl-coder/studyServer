@@ -18,14 +18,11 @@ package org.springblade.adata.feign;
 
 import org.springblade.adata.entity.Expert;
 import org.springblade.common.constant.LauncherConstant;
-import org.springblade.core.mp.support.BladePage;
-import org.springblade.adata.entity.Notice;
 import org.springblade.core.tool.api.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Notice Feign接口类
@@ -41,6 +38,7 @@ public interface IExpertClient {
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
+	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
 
 	/**
 	 * 获取学者信息
@@ -57,7 +55,12 @@ public interface IExpertClient {
 	 * @param expert 学者实体
 	 * @return
 	 */
-	@GetMapping(SAVE_EXPERT)
-	R<Boolean> saveExpert(@RequestBody Expert expert);
+	@PostMapping(SAVE_EXPERT)
+	R saveExpert(@RequestBody Expert expert);
 
+	/**
+	 * 导入智库中所有学者
+	 */
+	@PostMapping(SAVE_EXPERT)
+	R importExpertBase(String expertBaseId, Long taskId);
 }

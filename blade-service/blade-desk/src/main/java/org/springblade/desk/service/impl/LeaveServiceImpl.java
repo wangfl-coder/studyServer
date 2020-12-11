@@ -72,7 +72,6 @@ public class LeaveServiceImpl extends BaseServiceImpl<LeaveMapper, ProcessLeave>
 				throw new ServiceException("开启流程失败");
 			}
 		} else {
-
 			updateById(leave);
 		}
 		return true;

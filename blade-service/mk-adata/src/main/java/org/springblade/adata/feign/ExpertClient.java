@@ -17,6 +17,8 @@
 package org.springblade.adata.feign;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.support.BladePage;
@@ -50,7 +52,7 @@ public class ExpertClient implements IExpertClient {
 	private final IExpertService service;
 
 	@Override
-	@PostMapping(GET_EXPERT)
+	@GetMapping(GET_EXPERT)
 	public R<Expert> detail(@RequestBody Expert expert) {
 		Expert detail = service.getOne(Condition.getQueryWrapper(expert));
 		return R.data(detail);
@@ -58,8 +60,14 @@ public class ExpertClient implements IExpertClient {
 
 	@Override
 	@PostMapping(SAVE_EXPERT)
-	public R<Boolean> saveExpert(@RequestBody Expert expert) {
+	public R saveExpert(@RequestBody Expert expert) {
 		return R.status(service.saveOrUpdate(expert));
+	}
+
+	@Override
+	@PostMapping(SAVE_EXPERT_BASE)
+	public R importExpertBase(String expertBaseId, Long taskId) {
+		return service.importExpertBase(expertBaseId, taskId);
 	}
 
 }
