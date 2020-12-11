@@ -38,6 +38,7 @@ public interface IExpertClient {
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
+	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
 
 	/**
 	 * 获取学者信息
@@ -57,4 +58,9 @@ public interface IExpertClient {
 	@PostMapping(SAVE_EXPERT)
 	R saveExpert(@RequestBody Expert expert);
 
+	/**
+	 * 导入智库中所有学者
+	 */
+	@PostMapping(SAVE_EXPERT)
+	R importExpertBase(String expertBaseId, Long taskId);
 }

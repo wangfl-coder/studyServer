@@ -151,7 +151,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 	}
 
 	@Override
-	public R<String> importDetail(String id) {
+	public R importDetail(String id, Long taskId) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -196,6 +196,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		body.put("schema", schema);
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
+
 		JSONObject resObj = JSON.parseObject(res);
 		Expert expert = new Expert();
 		JSONArray dataArray = resObj.getJSONArray("data");
@@ -260,8 +261,77 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		expert.setWork(work);
 		expert.setBio(bio);
 		expert.setBioZh(bioZh);
+		expert.setTaskId(taskId);
 
 		saveOrUpdate(expert);
 		return R.data(res);
+	}
+	@Override
+	public R<String> importExpertBase(String ebId, Long taskId) {
+		if (ebId == null)
+			return R.fail("需要智库Id");
+
+		JSONArray requestBody = new JSONArray();
+		JSONObject body = new JSONObject();
+
+		JSONObject parameters = new JSONObject();
+		JSONObject filters = new JSONObject();
+		JSONObject dims = new JSONObject();
+		JSONArray eb = new JSONArray();
+		eb.add(ebId);
+		dims.put("eb", eb);
+		filters.put("dims", dims);
+		parameters.put("filters", filters);
+		parameters.put("searchType", "all");
+		parameters.put("offset", 0);
+		parameters.put("size", 20);
+
+
+		JSONObject schema = new JSONObject();
+		JSONArray expert = new JSONArray();
+		expert.add("id");
+		expert.add("name");
+		expert.add("name_zh");
+		expert.add("avatar");
+		expert.add("links");
+
+		JSONObject profile_obj = new JSONObject();
+		JSONArray profile = new JSONArray();
+		profile.add("titles");
+		profile.add("phone");
+		profile.add("fax");
+		profile.add("email");
+		profile.add("affiliation");
+		profile.add("affiliation_zh");
+		profile.add("address");
+		profile.add("homepage");
+		profile.add("gender");
+		profile.add("lang");
+		profile.add("edu");
+		profile.add("work");
+		profile.add("bio");
+		profile.add("bio_zh");
+		profile.add("position");
+		profile.add("position_zh");
+		profile_obj.put("profile", profile);
+		expert.add(profile_obj);
+		schema.put("person", expert);
+
+		body.put("action", "search.search");
+		body.put("parameters", parameters);
+		body.put("schema", schema);
+		requestBody.add(body);
+		String res = MagicRequest.getInstance().magic(requestBody.toString());
+
+		//解析json,拿到每个学者的id
+		JSONObject resObj = JSON.parseObject(res);
+		JSONArray dataArray = resObj.getJSONArray("data");
+		JSONObject tempObj = dataArray.getJSONObject(0);
+		JSONArray experts = tempObj.getJSONArray("items");
+		for (int i = 0; i < experts.size(); i++) {
+			String expert_id = experts.getJSONObject(i).getString("id");
+			importDetail(expert_id, taskId);
+		}
+		return R.success("导入成功");
 	}
 }

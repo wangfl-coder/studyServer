@@ -52,5 +52,12 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param id
 	 * @return
 	 */
-	R<String> importDetail(String id);
+	R<String> importDetail(String id, Long taskId);
+
+	/**
+	 * 导入智库下所有学者
+	 * @param id
+	 * @return
+	 */
+	R importExpertBase(String id, Long taskId);
 }
