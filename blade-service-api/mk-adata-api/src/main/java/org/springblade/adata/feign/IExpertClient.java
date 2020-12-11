@@ -23,6 +23,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * Notice Feign接口类
@@ -36,6 +39,7 @@ public interface IExpertClient {
 
 	String API_PREFIX = "/client";
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
+	String GET_EXPERT_LIST = API_PREFIX + "/mk-adata/expert-list";
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
 	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
@@ -46,8 +50,17 @@ public interface IExpertClient {
 	 * @param expert 学者实体
 	 * @return
 	 */
-	@PostMapping(GET_EXPERT)
+	@GetMapping(GET_EXPERT)
 	R<Expert> detail(@RequestBody Expert expert);
+
+	/**
+	 * 获取学者列表信息
+	 *
+	 * @param expert 学者实体
+	 * @return
+	 */
+	@GetMapping(GET_EXPERT_LIST)
+	R<List<Expert>> detail_list(@RequestBody Expert expert);
 
 	/**
 	 * 保存学者信息
@@ -61,6 +74,6 @@ public interface IExpertClient {
 	/**
 	 * 导入智库中所有学者
 	 */
-	@PostMapping(SAVE_EXPERT)
-	R importExpertBase(String expertBaseId, Long taskId);
+	@GetMapping(SAVE_EXPERT)
+	R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId);
 }
