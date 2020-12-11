@@ -2,6 +2,7 @@ package org.springblade.desk.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springblade.adata.entity.Expert;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -32,9 +33,10 @@ public class SubTaskServiceImpl extends BaseServiceImpl<SubTaskMapper, SubTask> 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(Long templateId, Long compositionId) {
+	public boolean startProcess(Long templateId,R<List<Expert>> persons) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LEAVE_KEY);
-		for(int i=0;i<persons.size();i++){
+		List<Expert> experts = persons.getData();
+		for(int i=0;i<experts.size();i++){
 			SubTask subTask = new SubTask();
 			if (Func.isEmpty(subTask.getId())) {
 				// 保存leave
@@ -50,9 +52,8 @@ public class SubTaskServiceImpl extends BaseServiceImpl<SubTaskMapper, SubTask> 
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 					// 返回流程id写入leave
 					subTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					subTask.setPersonId(persons.get(i).getId());
+					subTask.setPersonId(experts.get(i).getId());
 					subTask.setTemplateId(templateId);
-					subTask.setCompositionId(compositionId);
 					updateById(subTask);
 				} else {
 					throw new ServiceException("开启流程失败");

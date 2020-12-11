@@ -23,6 +23,12 @@
             <groupId>org.springblade</groupId>
             <artifactId>blade-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-adata-api</artifactId>
+            <version>2.7.0.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <packaging>jar</packaging>
 

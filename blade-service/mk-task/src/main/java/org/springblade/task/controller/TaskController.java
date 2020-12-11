@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
+import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -17,6 +18,8 @@ import org.springblade.desk.feign.ISubTaskClient;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -34,7 +37,10 @@ public class TaskController extends BladeController {
 	public R save(@RequestBody Task task){
 		boolean save = taskService.save(task);
 		iExpertClient.importExpertBase(task.getEbId(), task.getId());
-		iSubTaskClient.startProcess(task.getTemplateId(),compositionId);
+		Expert expert = new Expert();
+		expert.setTaskId(task.getId());
+		R<List<Expert>> persons = iExpertClient.detail_list(expert);
+		iSubTaskClient.startProcess(task.getTemplateId(),persons);
 		return R.status(save);
 	}
 
