@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * Notice Feign
  *
@@ -56,6 +58,13 @@ public class ExpertClient implements IExpertClient {
 	public R<Expert> detail(@RequestBody Expert expert) {
 		Expert detail = service.getOne(Condition.getQueryWrapper(expert));
 		return R.data(detail);
+	}
+
+	@Override
+	@GetMapping(GET_EXPERT_LIST)
+	public R<List<Expert>> detail_list(@RequestBody Expert expert) {
+		List<Expert> details = service.list(Condition.getQueryWrapper(expert));
+		return R.data(details);
 	}
 
 	@Override
