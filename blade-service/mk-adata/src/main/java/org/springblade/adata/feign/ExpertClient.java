@@ -32,10 +32,7 @@ import org.springblade.system.user.entity.User;
 import org.springblade.system.user.entity.UserInfo;
 import org.springblade.system.user.entity.UserOauth;
 import org.springblade.system.user.enums.UserEnum;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
@@ -74,8 +71,8 @@ public class ExpertClient implements IExpertClient {
 	}
 
 	@Override
-	@PostMapping(SAVE_EXPERT_BASE)
-	public R importExpertBase(String expertBaseId, Long taskId) {
+	@GetMapping(SAVE_EXPERT_BASE)
+	public R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId) {
 		return service.importExpertBase(expertBaseId, taskId);
 	}
 

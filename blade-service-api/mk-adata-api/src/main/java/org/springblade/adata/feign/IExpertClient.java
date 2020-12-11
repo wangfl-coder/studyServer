@@ -23,6 +23,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -73,6 +74,6 @@ public interface IExpertClient {
 	/**
 	 * 导入智库中所有学者
 	 */
-	@PostMapping(SAVE_EXPERT)
-	R importExpertBase(String expertBaseId, Long taskId);
+	@GetMapping(SAVE_EXPERT)
+	R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId);
 }
