@@ -73,7 +73,7 @@ public class ExpertClient implements IExpertClient {
 	@Override
 	@PostMapping(SAVE_EXPERT_BASE)
 	public R importExpertBase(String expertBaseId, Long taskId) {
-		return service.importExpertBase(@RequestParam(value = "expertBaseId") expertBaseId, taskId);
+		return service.importExpertBase(expertBaseId, taskId);
 	}
 
 }
