@@ -15,14 +15,20 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "Task对象", description = "Task对象")
-public class Task extends FlowEntity {
+public class SubTask extends FlowEntity {
 
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;
 	@ApiModelProperty(value = "流程实例id")
 	private String processInstanceId;
+	@ApiModelProperty(value = "任务id")
+	private Long taskId;
+	@ApiModelProperty(value = "专家id")
+	private Long personId;
 	@ApiModelProperty(value = "组合id")
-	private String compositionId;
+	private Long compositionId;
+	@ApiModelProperty(value = "模版id")
+	private Long templateId;
 	@ApiModelProperty(value = "任务领取人")
 	private String taskUser;
 	@ApiModelProperty(value = "开始时间")
