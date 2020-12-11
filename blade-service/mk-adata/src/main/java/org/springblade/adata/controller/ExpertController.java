@@ -165,10 +165,20 @@ public class ExpertController extends BladeController {
 	/**
 	 * 导入
 	 */
-	@GetMapping("/import")
+	@PostMapping("/import")
 	@ApiOperationSupport(order = 1)
-	@ApiOperation(value = "导入", notes = "传入学者id")
-	public R<String> importDetail(String id) {
-		return expertService.importDetail(id);
+	@ApiOperation(value = "导入", notes = "传入学者id,任务id")
+	public R<String> importDetail(String id, Long taskId) {
+		return expertService.importDetail(id, taskId);
+	}
+
+	/**
+	 * 导入智库下所有学者
+	 */
+	@PostMapping("/expert_base_import")
+	@ApiOperationSupport(order = 8)
+	@ApiOperation(value = "导入", notes = "传入智库id,任务id")
+	public R importExpertBase(String id, Long taskId) {
+		return expertService.importExpertBase(id,taskId);
 	}
 }

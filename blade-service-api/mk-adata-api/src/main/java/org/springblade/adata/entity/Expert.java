@@ -37,6 +37,12 @@ public class Expert extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * 任务id
+	 */
+	@ApiModelProperty(value = "任务id")
+	private Long taskId;
+
+	/**
 	 * 姓名
 	 */
 	@ApiModelProperty(value = "姓名")
