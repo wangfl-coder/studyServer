@@ -8,5 +8,5 @@ import org.springblade.desk.entity.SubTask;
 import java.util.List;
 
 public interface SubTaskService extends BaseService<SubTask> {
-	boolean startProcess(Long templateId, R<List<Expert>> persons);
+	boolean startProcess(Long templateId, List<Long> ids);
 }

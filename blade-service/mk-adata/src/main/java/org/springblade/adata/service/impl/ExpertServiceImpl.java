@@ -42,7 +42,7 @@ import java.util.Map;
 public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> implements IExpertService {
 
 	@Override
-	public R<String> fetchDetail(String id) {
+	public String fetchDetail(String id) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -87,15 +87,15 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		body.put("schema", schema);
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
-		return R.data(res);
+		return res;
 	}
 
 	@Override
-	public R<String> fetchList(Map<String, Object> params, Query query) {
+	public String fetchList(Map<String, Object> params, Query query) {
 		String ebId = (String)params.get("ebId");
-		if (ebId == null)
-			return R.fail("需要智库Id");
-
+		if (ebId == null) {
+			return ("需要智库Id");
+		}
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -147,11 +147,11 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		body.put("schema", schema);
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
-		return R.data(res);
+		return res;
 	}
 
 	@Override
-	public R importDetail(String id, Long taskId) {
+	public Boolean importDetail(String id, Long taskId) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -264,13 +264,13 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		expert.setTaskId(taskId);
 
 		saveOrUpdate(expert);
-		return R.data(res);
+		return true;
 	}
 	@Override
-	public R<String> importExpertBase(String ebId, Long taskId) {
-		if (ebId == null)
-			return R.fail("需要智库Id");
-
+	public Boolean importExpertBase(String ebId, Long taskId) {
+		if (ebId == null) {
+			return false;
+		}
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -332,6 +332,6 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			String expert_id = experts.getJSONObject(i).getString("id");
 			importDetail(expert_id, taskId);
 		}
-		return R.success("导入成功");
+		return true;
 	}
 }

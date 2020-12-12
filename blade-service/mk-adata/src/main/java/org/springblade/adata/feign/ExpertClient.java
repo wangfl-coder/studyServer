@@ -18,6 +18,7 @@ package org.springblade.adata.feign;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
@@ -35,6 +36,7 @@ import org.springblade.system.user.enums.UserEnum;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,17 +53,19 @@ public class ExpertClient implements IExpertClient {
 	private final IExpertService service;
 
 	@Override
-	@GetMapping(GET_EXPERT)
+	@PostMapping(GET_EXPERT)
 	public R<Expert> detail(@RequestBody Expert expert) {
 		Expert detail = service.getOne(Condition.getQueryWrapper(expert));
 		return R.data(detail);
 	}
 
 	@Override
-	@GetMapping(GET_EXPERT_LIST)
-	public R<List<Expert>> detail_list(@RequestBody Expert expert) {
+	@PostMapping(GET_EXPERT_LIST)
+	public List<Long> detail_list(@RequestBody Expert expert) {
 		List<Expert> details = service.list(Condition.getQueryWrapper(expert));
-		return R.data(details);
+		List<Long> ids = new ArrayList<>();
+		details.forEach(detail -> ids.add(detail.getId()));
+		return ids;
 	}
 
 	@Override
@@ -73,7 +77,8 @@ public class ExpertClient implements IExpertClient {
 	@Override
 	@GetMapping(SAVE_EXPERT_BASE)
 	public R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId) {
-		return service.importExpertBase(expertBaseId, taskId);
+		Boolean res = service.importExpertBase(expertBaseId, taskId);
+		return R.status(res);
 	}
 
 }
