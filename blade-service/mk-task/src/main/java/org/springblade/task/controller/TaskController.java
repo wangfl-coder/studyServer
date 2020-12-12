@@ -36,11 +36,11 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加任务")
 	public R save(@RequestBody Task task){
 		boolean save = taskService.save(task);
-		iExpertClient.importExpertBase(task.getEbId(), task.getId());
+		R tmp = iExpertClient.importExpertBase(task.getEbId(), task.getId());
 		Expert expert = new Expert();
 		expert.setTaskId(task.getId());
-		R<List<Expert>> persons = iExpertClient.detail_list(expert);
-		iSubTaskClient.startProcess(task.getTemplateId(),persons);
+		List<Long> ids = iExpertClient.detail_list(expert);
+		iSubTaskClient.startProcess(task.getTemplateId(),ids);
 		return R.status(save);
 	}
 

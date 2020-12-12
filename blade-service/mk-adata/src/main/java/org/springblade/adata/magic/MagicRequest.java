@@ -47,13 +47,16 @@ public class MagicRequest {
 			JSONObject res_obj = JSON.parseObject(res);
 			JSONArray array = res_obj.getJSONArray("data");
 			JSONObject data = array.getJSONObject(0);
-			if (!data.getBoolean("succeed") || data.getInteger("total") == 0) {
+			if (!data.getBoolean("succeed")) {
 				// "action": "search.search" API returns {"data":[{"succeed":false,"error":["server encounter internal error. "]}]} when Authorization failed,
 				// from which we can't determine the error, so we login again for all cases.
 //				if (403 == data.getInteger("err_code")) {
 //					login();
 //					res = request(json, API_MAGIC);
 //				}
+				login();
+				res = request(json, API_MAGIC);
+			} else if (data.getBoolean("succeed") && data.getInteger("total") != null && data.getInteger("total") == 0) {
 				login();
 				res = request(json, API_MAGIC);
 			}

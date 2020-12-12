@@ -38,10 +38,10 @@ public class SubTaskController extends BladeController implements CacheNames {
 
 	@PostMapping("start-process")
 	@ApiOperation(value = "新增或修改")
-	public R startProcess(@RequestParam(value = "templateId") Long templateId,@RequestBody R<List<Expert>> persons) {
+	public R startProcess(@RequestParam(value = "templateId") Long templateId,@RequestBody List<Long> ids) {
 //		 List<Person> persons = getPersons().getData();
 
-		return R.status(taskService.startProcess(templateId,persons));
+		return R.status(taskService.startProcess(templateId,ids));
 	}
 
 }

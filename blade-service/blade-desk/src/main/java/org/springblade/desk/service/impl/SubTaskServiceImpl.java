@@ -33,26 +33,27 @@ public class SubTaskServiceImpl extends BaseServiceImpl<SubTaskMapper, SubTask> 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(Long templateId,R<List<Expert>> persons) {
+	public boolean startProcess(Long templateId,List<Long> ids) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LEAVE_KEY);
-		List<Expert> experts = persons.getData();
-		for(int i=0;i<experts.size();i++){
+		//List<Expert> experts = persons.getData();
+		for(int i=0;i<ids.size();i++){
 			SubTask subTask = new SubTask();
+			subTask.setProcessDefinitionId("task:2:0be15c7d-3aa7-11eb-80aa-525400691a30");
 			if (Func.isEmpty(subTask.getId())) {
 				// 保存leave
 				subTask.setCreateTime(DateUtil.now());
-				save(subTask);
+				boolean save = save(subTask);
 				// 启动流程
 				Kv variables = Kv.create()
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
-					.set("taskUser", TaskUtil.getTaskUser(subTask.getTaskUser()))
-					.set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
+					.set("taskUser", TaskUtil.getTaskUser(subTask.getTaskUser()));
+					//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(subTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(subTask.getId())), variables);
 				if (result.isSuccess()) {
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 					// 返回流程id写入leave
 					subTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					subTask.setPersonId(experts.get(i).getId());
+					subTask.setPersonId(ids.get(i));
 					subTask.setTemplateId(templateId);
 					updateById(subTask);
 				} else {

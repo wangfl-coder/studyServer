@@ -50,7 +50,7 @@ public interface IExpertClient {
 	 * @param expert 学者实体
 	 * @return
 	 */
-	@GetMapping(GET_EXPERT)
+	@PostMapping(GET_EXPERT)
 	R<Expert> detail(@RequestBody Expert expert);
 
 	/**
@@ -59,8 +59,8 @@ public interface IExpertClient {
 	 * @param expert 学者实体
 	 * @return
 	 */
-	@GetMapping(GET_EXPERT_LIST)
-	R<List<Expert>> detail_list(@RequestBody Expert expert);
+	@PostMapping(GET_EXPERT_LIST)
+	List<Long> detail_list(@RequestBody Expert expert);
 
 	/**
 	 * 保存学者信息
@@ -74,6 +74,6 @@ public interface IExpertClient {
 	/**
 	 * 导入智库中所有学者
 	 */
-	@GetMapping(SAVE_EXPERT)
+	@GetMapping(SAVE_EXPERT_BASE)
 	R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId);
 }

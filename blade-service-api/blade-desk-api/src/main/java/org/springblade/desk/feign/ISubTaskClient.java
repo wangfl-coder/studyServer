@@ -16,5 +16,5 @@ import java.util.List;
 public interface ISubTaskClient {
 
 	@PostMapping("feign/start-process")
-	R startProcess(@RequestParam(value = "templateId") Long templateId,@RequestBody R<List<Expert>> persons);
+	R startProcess(@RequestParam(value = "templateId") Long templateId,@RequestBody List<Long> ids);
 }

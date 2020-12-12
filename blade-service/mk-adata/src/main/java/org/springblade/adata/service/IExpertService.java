@@ -37,7 +37,7 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param id
 	 * @return
 	 */
-	R<String> fetchDetail(String id);
+	String fetchDetail(String id);
 
 	/**
 	 * 列表
@@ -45,19 +45,19 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param query
 	 * @return
 	 */
-	R<String> fetchList(Map<String, Object> params, Query query);
+	String fetchList(Map<String, Object> params, Query query);
 
 	/**
 	 * 导入
 	 * @param id
 	 * @return
 	 */
-	R<String> importDetail(String id, Long taskId);
+	Boolean importDetail(String id, Long taskId);
 
 	/**
 	 * 导入智库下所有学者
 	 * @param id
 	 * @return
 	 */
-	R importExpertBase(String id, Long taskId);
+	Boolean importExpertBase(String id, Long taskId);
 }

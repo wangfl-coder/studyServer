@@ -146,7 +146,7 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 1)
 	@ApiOperation(value = "详情", notes = "传入学者id")
 	public R<String> fetchDetail(String id) {
-		return expertService.fetchDetail(id);
+		return R.data(expertService.fetchDetail(id));
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入expert")
 	public R<String> fetchList(@ApiIgnore @RequestParam Map<String, Object> params, Query query) {
-		return expertService.fetchList(params, query);
+		return R.data(expertService.fetchList(params, query));
 	}
 
 	/**
@@ -168,8 +168,8 @@ public class ExpertController extends BladeController {
 	@PostMapping("/import")
 	@ApiOperationSupport(order = 1)
 	@ApiOperation(value = "导入", notes = "传入学者id,任务id")
-	public R<String> importDetail(String id, Long taskId) {
-		return expertService.importDetail(id, taskId);
+	public R importDetail(String id, Long taskId) {
+		return R.status(expertService.importDetail(id, taskId));
 	}
 
 	/**
@@ -179,6 +179,6 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 8)
 	@ApiOperation(value = "导入", notes = "传入智库id,任务id")
 	public R importExpertBase(String id, Long taskId) {
-		return expertService.importExpertBase(id,taskId);
+		return R.data(expertService.importExpertBase(id,taskId));
 	}
 }
