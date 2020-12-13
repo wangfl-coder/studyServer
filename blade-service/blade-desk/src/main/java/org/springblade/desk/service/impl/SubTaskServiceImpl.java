@@ -46,7 +46,8 @@ public class SubTaskServiceImpl extends BaseServiceImpl<SubTaskMapper, SubTask> 
 				// 启动流程
 				Kv variables = Kv.create()
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
-					.set("taskUser", TaskUtil.getTaskUser(subTask.getTaskUser()));
+					.set("taskUser", TaskUtil.getTaskUser(subTask.getTaskUser()))
+					.set("priority",2);
 					//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(subTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(subTask.getId())), variables);
 				if (result.isSuccess()) {
