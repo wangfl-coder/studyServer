@@ -34,6 +34,16 @@ public interface ProcessConstant {
 	String EXPENSE_KEY = "Expense";
 
 	/**
+	 * 标注流程标识
+	 */
+	String LABEL_KEY = "Label";
+
+	/**
+	 * 质检流程标识
+	 */
+	String QUALITY_INSPECTION_KEY = "QualityInspection";
+
+	/**
 	 * 同意标识
 	 */
 	String PASS_KEY = "pass";

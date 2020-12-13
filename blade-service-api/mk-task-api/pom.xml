@@ -16,6 +16,12 @@
     <dependencies>
         <dependency>
             <groupId>org.springblade</groupId>
+            <artifactId>blade-flow-api</artifactId>
+            <version>2.7.0.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
             <artifactId>blade-common</artifactId>
         </dependency>
     </dependencies>

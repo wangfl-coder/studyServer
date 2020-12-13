@@ -1,4 +1,4 @@
-package org.springblade.desk.entity;
+package org.springblade.task.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -11,11 +11,11 @@ import org.springblade.flow.core.entity.FlowEntity;
 import java.util.Date;
 
 @Data
-@TableName(value = "mk_subtask")
+@TableName(value = "mk_task_quality_inspection")
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(value = "Task对象", description = "Task对象")
-public class SubTask extends FlowEntity {
+@ApiModel(value = "质检Task对象", description = "质检Task对象")
+public class QualityInspectionTask extends FlowEntity {
 
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;

@@ -39,7 +39,7 @@ public interface IExpertClient {
 
 	String API_PREFIX = "/client";
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
-	String GET_EXPERT_LIST = API_PREFIX + "/mk-adata/expert-list";
+	String GET_EXPERT_IDS = API_PREFIX + "/mk-adata/expert-ids";
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
 	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
@@ -54,13 +54,13 @@ public interface IExpertClient {
 	R<Expert> detail(@RequestBody Expert expert);
 
 	/**
-	 * 获取学者列表信息
+	 * 通过任务id获取学者id列表
 	 *
-	 * @param expert 学者实体
+	 * @param taskId 任务id
 	 * @return
 	 */
-	@PostMapping(GET_EXPERT_LIST)
-	List<Long> detail_list(@RequestBody Expert expert);
+	@GetMapping(GET_EXPERT_IDS)
+	R<List<Long>> getExpertIds(@RequestParam Long taskId);
 
 	/**
 	 * 保存学者信息

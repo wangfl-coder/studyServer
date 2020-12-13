@@ -32,7 +32,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.StringUtil;
-import org.springblade.desk.feign.ISubTaskClient;
+import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -57,7 +57,7 @@ public class AnnotationDataController extends BladeController {
 
 	private final IAnnotationDataService annotationDataService;
 	private final IExpertClient expertClient;
-	private final ISubTaskClient iSubTaskClient;
+	private final ILabelTaskClient labelTaskClient;
 
 	/**
 	 * 查询标注数据

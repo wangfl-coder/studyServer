@@ -17,8 +17,8 @@
 package org.springblade.adata.feign;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
@@ -60,12 +60,12 @@ public class ExpertClient implements IExpertClient {
 	}
 
 	@Override
-	@PostMapping(GET_EXPERT_LIST)
-	public List<Long> detail_list(@RequestBody Expert expert) {
-		List<Expert> details = service.list(Condition.getQueryWrapper(expert));
+	@GetMapping(GET_EXPERT_IDS)
+	public R<List<Long>> getExpertIds(@RequestParam Long taskId) {
+		List<Expert> details = service.list(Wrappers.<Expert>query().lambda().eq(Expert::getTaskId, taskId));
 		List<Long> ids = new ArrayList<>();
 		details.forEach(detail -> ids.add(detail.getId()));
-		return ids;
+		return R.data(ids);
 	}
 
 	@Override

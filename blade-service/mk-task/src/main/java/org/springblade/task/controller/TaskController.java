@@ -7,19 +7,21 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
-import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
-import org.springblade.desk.feign.ISubTaskClient;
+import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.entity.Task;
+import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController
@@ -29,19 +31,29 @@ import java.util.List;
 public class TaskController extends BladeController {
 
 	private TaskService taskService;
-	private IExpertClient iExpertClient;
-	private ISubTaskClient iSubTaskClient;
+	private IExpertClient expertClient;
+	private LabelTaskService labelTaskService;
 
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加任务")
-	public R save(@RequestBody Task task){
+	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO){
+		Boolean result;
+		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
 		boolean save = taskService.save(task);
-		R tmp = iExpertClient.importExpertBase(task.getEbId(), task.getId());
-		Expert expert = new Expert();
-		expert.setTaskId(task.getId());
-		List<Long> ids = iExpertClient.detail_list(expert);
-		iSubTaskClient.startProcess(task.getTemplateId(),ids);
-		return R.status(save);
+		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());
+		if (res_eb.isSuccess()) {
+			R res_ids = expertClient.getExpertIds(task.getId());
+			if (res_ids.isSuccess()) {
+				List<Long> ids = (List<Long>)res_ids.getData();
+				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, ids);
+			} else {
+				return R.fail("读取专家列表失败");
+			}
+		} else {
+			return R.fail("导入智库失败");
+		}
+
+		return R.status(result);
 	}
 
 	@RequestMapping(value = "/detail/{id}" , method = RequestMethod.GET)

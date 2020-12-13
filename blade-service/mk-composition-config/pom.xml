@@ -22,11 +22,6 @@
         </dependency>
         <dependency>
             <groupId>org.springblade</groupId>
-            <artifactId>blade-desk-api</artifactId>
-            <version>${bladex.project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springblade</groupId>
             <artifactId>blade-starter-swagger</artifactId>
         </dependency>
         <dependency>
@@ -39,7 +34,11 @@
             <artifactId>mk-adata-api</artifactId>
             <version>${bladex.project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-task-api</artifactId>
+            <version>${bladex.project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
