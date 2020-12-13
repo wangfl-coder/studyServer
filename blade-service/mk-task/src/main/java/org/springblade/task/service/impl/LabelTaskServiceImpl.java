@@ -9,7 +9,6 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
-import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
@@ -31,6 +30,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	private final IFlowClient flowClient;
 
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
@@ -49,6 +49,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 					.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
 					.set("priority", task.getPriority());
+//					.set("taskPriority", task.getPriority());
 				//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
 				if (result.isSuccess()) {

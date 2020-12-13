@@ -69,7 +69,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			.includeProcessVariables().active().orderByTaskCreateTime().desc();
 		// 通用流程等待签收的任务
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskCreateTime().desc();
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
 		// 构建列表数据
 		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, FlowEngineConstant.STATUS_CLAIM);
@@ -290,6 +290,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setClaimTime(task.getClaimTime());
 			flow.setExecutionId(task.getExecutionId());
 			flow.setVariables(task.getProcessVariables());
+			flow.setPriority(task.getPriority());
 
 			HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
 			if (Func.isNotEmpty(historicProcessInstance)) {

@@ -21,6 +21,8 @@ import org.flowable.engine.IdentityService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskQuery;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +60,11 @@ public class FlowClient implements IFlowClient {
 		identityService.setAuthenticatedUserId(TaskUtil.getTaskUser());
 		// 开启流程
 		ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
+		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
+		tasks.forEach(t -> {
+			int p = (int)variables.get("priority");
+			taskService.setPriority(t.getId(), p);
+		});
 		// 组装流程通用类
 		BladeFlow flow = new BladeFlow();
 		flow.setProcessInstanceId(processInstance.getId());

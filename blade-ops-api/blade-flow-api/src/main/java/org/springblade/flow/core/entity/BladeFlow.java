@@ -53,6 +53,10 @@ public class BladeFlow implements Serializable {
 	 */
 	private String assigneeName;
 	/**
+	 * 任务优先级
+	 */
+	private int priority;
+	/**
 	 * 流程分类
 	 */
 	private String category;
