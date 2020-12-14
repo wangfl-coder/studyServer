@@ -32,6 +32,9 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.entity.FlowProcess;
 import org.springblade.flow.engine.service.FlowEngineService;
+import org.springblade.task.entity.LabelTask;
+import org.springblade.task.entity.Task;
+import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -49,6 +52,7 @@ public class WorkController {
 	private final TaskService taskService;
 	private final FlowEngineService flowEngineService;
 	private final FlowBusinessService flowBusinessService;
+	private final ILabelTaskClient iLabelTaskClient;
 
 	/**
 	 * 发起事务列表页
@@ -70,6 +74,27 @@ public class WorkController {
 	public R<IPage<BladeFlow>> claimList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
 		IPage<BladeFlow> pages = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
+	}
+
+	@GetMapping("claim-one")
+	@ApiOperationSupport(order = 3)
+	@ApiOperation(value = "一个待签事务", notes = "传入流程信息")
+	public BladeFlow claimOne() {
+//		Query query = new Query();
+//		query.setCurrent(1).setSize(1);
+//		IPage<BladeFlow> bladeFlowIPage = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
+//		if(bladeFlowIPage!=null){
+//			BladeFlow bladeFlow1 = bladeFlowIPage.getRecords().get(1);
+//			String processInstanceId = bladeFlow1.getProcessInstanceId();
+//			R<LabelTask> lableTask = iLabelTaskClient.getLableTask(processInstanceId);
+//			return lableTask.getData();
+//		}else {
+//			return null;
+//		}
+		BladeFlow flow = flowBusinessService.selectONeClaimPage();
+		taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
+		return flow;
+
 	}
 
 	/**
@@ -118,17 +143,17 @@ public class WorkController {
 		return R.success("签收事务成功");
 	}
 
-	/**
-	 * 签收一条事务
-	 *
-	 */
-	@PostMapping("claim-one-task")
-	@ApiOperationSupport(order = 8)
-	@ApiOperation(value = "签收事务", notes = "传入流程信息")
-	public R claimTask() {
-//		taskService.claim(taskId, TaskUtil.getTaskUser());
-		return R.success("签收事务成功");
-	}
+//	*
+//	 * 签收一条事务
+//	 *
+//
+//	@PostMapping("claim-one-task")
+//	@ApiOperationSupport(order = 8)
+//	@ApiOperation(value = "签收事务", notes = "传入流程信息")
+//	public R claimOneTask(@RequestBody BladeFlow bladeFlow) {
+//		taskService.claim(bladeFlow.getTaskId(), TaskUtil.getTaskUser());
+//		return R.success("签收事务成功");
+//	}
 
 	/**
 	 * 完成任务

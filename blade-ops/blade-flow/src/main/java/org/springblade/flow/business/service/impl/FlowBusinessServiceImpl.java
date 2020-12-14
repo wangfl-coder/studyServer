@@ -23,6 +23,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
@@ -37,6 +38,7 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.constant.FlowEngineConstant;
 import org.springblade.flow.engine.utils.FlowCache;
+
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -85,6 +87,67 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 设置数据
 		page.setRecords(flowList);
 		return page;
+	}
+
+	@Override
+	public BladeFlow selectONeClaimPage() {
+		String taskUser = TaskUtil.getTaskUser();
+		String taskGroup = TaskUtil.getCandidateGroup();
+
+//		// 个人等待签收的任务
+//		TaskQuery claimUserQuery = taskService.createTaskQuery().taskCandidateUser(taskUser)
+//			.includeProcessVariables().active().orderByTaskCreateTime().desc();
+//		// 定制流程等待签收的任务
+//		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
+//			.includeProcessVariables().active().orderByTaskCreateTime().desc();
+		// 通用流程等待签收的任务
+		Task task = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc().singleResult();
+
+		BladeFlow flow = new BladeFlow();
+		flow.setTaskId(task.getId());
+		flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
+		flow.setTaskName(task.getName());
+		flow.setAssignee(task.getAssignee());
+		flow.setCreateTime(task.getCreateTime());
+		flow.setClaimTime(task.getClaimTime());
+		flow.setExecutionId(task.getExecutionId());
+		flow.setVariables(task.getProcessVariables());
+		flow.setPriority(task.getPriority());
+
+		HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
+		if (Func.isNotEmpty(historicProcessInstance)) {
+			String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
+			flow.setBusinessTable(businessKey[0]);
+			flow.setBusinessId(businessKey[1]);
+		}
+
+		ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
+		flow.setCategory(processDefinition.getCategory());
+		flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
+		flow.setProcessDefinitionId(processDefinition.getId());
+		flow.setProcessDefinitionName(processDefinition.getName());
+		flow.setProcessDefinitionKey(processDefinition.getKey());
+		flow.setProcessDefinitionVersion(processDefinition.getVersion());
+		flow.setProcessInstanceId(task.getProcessInstanceId());
+		//flow.setStatus(status);
+
+		return flow;
+		// 构建列表数据
+//		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, FlowEngineConstant.STATUS_CLAIM);
+//		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
+//		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
+
+//		// 计算总数
+//		long count = claimUserQuery.count() + claimRoleWithTenantIdQuery.count() + claimRoleWithoutTenantIdQuery.count();
+//		// 设置页数
+//		page.setSize(count);
+//		// 设置总数
+//		page.setTotal(count);
+//		// 设置数据
+//		page.setRecords(flowList);
+//		BladeFlow bladeFlow1 = flowList.get(1);
+//		return bladeFlow1;
 	}
 
 	@Override
