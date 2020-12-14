@@ -76,4 +76,10 @@ public class Template extends BaseEntity {
 	@ApiModelProperty(value = "做补充信息的岗位Id")
 	private String moreMessagePositionId;
 
+	/**
+	 * 流程模型ID
+	 */
+	@ApiModelProperty(value = "流程模型ID")
+	private String processDefinitionId;
+
 }
