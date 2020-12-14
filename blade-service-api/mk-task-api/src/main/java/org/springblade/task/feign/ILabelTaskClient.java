@@ -4,6 +4,7 @@ import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.launch.constant.AppConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.task.dto.ExpertTaskDTO;
+import org.springblade.task.entity.LabelTask;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,4 +20,5 @@ public interface ILabelTaskClient {
 
 	@PostMapping(START_LABEL_PROCESS)
 	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
+
 }

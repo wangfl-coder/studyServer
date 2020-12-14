@@ -57,6 +57,11 @@
             <artifactId>blade-flow-api</artifactId>
             <version>${bladex.project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-task-api</artifactId>
+            <version>${bladex.project.version}</version>
+        </dependency>
         <!-- 工作流 -->
         <dependency>
             <groupId>org.flowable</groupId>
