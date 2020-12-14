@@ -23,6 +23,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
@@ -72,9 +73,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
 		// 构建列表数据
-		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, FlowEngineConstant.STATUS_CLAIM);
-		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
-		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
+		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, page, FlowEngineConstant.STATUS_CLAIM);
+		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
+		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
 
 		// 计算总数
 		long count = claimUserQuery.count() + claimRoleWithTenantIdQuery.count() + claimRoleWithoutTenantIdQuery.count();
@@ -97,7 +98,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			.includeProcessVariables().orderByTaskCreateTime().desc();
 
 		// 构建列表数据
-		buildFlowTaskList(bladeFlow, flowList, todoQuery, FlowEngineConstant.STATUS_TODO);
+		buildFlowTaskList(bladeFlow, flowList, todoQuery, page, FlowEngineConstant.STATUS_TODO);
 
 		// 计算总数
 		long count = todoQuery.count();
@@ -270,7 +271,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	 * @param taskQuery 任务查询类
 	 * @param status    状态
 	 */
-	private void buildFlowTaskList(BladeFlow bladeFlow, List<BladeFlow> flowList, TaskQuery taskQuery, String status) {
+	private void buildFlowTaskList(BladeFlow bladeFlow, List<BladeFlow> flowList, TaskQuery taskQuery, IPage<BladeFlow> page, String status) {
 		if (bladeFlow.getCategory() != null) {
 			taskQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
 		}
@@ -280,7 +281,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (bladeFlow.getEndDate() != null) {
 			taskQuery.taskCreatedBefore(bladeFlow.getEndDate());
 		}
-		taskQuery.list().forEach(task -> {
+		List<Task> taskList = taskQuery.listPage((int)(page.getCurrent()-1)*(int)page.getSize(), (int)page.getSize());
+		taskList.forEach(task -> {
 			BladeFlow flow = new BladeFlow();
 			flow.setTaskId(task.getId());
 			flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
