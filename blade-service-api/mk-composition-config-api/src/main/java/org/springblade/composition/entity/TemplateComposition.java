@@ -69,11 +69,11 @@ public class TemplateComposition extends BaseEntity {
 	private Long compositionId;
 
 	/**
-	 * 岗位id
+	 * 角色名
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "岗位id")
-	private Long positionId;
+	@ApiModelProperty(value = "角色名")
+	private String roleName;
 
 	/**
 	 * 重复标注次数
