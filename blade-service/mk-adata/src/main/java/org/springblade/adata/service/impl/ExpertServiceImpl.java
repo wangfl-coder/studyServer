@@ -215,24 +215,56 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		String address = p.getString("address");
 		String homepage = p.getString("homepage");
 		JSONObject links = d.getJSONObject("links");
-		JSONObject google = links.getJSONObject("gs");
-		JSONObject resource = links.getJSONObject("resource");
-		JSONArray resource_link = resource.getJSONArray("resource_link");
-		JSONObject first = resource_link.getJSONObject(0);
-		JSONObject second = resource_link.getJSONObject(1);
-		String hp = "";
-		String dblp = "";
-		if (first.getString("id").equals("hp")) {
-			hp = first.getString("url");
-		} else {
-			hp = second.getString("url");
+
+
+//		JSONArray resource_link = resource.getJSONArray("resource_link");
+//		JSONObject first = resource_link.getJSONObject(0);
+//		JSONObject second = resource_link.getJSONObject(1);
+//		String hp = "";
+//		String dblp = "";
+//		if (first.getString("id").equals("hp")) {
+//			hp = first.getString("url");
+//		} else {
+//			hp = second.getString("url");
+//		}
+//		if (first.getString("id").equals("dblp")) {
+//			dblp = first.getString("url");
+//		} else {
+//			dblp = second.getString("url");
+//		}
+		String hp = null;
+		String dblp = null;
+		String gs = null;
+		if (links != null) {
+			JSONObject resource = links.getJSONObject("resource");
+			if (resource != null) {
+				JSONArray resource_link = resource.getJSONArray("resource_link");
+				JSONObject first;
+				JSONObject second;
+
+
+				if (resource_link.size() == 1) {
+					first = resource_link.getJSONObject(0);
+					if (first.getString("id").equals("dblp")) {
+						dblp = first.getString("url");
+					}
+				} else if (resource_link.size() == 2) {
+					first = resource_link.getJSONObject(0);
+					second = resource_link.getJSONObject(1);
+					if (first.getString("id").equals("dblp")) {
+						dblp = first.getString("url");
+					} else {
+						dblp = second.getString("url");
+					}
+				}
+			}
+			JSONObject google = links.getJSONObject("gs");
+
+			if(google != null) {
+				gs = google.getString("url");
+			}
 		}
-		if (first.getString("id").equals("dblp")) {
-			dblp = first.getString("url");
-		} else {
-			dblp = second.getString("url");
-		}
-		String gs = google.getString("url");
+
 		String gender = p.getString("gender");
 		String language = p.getString("language");
 		String avatar = d.getString("avatar");

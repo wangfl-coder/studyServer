@@ -21,14 +21,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.composition.service.CompositionService;
 import org.springblade.composition.service.ITemplateCompositionService;
 import org.springblade.composition.service.ITemplateService;
 import org.springblade.composition.vo.TemplateVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 
@@ -60,6 +63,20 @@ public class TemplateController extends BladeController {
 
 	private final ITemplateService templateService;
 	private final ITemplateCompositionService templateCompositionService;
+	private final CompositionService compositionService;
+
+	@GetMapping("/role-field")
+	@ApiOperationSupport(order = 8)
+	@ApiOperation(value = "角色标注的字段", notes = "传入template ID")
+	public R<Composition> detail(Long templateId) {
+		TemplateComposition templateComposition = new TemplateComposition();
+		templateComposition.setTemplateId(templateId);
+		templateComposition.setRoleName(AuthUtil.getUserRole());
+		TemplateComposition detail = templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition));
+		Long compositionId = detail.getCompositionId();
+		Composition composition = compositionService.getById(compositionId);
+		return R.data(composition);
+	}
 
 	/**
 	 * 模板详情
@@ -76,7 +93,7 @@ public class TemplateController extends BladeController {
 	 * 查询模板的所有组合
 	 */
 	@GetMapping("/compositions")
-	@ApiOperationSupport(order = 6)
+	@ApiOperationSupport(order = 7)
 	@ApiOperation(value = "模板的所有组合", notes = "传入template")
 	public R<TemplateVO> compositions(Template template) {
 		Template detail = templateService.getOne(Condition.getQueryWrapper(template));
