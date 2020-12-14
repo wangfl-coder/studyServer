@@ -9,6 +9,7 @@
         <result column="tenant_id" property="tenantId"/>
         <result column="remark" property="remark"/>
         <result column="more_message_position_id" property="moreMessagePositionId"/>
+        <result column="process_definition_id" property="processDefinitionId"/>
     </resultMap>
 
 </mapper>
