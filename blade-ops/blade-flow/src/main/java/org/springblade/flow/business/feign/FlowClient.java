@@ -61,10 +61,13 @@ public class FlowClient implements IFlowClient {
 		// 开启流程
 		ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
 		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
-		tasks.forEach(t -> {
-			int p = (int)variables.get("priority");
-			taskService.setPriority(t.getId(), p);
-		});
+		if(variables.get("priority")!=null){
+			tasks.forEach(t -> {
+				int p = (int)variables.get("priority");
+				taskService.setPriority(t.getId(), p);
+			});
+		}
+
 		// 组装流程通用类
 		BladeFlow flow = new BladeFlow();
 		flow.setProcessInstanceId(processInstance.getId());

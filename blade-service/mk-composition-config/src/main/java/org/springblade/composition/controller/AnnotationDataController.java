@@ -24,10 +24,14 @@ import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.service.IAnnotationDataService;
+import org.springblade.composition.service.IStatisticsService;
+import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
@@ -58,6 +62,7 @@ public class AnnotationDataController extends BladeController {
 	private final IAnnotationDataService annotationDataService;
 	private final IExpertClient expertClient;
 	private final ILabelTaskClient labelTaskClient;
+	private final IStatisticsService statisticsService;
 
 	/**
 	 * 查询标注数据
@@ -94,8 +99,10 @@ public class AnnotationDataController extends BladeController {
 	@PostMapping("/submit")
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationData列表")
-	public R submit(@Valid @RequestBody List<AnnotationData> annotationDataList) {
+	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
+	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+		Long subTaskId = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
+		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		// 删除原来的标注数据
 		List<Long> annotationDataIds = new ArrayList<>();
 		Expert expert = new Expert();
@@ -109,6 +116,25 @@ public class AnnotationDataController extends BladeController {
 		annotationDataList.forEach(annotationData -> {
 			annotationData.setId(null);
 		});
+
+		//更新统计表，记录标注用时
+		Statistics statistics_query = new Statistics();
+		statistics_query.setSubTaskId(subTaskId);
+		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
+		statistics_query.setUserId(AuthUtil.getUserId());
+
+		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+		if (statistics != null){
+			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
+		} else {
+			statistics = new Statistics();
+			statistics.setTime(annotationDataVO.getTime());
+			statistics.setUserId(AuthUtil.getUserId());
+			statistics.setCompositionId(annotationDataVO.getCompositionId());
+			statistics.setSubTaskId(subTaskId);
+			statistics.setTemplateId(annotationDataVO.getTemplateId());
+		}
+		statisticsService.saveOrUpdate(statistics);
 		return R.status(annotationDataService.saveBatch(annotationDataList));
 	}
 
