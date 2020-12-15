@@ -30,6 +30,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -298,11 +299,14 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		saveOrUpdate(expert);
 		return true;
 	}
-	@Override
-	public Boolean importExpertBase(String ebId, Long taskId) {
-		if (ebId == null) {
-			return false;
-		}
+
+	/**
+	 * 每次20个学者请求一次智库
+	 * @param ebId
+	 * @param taskId
+	 * @return
+	 */
+	public int getExperts(String ebId, Long taskId, int offset, int size) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -315,38 +319,13 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		filters.put("dims", dims);
 		parameters.put("filters", filters);
 		parameters.put("searchType", "all");
-		parameters.put("offset", 0);
-		parameters.put("size", 20);
+		parameters.put("offset", offset);
+		parameters.put("size", size);
 
 
 		JSONObject schema = new JSONObject();
 		JSONArray expert = new JSONArray();
 		expert.add("id");
-		expert.add("name");
-		expert.add("name_zh");
-		expert.add("avatar");
-		expert.add("links");
-
-		JSONObject profile_obj = new JSONObject();
-		JSONArray profile = new JSONArray();
-		profile.add("titles");
-		profile.add("phone");
-		profile.add("fax");
-		profile.add("email");
-		profile.add("affiliation");
-		profile.add("affiliation_zh");
-		profile.add("address");
-		profile.add("homepage");
-		profile.add("gender");
-		profile.add("lang");
-		profile.add("edu");
-		profile.add("work");
-		profile.add("bio");
-		profile.add("bio_zh");
-		profile.add("position");
-		profile.add("position_zh");
-		profile_obj.put("profile", profile);
-		expert.add(profile_obj);
 		schema.put("person", expert);
 
 		body.put("action", "search.search");
@@ -359,11 +338,34 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		JSONObject resObj = JSON.parseObject(res);
 		JSONArray dataArray = resObj.getJSONArray("data");
 		JSONObject tempObj = dataArray.getJSONObject(0);
+		int total = tempObj.getInteger("total");
 		JSONArray experts = tempObj.getJSONArray("items");
+		// 存在有的智库中没有学者
+		if (total == 0) {
+			return 0;
+		}
 		for (int i = 0; i < experts.size(); i++) {
 			String expert_id = experts.getJSONObject(i).getString("id");
 			importDetail(expert_id, taskId);
 		}
+		return total;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Boolean importExpertBase(String ebId, Long taskId) {
+		if (ebId == null) {
+			return false;
+		}
+		// 首先导入智库下20个学者，并且得到这个智库下一共有多少学者
+		int total = getExperts(ebId, taskId, 0, 20);
+
+		// 循环导入剩下的学者
+		int number = (total-1) / 20;
+		for (int i = 0; i < number ; i++) {
+			getExperts(ebId, taskId, (i + 1) * 20, 20);
+		}
 		return true;
 	}
+
 }
