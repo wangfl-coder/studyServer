@@ -76,9 +76,12 @@ public class WorkController {
 		return R.data(pages);
 	}
 
+	/**
+	 * 返回一个待签事务并签收
+	 */
 	@GetMapping("claim-one")
 	@ApiOperationSupport(order = 3)
-	@ApiOperation(value = "一个待签事务", notes = "传入流程信息")
+	@ApiOperation(value = "返回一个待签事务并签收", notes = "传入流程信息")
 	public BladeFlow claimOne() {
 //		Query query = new Query();
 //		query.setCurrent(1).setSize(1);

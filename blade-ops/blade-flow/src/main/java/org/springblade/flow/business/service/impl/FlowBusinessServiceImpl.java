@@ -91,9 +91,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 	@Override
 	public BladeFlow selectONeClaimPage() {
-		String taskUser = TaskUtil.getTaskUser();
+//		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup = TaskUtil.getCandidateGroup();
-
+//		List<BladeFlow> flowList = new LinkedList<>();
 //		// 个人等待签收的任务
 //		TaskQuery claimUserQuery = taskService.createTaskQuery().taskCandidateUser(taskUser)
 //			.includeProcessVariables().active().orderByTaskCreateTime().desc();
@@ -101,9 +101,13 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
 //			.includeProcessVariables().active().orderByTaskCreateTime().desc();
 		// 通用流程等待签收的任务
-		Task task = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc().singleResult();
+//		Task task = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
+//			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc().singleResult();
 
+		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
+
+		Task task = taskQuery.listPage(0, 1).get(0);
 		BladeFlow flow = new BladeFlow();
 		flow.setTaskId(task.getId());
 		flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
@@ -114,14 +118,6 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		flow.setExecutionId(task.getExecutionId());
 		flow.setVariables(task.getProcessVariables());
 		flow.setPriority(task.getPriority());
-
-		HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
-		if (Func.isNotEmpty(historicProcessInstance)) {
-			String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
-			flow.setBusinessTable(businessKey[0]);
-			flow.setBusinessId(businessKey[1]);
-		}
-
 		ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
 		flow.setCategory(processDefinition.getCategory());
 		flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
@@ -130,24 +126,15 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		flow.setProcessDefinitionKey(processDefinition.getKey());
 		flow.setProcessDefinitionVersion(processDefinition.getVersion());
 		flow.setProcessInstanceId(task.getProcessInstanceId());
-		//flow.setStatus(status);
-
+//		flow.setStatus(status);
+//		HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
+//		if (Func.isNotEmpty(historicProcessInstance)) {
+//			String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
+//			flow.setBusinessTable(businessKey[0]);
+//			flow.setBusinessId(businessKey[1]);
+//		}
 		return flow;
-		// 构建列表数据
-//		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, FlowEngineConstant.STATUS_CLAIM);
-//		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
-//		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, FlowEngineConstant.STATUS_CLAIM);
 
-//		// 计算总数
-//		long count = claimUserQuery.count() + claimRoleWithTenantIdQuery.count() + claimRoleWithoutTenantIdQuery.count();
-//		// 设置页数
-//		page.setSize(count);
-//		// 设置总数
-//		page.setTotal(count);
-//		// 设置数据
-//		page.setRecords(flowList);
-//		BladeFlow bladeFlow1 = flowList.get(1);
-//		return bladeFlow1;
 	}
 
 	@Override
