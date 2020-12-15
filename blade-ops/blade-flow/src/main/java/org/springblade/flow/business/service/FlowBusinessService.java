@@ -18,6 +18,7 @@ package org.springblade.flow.business.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.task.entity.Task;
 
 /**
  * 流程业务类
@@ -34,6 +35,14 @@ public interface FlowBusinessService {
 	 * @return
 	 */
 	IPage<BladeFlow> selectClaimPage(IPage<BladeFlow> page, BladeFlow bladeFlow);
+
+
+	/**
+	 * 流程待签列表
+	 *
+	 * @return
+	 */
+	BladeFlow selectONeClaimPage();
 
 	/**
 	 * 流程待办列表
