@@ -1,5 +1,6 @@
 package org.springblade.task.feign;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
@@ -9,10 +10,7 @@ import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.LabelTaskService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
@@ -31,6 +29,15 @@ public class LabelTaskClient implements ILabelTaskClient {
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
 		boolean b = labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExpertIds());
 		return R.status(b);
+	}
+
+	@Override
+	@GetMapping(QUERY_LABEL_TASK)
+	public R<LabelTask> queryLabelTask(String processInstanceId) {
+		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+		labelTaskQueryWrapper.eq("process_instance_id",processInstanceId);
+		LabelTask labelTask = labelTaskService.getOne(labelTaskQueryWrapper);
+		return R.data(labelTask);
 	}
 
 }

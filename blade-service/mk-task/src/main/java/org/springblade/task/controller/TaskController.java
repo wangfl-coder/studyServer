@@ -52,7 +52,6 @@ public class TaskController extends BladeController {
 		} else {
 			return R.fail("导入智库失败");
 		}
-
 		return R.status(result);
 	}
 

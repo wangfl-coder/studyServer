@@ -35,10 +35,13 @@ import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.constant.FlowEngineConstant;
 import org.springblade.flow.engine.utils.FlowCache;
 
+import org.springblade.task.entity.LabelTask;
+import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -56,6 +59,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 	private final TaskService taskService;
 	private final HistoryService historyService;
+	private final ILabelTaskClient iLabelTaskClient;
 
 	@Override
 	public IPage<BladeFlow> selectClaimPage(IPage<BladeFlow> page, BladeFlow bladeFlow) {
@@ -90,52 +94,43 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public BladeFlow selectONeClaimPage() {
+	public SingleFlow selectOneClaimPage() {
 //		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup = TaskUtil.getCandidateGroup();
-//		List<BladeFlow> flowList = new LinkedList<>();
-//		// 个人等待签收的任务
-//		TaskQuery claimUserQuery = taskService.createTaskQuery().taskCandidateUser(taskUser)
-//			.includeProcessVariables().active().orderByTaskCreateTime().desc();
-//		// 定制流程等待签收的任务
-//		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
-//			.includeProcessVariables().active().orderByTaskCreateTime().desc();
-		// 通用流程等待签收的任务
-//		Task task = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-//			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc().singleResult();
 
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
-
-		Task task = taskQuery.listPage(0, 1).get(0);
-		BladeFlow flow = new BladeFlow();
-		flow.setTaskId(task.getId());
-		flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
-		flow.setTaskName(task.getName());
-		flow.setAssignee(task.getAssignee());
-		flow.setCreateTime(task.getCreateTime());
-		flow.setClaimTime(task.getClaimTime());
-		flow.setExecutionId(task.getExecutionId());
-		flow.setVariables(task.getProcessVariables());
-		flow.setPriority(task.getPriority());
-		ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
-		flow.setCategory(processDefinition.getCategory());
-		flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
-		flow.setProcessDefinitionId(processDefinition.getId());
-		flow.setProcessDefinitionName(processDefinition.getName());
-		flow.setProcessDefinitionKey(processDefinition.getKey());
-		flow.setProcessDefinitionVersion(processDefinition.getVersion());
-		flow.setProcessInstanceId(task.getProcessInstanceId());
-//		flow.setStatus(status);
-//		HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
-//		if (Func.isNotEmpty(historicProcessInstance)) {
-//			String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
-//			flow.setBusinessTable(businessKey[0]);
-//			flow.setBusinessId(businessKey[1]);
-//		}
-		return flow;
-
+				if(taskQuery.listPage(0, 1).size()!=0){
+				Task task = taskQuery.listPage(0, 1).get(0);
+				SingleFlow flow = new SingleFlow();
+				flow.setTaskId(task.getId());
+				flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
+				flow.setTaskName(task.getName());
+				flow.setAssignee(task.getAssignee());
+				flow.setCreateTime(task.getCreateTime());
+				flow.setClaimTime(task.getClaimTime());
+				flow.setExecutionId(task.getExecutionId());
+				flow.setVariables(task.getProcessVariables());
+				flow.setPriority(task.getPriority());
+				ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
+				flow.setCategory(processDefinition.getCategory());
+				flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
+				flow.setProcessDefinitionId(processDefinition.getId());
+				flow.setProcessDefinitionName(processDefinition.getName());
+				flow.setProcessDefinitionKey(processDefinition.getKey());
+				flow.setProcessDefinitionVersion(processDefinition.getVersion());
+				flow.setProcessInstanceId(task.getProcessInstanceId());
+				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				return flow;
+		}else{
+			return new SingleFlow();
+		}
 	}
+
+
+
 
 	@Override
 	public IPage<BladeFlow> selectTodoPage(IPage<BladeFlow> page, BladeFlow bladeFlow) {

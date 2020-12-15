@@ -17,8 +17,12 @@ import java.util.List;
 public interface ILabelTaskClient {
 	String API_PREFIX = "/client";
 	String START_LABEL_PROCESS = API_PREFIX + "/start-label-process";
+	String QUERY_LABEL_TASK = API_PREFIX + "/query-label-task";
 
 	@PostMapping(START_LABEL_PROCESS)
 	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
+
+	@GetMapping(QUERY_LABEL_TASK)
+	R<LabelTask> queryLabelTask(@RequestParam(value = "processInstanceId") String processInstanceId);
 
 }
