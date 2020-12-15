@@ -20,8 +20,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.service.IExpertService;
 import org.springblade.adata.vo.ExpertVO;
 import org.springblade.adata.wrapper.ExpertWrapper;
@@ -29,10 +31,12 @@ import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.oss.model.BladeFile;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.Func;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
@@ -50,7 +54,7 @@ import static org.springblade.core.cache.constant.CacheConstant.PARAM_CACHE;
 @Slf4j
 @NonDS
 @RestController
-@RequestMapping("expert")
+@RequestMapping("/expert")
 @AllArgsConstructor
 @Api(value = "学者接口", tags = "学者接口")
 public class ExpertController extends BladeController {
@@ -180,5 +184,24 @@ public class ExpertController extends BladeController {
 	@ApiOperation(value = "导入", notes = "传入智库id,任务id")
 	public R importExpertBase(String id, Long taskId) {
 		return R.data(expertService.importExpertBase(id,taskId));
+	}
+
+	/**
+	 * 上传学者头像
+	 *
+	 * @param action 	 学者Id
+	 * @param parameters 学者Id
+	 * @param file     	 文件
+	 * @return ObjectStat
+	 */
+	@PostMapping("/put-avatar-by-id")
+	@ApiOperationSupport(order = 9)
+	@ApiOperation(value = "上传学者头像", notes = "上传学者头像")
+	public R putFile(@RequestParam String action, @RequestParam String parameters, @RequestParam MultipartFile file) {
+		if (file.isEmpty()) {
+			return R.fail("参数为空");
+		}
+		String res = MagicRequest.getInstance().uploadAvatar(action, parameters, file);
+		return R.data(res);
 	}
 }

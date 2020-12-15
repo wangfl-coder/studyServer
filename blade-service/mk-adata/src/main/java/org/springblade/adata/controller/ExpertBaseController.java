@@ -41,7 +41,7 @@ import java.util.Map;
 @Slf4j
 @NonDS
 @RestController
-@RequestMapping("expertbase")
+@RequestMapping("/expertbase")
 @AllArgsConstructor
 @Api(value = "智库接口", tags = "智库接口")
 public class ExpertBaseController extends BladeController {
