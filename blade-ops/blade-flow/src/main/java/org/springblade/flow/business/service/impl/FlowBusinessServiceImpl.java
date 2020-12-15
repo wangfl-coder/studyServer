@@ -281,7 +281,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (bladeFlow.getEndDate() != null) {
 			taskQuery.taskCreatedBefore(bladeFlow.getEndDate());
 		}
-		List<Task> taskList = taskQuery.listPage((int)(page.getCurrent()-1)*(int)page.getSize(), (int)page.getSize());
+		List<Task> taskList = taskQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
 		taskList.forEach(task -> {
 			BladeFlow flow = new BladeFlow();
 			flow.setTaskId(task.getId());
