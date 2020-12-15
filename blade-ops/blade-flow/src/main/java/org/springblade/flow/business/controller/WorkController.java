@@ -29,6 +29,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.entity.FlowProcess;
 import org.springblade.flow.engine.service.FlowEngineService;
@@ -52,7 +53,7 @@ public class WorkController {
 	private final TaskService taskService;
 	private final FlowEngineService flowEngineService;
 	private final FlowBusinessService flowBusinessService;
-	private final ILabelTaskClient iLabelTaskClient;
+
 
 	/**
 	 * 发起事务列表页
@@ -82,7 +83,7 @@ public class WorkController {
 	@GetMapping("claim-one")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "返回一个待签事务并签收", notes = "传入流程信息")
-	public BladeFlow claimOne() {
+	public R<SingleFlow> claimOne() {
 //		Query query = new Query();
 //		query.setCurrent(1).setSize(1);
 //		IPage<BladeFlow> bladeFlowIPage = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
@@ -94,10 +95,13 @@ public class WorkController {
 //		}else {
 //			return null;
 //		}
-		BladeFlow flow = flowBusinessService.selectONeClaimPage();
-		taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
-		return flow;
-
+		SingleFlow flow = flowBusinessService.selectOneClaimPage();
+		if(flow.getTaskId()!=null){
+			taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
+			return R.data(flow);
+		}else{
+			return R.success("没有任务领取");
+		}
 	}
 
 	/**
