@@ -72,8 +72,8 @@ public class WorkController {
 	@GetMapping("claim-list")
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "待签事务列表页", notes = "传入流程信息")
-	public R<IPage<BladeFlow>> claimList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
-		IPage<BladeFlow> pages = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
+	public R<IPage<SingleFlow>> claimList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
+		IPage<SingleFlow> pages = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
 	}
 
@@ -110,8 +110,8 @@ public class WorkController {
 	@GetMapping("todo-list")
 	@ApiOperationSupport(order = 4)
 	@ApiOperation(value = "待办事务列表页", notes = "传入流程信息")
-	public R<IPage<BladeFlow>> todoList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
-		IPage<BladeFlow> pages = flowBusinessService.selectTodoPage(Condition.getPage(query), bladeFlow);
+	public R<IPage<SingleFlow>> todoList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
+		IPage<SingleFlow> pages = flowBusinessService.selectTodoPage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
 	}
 
@@ -121,8 +121,8 @@ public class WorkController {
 	@GetMapping("send-list")
 	@ApiOperationSupport(order = 5)
 	@ApiOperation(value = "已发事务列表页", notes = "传入流程信息")
-	public R<IPage<BladeFlow>> sendList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
-		IPage<BladeFlow> pages = flowBusinessService.selectSendPage(Condition.getPage(query), bladeFlow);
+	public R<IPage<SingleFlow>> sendList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
+		IPage<SingleFlow> pages = flowBusinessService.selectSendPage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
 	}
 
@@ -132,8 +132,8 @@ public class WorkController {
 	@GetMapping("done-list")
 	@ApiOperationSupport(order = 6)
 	@ApiOperation(value = "办结事务列表页", notes = "传入流程信息")
-	public R<IPage<BladeFlow>> doneList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
-		IPage<BladeFlow> pages = flowBusinessService.selectDonePage(Condition.getPage(query), bladeFlow);
+	public R<IPage<SingleFlow>> doneList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
+		IPage<SingleFlow> pages = flowBusinessService.selectDonePage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
 	}
 

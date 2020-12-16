@@ -25,6 +25,8 @@ public class QualityInspectionTask extends FlowEntity {
 	private Long taskId;
 	@ApiModelProperty(value = "专家id")
 	private Long personId;
+	@ApiModelProperty(value = "专家名字")
+	private String personName;
 	@ApiModelProperty(value = "组合id")
 	private Long compositionId;
 	@ApiModelProperty(value = "模版id")

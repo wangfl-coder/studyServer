@@ -62,10 +62,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final ILabelTaskClient iLabelTaskClient;
 
 	@Override
-	public IPage<BladeFlow> selectClaimPage(IPage<BladeFlow> page, BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup = TaskUtil.getCandidateGroup();
-		List<BladeFlow> flowList = new LinkedList<>();
+		List<SingleFlow> flowList = new LinkedList<>();
 
 		// 个人等待签收的任务
 		TaskQuery claimUserQuery = taskService.createTaskQuery().taskCandidateUser(taskUser)
@@ -85,8 +85,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 计算总数
 		long count = claimUserQuery.count() + claimRoleWithTenantIdQuery.count() + claimRoleWithoutTenantIdQuery.count();
 		// 设置页数
-		page.setSize(count);
-		// 设置总数
+		//page.setSize(page.getSize());
+		// 设置总数u
 		page.setTotal(count);
 		// 设置数据
 		page.setRecords(flowList);
@@ -123,19 +123,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 				flow.setTemplateId(labelTask.getTemplateId());
 				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
 				return flow;
 		}else{
 			return new SingleFlow();
 		}
 	}
 
-
-
-
 	@Override
-	public IPage<BladeFlow> selectTodoPage(IPage<BladeFlow> page, BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectTodoPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
-		List<BladeFlow> flowList = new LinkedList<>();
+		List<SingleFlow> flowList = new LinkedList<>();
 
 		// 已签收的任务
 		TaskQuery todoQuery = taskService.createTaskQuery().taskAssignee(taskUser).active()
@@ -156,9 +154,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public IPage<BladeFlow> selectSendPage(IPage<BladeFlow> page, BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectSendPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
-		List<BladeFlow> flowList = new LinkedList<>();
+		List<SingleFlow> flowList = new LinkedList<>();
 
 		HistoricProcessInstanceQuery historyQuery = historyService.createHistoricProcessInstanceQuery().startedBy(taskUser).orderByProcessInstanceStartTime().desc();
 
@@ -176,7 +174,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		List<HistoricProcessInstance> historyList = historyQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
 
 		historyList.forEach(historicProcessInstance -> {
-			BladeFlow flow = new BladeFlow();
+			SingleFlow flow = new SingleFlow();
 			// historicProcessInstance
 			flow.setCreateTime(historicProcessInstance.getStartTime());
 			flow.setEndTime(historicProcessInstance.getEndTime());
@@ -213,6 +211,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setProcessIsFinished(FlowEngineConstant.STATUS_UNFINISHED);
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
+			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
+			flow.setTemplateId(labelTask.getTemplateId());
+			flow.setPersonId(labelTask.getPersonId());
+			flow.setPersonName(labelTask.getPersonName());
 			flowList.add(flow);
 		});
 
@@ -225,9 +227,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public IPage<BladeFlow> selectDonePage(IPage<BladeFlow> page, BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectDonePage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
-		List<BladeFlow> flowList = new LinkedList<>();
+		List<SingleFlow> flowList = new LinkedList<>();
 
 		HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 			.includeProcessVariables().orderByHistoricTaskInstanceEndTime().desc();
@@ -245,7 +247,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 查询列表
 		List<HistoricTaskInstance> doneList = doneQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
 		doneList.forEach(historicTaskInstance -> {
-			BladeFlow flow = new BladeFlow();
+			SingleFlow flow = new SingleFlow();
 			flow.setTaskId(historicTaskInstance.getId());
 			flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
 			flow.setTaskName(historicTaskInstance.getName());
@@ -277,6 +279,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				}
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
+			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
+			flow.setTemplateId(labelTask.getTemplateId());
+			flow.setPersonId(labelTask.getPersonId());
+			flow.setPersonName(labelTask.getPersonName());
 			flowList.add(flow);
 		});
 		// 计算总数
@@ -315,7 +321,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	 * @param taskQuery 任务查询类
 	 * @param status    状态
 	 */
-	private void buildFlowTaskList(BladeFlow bladeFlow, List<BladeFlow> flowList, TaskQuery taskQuery, IPage<BladeFlow> page, String status) {
+	private void buildFlowTaskList(BladeFlow bladeFlow, List<SingleFlow> flowList, TaskQuery taskQuery, IPage<SingleFlow> page, String status) {
 		if (bladeFlow.getCategory() != null) {
 			taskQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
 		}
@@ -327,7 +333,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		}
 		List<Task> taskList = taskQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
 		taskList.forEach(task -> {
-			BladeFlow flow = new BladeFlow();
+			SingleFlow flow = new SingleFlow();
 			flow.setTaskId(task.getId());
 			flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
 			flow.setTaskName(task.getName());
@@ -354,6 +360,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setProcessDefinitionVersion(processDefinition.getVersion());
 			flow.setProcessInstanceId(task.getProcessInstanceId());
 			flow.setStatus(status);
+			LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+			flow.setTemplateId(labelTask.getTemplateId());
+			flow.setPersonId(labelTask.getPersonId());
+			flow.setPersonName(labelTask.getPersonName());
 			flowList.add(flow);
 		});
 	}

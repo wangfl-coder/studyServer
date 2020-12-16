@@ -35,7 +35,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	IPage<BladeFlow> selectClaimPage(IPage<BladeFlow> page, BladeFlow bladeFlow);
+	IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow);
 
 
 	/**
@@ -52,7 +52,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	IPage<BladeFlow> selectTodoPage(IPage<BladeFlow> page, BladeFlow bladeFlow);
+	IPage<SingleFlow> selectTodoPage(IPage<SingleFlow> page, BladeFlow bladeFlow);
 
 	/**
 	 * 流程已发列表
@@ -61,7 +61,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	IPage<BladeFlow> selectSendPage(IPage<BladeFlow> page, BladeFlow bladeFlow);
+	IPage<SingleFlow> selectSendPage(IPage<SingleFlow> page, BladeFlow bladeFlow);
 
 	/**
 	 * 流程办结列表
@@ -70,7 +70,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	IPage<BladeFlow> selectDonePage(IPage<BladeFlow> page, BladeFlow bladeFlow);
+	IPage<SingleFlow> selectDonePage(IPage<SingleFlow> page, BladeFlow bladeFlow);
 
 	/**
 	 * 完成任务

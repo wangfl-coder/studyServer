@@ -61,11 +61,9 @@ public class ExpertClient implements IExpertClient {
 
 	@Override
 	@GetMapping(GET_EXPERT_IDS)
-	public R<List<Long>> getExpertIds(@RequestParam Long taskId) {
-		List<Expert> details = service.list(Wrappers.<Expert>query().lambda().eq(Expert::getTaskId, taskId));
-		List<Long> ids = new ArrayList<>();
-		details.forEach(detail -> ids.add(detail.getId()));
-		return R.data(ids);
+	public R<List<Expert>> getExpertIds(@RequestParam Long taskId) {
+		List<Expert> experts = service.list(Wrappers.<Expert>query().lambda().eq(Expert::getTaskId, taskId));
+		return R.data(experts);
 	}
 
 	@Override
