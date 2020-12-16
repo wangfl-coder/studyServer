@@ -16,6 +16,8 @@
  */
 package org.springblade.composition.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -42,18 +44,21 @@ public class AnnotationDataVO {
 	/**
 	 * 标注或质检的用时
 	 */
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "标注或质检的用时")
 	private Integer time;
 
 	/**
 	 * 模板id
 	 */
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模板id")
 	private Long templateId;
 
 	/**
 	 * 组合id
 	 */
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "组合id")
 	private Long compositionId;
 
