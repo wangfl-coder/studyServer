@@ -61,6 +61,12 @@ public class Expert extends BaseEntity {
 	private String titles;
 
 	/**
+	 * 职称描述
+	 */
+	@ApiModelProperty(value = "职称描述")
+	private String titlesDesc;
+
+	/**
 	 * 联系电话
 	 */
 	@ApiModelProperty(value = "联系电话")
