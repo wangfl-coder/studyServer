@@ -109,7 +109,7 @@ public class AnnotationDataController extends BladeController {
 		expert.setId(annotationDataList.get(0).getExpertId());
 		annotationDataList.forEach(annotationData -> {
 			annotationDataIds.add(annotationData.getId());
-			BeanUtil.setProperty(expert, StringUtil.underlineToHump(annotationData.getField()),annotationData.getValue());
+			BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue());
 		});
 		expertClient.saveExpert(expert);
 		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().in(AnnotationData::getId, annotationDataIds));
