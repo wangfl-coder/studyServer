@@ -36,6 +36,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 
 
+import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -71,10 +72,25 @@ public class TemplateController extends BladeController {
 	public R<Composition> detail(Long templateId) {
 		TemplateComposition templateComposition = new TemplateComposition();
 		templateComposition.setTemplateId(templateId);
-		templateComposition.setRoleName(AuthUtil.getUserRole());
+		// 补充信息人员的角色名
+		String supplementRoleName = "ci";
+		// 如果是补充信息人员，直接返回一个composition
+		String userRoleName = AuthUtil.getUserRole();
+		if(supplementRoleName.equals(userRoleName)){
+			Composition composition = new Composition();
+			composition.setAnnotationType(3);
+			return R.data(composition);
+		}
+		templateComposition.setRoleName(userRoleName);
 		TemplateComposition detail = templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition));
+		if (detail == null){
+			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
+		}
 		Long compositionId = detail.getCompositionId();
 		Composition composition = compositionService.getById(compositionId);
+		if (composition == null){
+			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
+		}
 		return R.data(composition);
 	}
 
