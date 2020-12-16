@@ -1,6 +1,8 @@
 package org.springblade.task.dto;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,7 @@ public class ExpertTaskDTO extends BaseEntity {
 	@ApiModelProperty(value = "任务描述")
 	private String description;
 	@ApiModelProperty(value = "模版id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long templateId;
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;
