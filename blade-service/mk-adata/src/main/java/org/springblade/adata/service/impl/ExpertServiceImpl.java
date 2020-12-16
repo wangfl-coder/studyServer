@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
@@ -276,7 +277,18 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 
 		expert.setName(name);
 		expert.setNameZh(nameZh);
-		expert.setTitles(titles);
+		if (titles != null){
+			if (StringUtils.contains(titles, "[")){
+				titles = StringUtils.removeEnd(titles, "\"]");
+				titles = StringUtils.removeStart(titles, "[\"");
+				expert.setTitles(titles);
+			} else {
+				expert.setTitles("-1");
+				titles = StringUtils.removeEnd(titles, "\"");
+				titles = StringUtils.removeStart(titles, "\"");
+				expert.setTitlesDesc(titles);
+			}
+		}
 		expert.setPhone(phone);
 		expert.setFax(fax);
 		expert.setEmail(email);
