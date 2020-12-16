@@ -124,6 +124,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setTemplateId(labelTask.getTemplateId());
 				flow.setPersonId(labelTask.getPersonId());
 				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
 				return flow;
 		}else{
 			return new SingleFlow();
@@ -215,6 +216,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setTemplateId(labelTask.getTemplateId());
 			flow.setPersonId(labelTask.getPersonId());
 			flow.setPersonName(labelTask.getPersonName());
+			flow.setSubTaskId(labelTask.getId());
 			flowList.add(flow);
 		});
 
@@ -283,6 +285,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setTemplateId(labelTask.getTemplateId());
 			flow.setPersonId(labelTask.getPersonId());
 			flow.setPersonName(labelTask.getPersonName());
+			flow.setSubTaskId(labelTask.getId());
 			flowList.add(flow);
 		});
 		// 计算总数
@@ -364,6 +367,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setTemplateId(labelTask.getTemplateId());
 			flow.setPersonId(labelTask.getPersonId());
 			flow.setPersonName(labelTask.getPersonName());
+			flow.setSubTaskId(labelTask.getId());
 			flowList.add(flow);
 		});
 	}

@@ -14,5 +14,8 @@ public class SingleFlow extends BladeFlow{
 	private String personName;
 	@ApiModelProperty(value = "模版id")
 	private Long templateId;
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
+
 
 }

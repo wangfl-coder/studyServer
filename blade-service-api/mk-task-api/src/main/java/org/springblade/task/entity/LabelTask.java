@@ -1,6 +1,8 @@
 package org.springblade.task.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -22,13 +24,17 @@ public class LabelTask extends FlowEntity {
 	@ApiModelProperty(value = "流程实例id")
 	private String processInstanceId;
 	@ApiModelProperty(value = "任务id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long taskId;
 	@ApiModelProperty(value = "专家id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long personId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "组合id")
 	private Long compositionId;
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模版id")
 	private Long templateId;
 	@ApiModelProperty(value = "任务领取人")

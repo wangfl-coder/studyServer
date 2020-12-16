@@ -1,6 +1,8 @@
 package org.springblade.task.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -22,14 +24,18 @@ public class QualityInspectionTask extends FlowEntity {
 	@ApiModelProperty(value = "流程实例id")
 	private String processInstanceId;
 	@ApiModelProperty(value = "任务id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long taskId;
 	@ApiModelProperty(value = "专家id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long personId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
 	@ApiModelProperty(value = "组合id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long compositionId;
 	@ApiModelProperty(value = "模版id")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long templateId;
 	@ApiModelProperty(value = "任务领取人")
 	private String taskUser;
