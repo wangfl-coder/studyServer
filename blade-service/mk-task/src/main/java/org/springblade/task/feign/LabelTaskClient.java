@@ -27,7 +27,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@PostMapping(START_LABEL_PROCESS)
 	public R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO) {
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
-		boolean b = labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExpertIds());
+		boolean b = labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExperts());
 		return R.status(b);
 	}
 

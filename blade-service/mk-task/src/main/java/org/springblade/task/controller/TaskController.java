@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
+import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -42,10 +43,10 @@ public class TaskController extends BladeController {
 		boolean save = taskService.save(task);
 		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());
 		if (res_eb.isSuccess()) {
-			R res_ids = expertClient.getExpertIds(task.getId());
-			if (res_ids.isSuccess()) {
-				List<Long> ids = (List<Long>)res_ids.getData();
-				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, ids);
+			R<List<Expert>> rexperts = expertClient.getExpertIds(task.getId());
+			if (rexperts.isSuccess()) {
+				List<Expert> experts = rexperts.getData();
+				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, experts);
 			} else {
 				return R.fail("读取专家列表失败");
 			}

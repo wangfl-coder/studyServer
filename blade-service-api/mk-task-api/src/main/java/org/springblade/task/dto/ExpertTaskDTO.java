@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.base.BaseEntity;
 
 import java.util.Date;
@@ -18,8 +19,8 @@ import java.util.List;
 @ApiModel(value = "新建学者标注任务", description = "新建学者标注任务对象")
 public class ExpertTaskDTO extends BaseEntity {
 
-	@ApiModelProperty(value = "学者id列表")
-	private List<Long> expertIds;
+	@ApiModelProperty(value = "学者列表")
+	private List<Expert> experts;
 	@ApiModelProperty(value = "任务名字")
 	private String taskName;
 	@ApiModelProperty(value = "任务类型")
