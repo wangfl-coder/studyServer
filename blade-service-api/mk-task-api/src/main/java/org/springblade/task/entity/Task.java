@@ -1,6 +1,8 @@
 package org.springblade.task.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,12 +19,14 @@ import java.util.Date;
 @ApiModel(value = "Task对象", description = "Task对象")
 public class Task extends BaseEntity {
 
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "智库id")
 	private String ebId;
 	@ApiModelProperty(value = "任务名字")
 	private String taskName;
 	@ApiModelProperty(value = "任务类型")
 	private Integer taskType;
+	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模版id")
 	private Long templateId;
 	@ApiModelProperty(value = "任务编码")

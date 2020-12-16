@@ -51,6 +51,7 @@ public class TaskController extends BladeController {
 				return R.fail("读取专家列表失败");
 			}
 		} else {
+			taskService.removeById(task.getId());
 			return R.fail("导入智库失败");
 		}
 		return R.status(result);
