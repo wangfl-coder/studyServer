@@ -44,7 +44,7 @@ public class LabelTaskController extends BladeController implements CacheNames {
 	public R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO) {
 //		 List<Person> persons = getPersons().getData();
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
-		return R.status(labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExpertIds()));
+		return R.status(labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExperts()));
 	}
 
 }

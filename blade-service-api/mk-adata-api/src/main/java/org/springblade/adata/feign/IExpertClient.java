@@ -60,7 +60,7 @@ public interface IExpertClient {
 	 * @return
 	 */
 	@GetMapping(GET_EXPERT_IDS)
-	R<List<Long>> getExpertIds(@RequestParam Long taskId);
+	R<List<Expert>> getExpertIds(@RequestParam Long taskId);
 
 	/**
 	 * 保存学者信息

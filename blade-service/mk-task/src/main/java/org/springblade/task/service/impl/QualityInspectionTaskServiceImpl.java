@@ -2,6 +2,7 @@ package org.springblade.task.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springblade.adata.entity.Expert;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -33,10 +34,10 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId, Task task, List<Long> ids) {
+	public boolean startProcess(String processDefinitionId, Task task, List<Expert> experts) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 		//List<Expert> experts = persons.getData();
-		ids.forEach( id -> {
+		experts.forEach( expert -> {
 			QualityInspectionTask inspectionTask = new QualityInspectionTask();
 			if (Func.isEmpty(inspectionTask.getId())) {
 				// 保存leave
@@ -53,8 +54,9 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 					// 返回流程id写入leave
 					inspectionTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					inspectionTask.setPersonId(id);
 					inspectionTask.setTemplateId(task.getTemplateId());
+					inspectionTask.setPersonId(expert.getId());
+					inspectionTask.setPersonName(expert.getName());
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");

@@ -2,6 +2,7 @@ package org.springblade.task.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springblade.adata.entity.Expert;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -34,10 +35,10 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId, Task task, List<Long> ids) {
+	public boolean startProcess(String processDefinitionId, Task task, List<Expert> experts) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 		//List<Expert> experts = persons.getData();
-		ids.forEach( id -> {
+		experts.forEach( expert -> {
 			LabelTask labelTask = new LabelTask();
 			labelTask.setProcessDefinitionId(processDefinitionId);
 			if (Func.isEmpty(labelTask.getId())) {
@@ -56,8 +57,9 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 					// 返回流程id写入leave
 					labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					labelTask.setPersonId(id);
 					labelTask.setTemplateId(task.getTemplateId());
+					labelTask.setPersonId(expert.getId());
+					labelTask.setPersonName(expert.getName());
 					updateById(labelTask);
 				} else {
 					throw new ServiceException("开启流程失败");
