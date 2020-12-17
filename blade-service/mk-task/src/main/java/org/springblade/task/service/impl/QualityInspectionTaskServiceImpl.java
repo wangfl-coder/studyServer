@@ -68,6 +68,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					inspectionTask.setTaskId(taskId);
 					inspectionTask.setPersonId(labelTask.getPersonId());
 					inspectionTask.setPersonName(labelTask.getPersonName());
+					inspectionTask.setType()
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");
