@@ -34,6 +34,7 @@
         <result column="bio" property="bio"/>
         <result column="bio_zh" property="bioZh"/>
         <result column="remark" property="remark"/>
+        <result column="expert_id" property="expertId"/>
     </resultMap>
 
 </mapper>

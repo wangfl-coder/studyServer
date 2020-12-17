@@ -206,6 +206,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		JSONArray data = tempObj.getJSONArray("data");
 		JSONObject d = data.getJSONObject(0);
 		String name = d.getString("name");
+		String expertId = d.getString("id");
 		String nameZh = d.getString("name_zh");
 		String titles = d.getString("titles");
 		JSONObject p = d.getJSONObject("profile");
@@ -275,6 +276,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		String bio = p.getString("bio");
 		String bioZh = p.getString("bio_zh");
 
+		expert.setExpertId(expertId);
 		expert.setName(name);
 		expert.setNameZh(nameZh);
 		if (titles != null){
