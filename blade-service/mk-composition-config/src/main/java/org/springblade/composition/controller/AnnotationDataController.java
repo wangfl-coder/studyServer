@@ -93,7 +93,7 @@ public class AnnotationDataController extends BladeController {
 
 	/**
 	 * 批量新增或修改标注数据
-	 * 每次都会逻辑删除之前的数据，但是要有id
+	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
 	 * 每次修改后同时更新mk_adata_expert表中的数据
 	 */
 	@PostMapping("/submit")
@@ -108,14 +108,14 @@ public class AnnotationDataController extends BladeController {
 		Expert expert = new Expert();
 		expert.setId(annotationDataList.get(0).getExpertId());
 		annotationDataList.forEach(annotationData -> {
-			annotationDataIds.add(annotationData.getId());
+			annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationData.getSubTaskId()).and(i->i.eq(AnnotationData::getField, annotationData.getField())));
 			BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue());
 		});
 		expertClient.saveExpert(expert);
-		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().in(AnnotationData::getId, annotationDataIds));
-		annotationDataList.forEach(annotationData -> {
-			annotationData.setId(null);
-		});
+		//因为前端不传id，所以这一步其实不需要了
+//		annotationDataList.forEach(annotationData -> {
+//			annotationData.setId(null);
+//		});
 
 		//更新统计表，记录标注用时
 		Statistics statistics_query = new Statistics();
@@ -137,6 +137,53 @@ public class AnnotationDataController extends BladeController {
 		statisticsService.saveOrUpdate(statistics);
 		return R.status(annotationDataService.saveBatch(annotationDataList));
 	}
+
+//	/**
+//	 * 批量新增或修改标注数据
+//	 * 每次都会逻辑删除之前的数据，但是要有id
+//	 * 每次修改后同时更新mk_adata_expert表中的数据
+//	 */
+//	@PostMapping("/submit")
+//	@ApiOperationSupport(order = 3)
+//	@Transactional(rollbackFor = Exception.class)
+//	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
+//	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+//		Long subTaskId = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
+//		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
+//		// 删除原来的标注数据
+//		List<Long> annotationDataIds = new ArrayList<>();
+//		Expert expert = new Expert();
+//		expert.setId(annotationDataList.get(0).getExpertId());
+//		annotationDataList.forEach(annotationData -> {
+//			annotationDataIds.add(annotationData.getId());
+//			BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue());
+//		});
+//		expertClient.saveExpert(expert);
+//		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().in(AnnotationData::getId, annotationDataIds));
+//		annotationDataList.forEach(annotationData -> {
+//			annotationData.setId(null);
+//		});
+//
+//		//更新统计表，记录标注用时
+//		Statistics statistics_query = new Statistics();
+//		statistics_query.setSubTaskId(subTaskId);
+//		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
+//		statistics_query.setUserId(AuthUtil.getUserId());
+//
+//		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+//		if (statistics != null){
+//			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
+//		} else {
+//			statistics = new Statistics();
+//			statistics.setTime(annotationDataVO.getTime());
+//			statistics.setUserId(AuthUtil.getUserId());
+//			statistics.setCompositionId(annotationDataVO.getCompositionId());
+//			statistics.setSubTaskId(subTaskId);
+//			statistics.setTemplateId(annotationDataVO.getTemplateId());
+//		}
+//		statisticsService.saveOrUpdate(statistics);
+//		return R.status(annotationDataService.saveBatch(annotationDataList));
+//	}
 
 
 }
