@@ -42,10 +42,10 @@ public class QualityInspectionTaskController extends BladeController implements 
 
 	@PostMapping("start-process")
 	@ApiOperation(value = "新增或修改")
-	public R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO) {
+	public R startProcess(@RequestParam(value = "taskId") Long taskId,@RequestParam(value = "count") Integer count,@RequestParam(value = "type") Integer type,@RequestParam(value = "processDefinitionId") String processDefinitionId,@RequestBody List<LabelTask> labelTasks) {
 //		 List<Person> persons = getPersons().getData();
-		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
-		return R.status(service.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExperts()));
+		//Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
+		return R.status(service.startProcess(taskId, count, type, processDefinitionId, labelTasks));
 	}
 
 }

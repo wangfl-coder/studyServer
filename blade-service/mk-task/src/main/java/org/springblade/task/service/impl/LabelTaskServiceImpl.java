@@ -58,6 +58,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					// 返回流程id写入leave
 					labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
 					labelTask.setTemplateId(task.getTemplateId());
+					labelTask.setTaskId(task.getId());
 					labelTask.setPersonId(expert.getId());
 					labelTask.setPersonName(expert.getName());
 					updateById(labelTask);
