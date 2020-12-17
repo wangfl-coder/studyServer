@@ -51,7 +51,7 @@ public class QualityInspectionTask extends FlowEntity {
 	private double duration;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
-	@ApiModelProperty(value = "任务类型")
+	@ApiModelProperty(value = "质检任务类型")
 	private Integer type;
 
 
