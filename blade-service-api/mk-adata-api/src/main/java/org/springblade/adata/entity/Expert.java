@@ -46,6 +46,12 @@ public class Expert extends BaseEntity {
 	private Long taskId;
 
 	/**
+	 * Aminer库中的原始学者ID
+	 */
+	@ApiModelProperty(value = "Aminer库中的原始学者ID")
+	private String expertId;
+
+	/**
 	 * 姓名
 	 */
 	@ApiModelProperty(value = "姓名")

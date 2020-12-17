@@ -27,7 +27,6 @@ public class LabelTask extends FlowEntity {
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long taskId;
 	@ApiModelProperty(value = "专家id")
-	@JsonSerialize(using = ToStringSerializer.class)
 	private Long personId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
