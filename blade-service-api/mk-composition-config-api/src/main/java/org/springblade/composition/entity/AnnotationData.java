@@ -84,4 +84,10 @@ public class AnnotationData extends BaseEntity {
 	@ApiModelProperty(value = "备注")
 	private String remark;
 
+	/**
+	 * 标注类型
+	 */
+	@ApiModelProperty(value = "标注类型")
+	private Integer type ;
+
 }

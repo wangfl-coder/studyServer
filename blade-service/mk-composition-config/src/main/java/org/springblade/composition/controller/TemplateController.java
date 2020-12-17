@@ -94,6 +94,25 @@ public class TemplateController extends BladeController {
 		return R.data(composition);
 	}
 
+	@GetMapping("/detail-compositions")
+	@ApiOperationSupport(order = 8)
+	@ApiOperation(value = "模板对应的所有组合", notes = "传入模板ID")
+	public R<List<Composition>> detail_compositions(Long templateId) {
+		TemplateComposition templateComposition = new TemplateComposition();
+		templateComposition.setTemplateId(templateId);
+		List<TemplateComposition> templateCompositionList = templateCompositionService.list(Condition.getQueryWrapper(templateComposition));
+		if (templateCompositionList.isEmpty()){
+			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
+		}
+		List<Long> compositionIdList = new ArrayList<>();
+		templateCompositionList.forEach(templateComposition1 -> compositionIdList.add(templateComposition1.getCompositionId()));
+		List<Composition> compositionList = compositionService.listByIds(compositionIdList);
+		if (compositionList.isEmpty()){
+			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
+		}
+		return R.data(compositionList);
+	}
+
 	/**
 	 * 模板详情
 	 */
