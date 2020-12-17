@@ -18,11 +18,21 @@ public interface ILabelTaskClient {
 	String API_PREFIX = "/client";
 	String START_LABEL_PROCESS = API_PREFIX + "/start-label-process";
 	String QUERY_LABEL_TASK = API_PREFIX + "/query-label-task";
+	String CHANGE_STATUS = API_PREFIX + "/change-status";
+	String QUERY_COMPLETE_LABEL_TASK = API_PREFIX + "/complete-label-task";
 
 	@PostMapping(START_LABEL_PROCESS)
 	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
 
 	@GetMapping(QUERY_LABEL_TASK)
 	R<LabelTask> queryLabelTask(@RequestParam(value = "processInstanceId") String processInstanceId);
+
+	@GetMapping(CHANGE_STATUS)
+	R changeStatus(@RequestParam(value = "processInstanceId") String processInstanceId);
+
+	@GetMapping(QUERY_COMPLETE_LABEL_TASK)
+	R<List<LabelTask>> queryCompleteTask(@RequestParam(value = "taskId") Long taskId);
+
+
 
 }

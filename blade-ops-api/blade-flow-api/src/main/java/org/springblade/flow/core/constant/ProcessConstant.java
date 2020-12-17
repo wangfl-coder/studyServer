@@ -41,7 +41,7 @@ public interface ProcessConstant {
 	/**
 	 * 质检流程标识
 	 */
-	String QUALITY_INSPECTION_KEY = "QualityInspection";
+	String QUALITY_INSPECTION_KEY = "Inspection";
 
 	/**
 	 * 同意标识

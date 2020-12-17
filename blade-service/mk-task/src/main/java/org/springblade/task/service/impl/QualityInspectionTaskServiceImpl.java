@@ -15,6 +15,7 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.FlowUtil;
 import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.QualityInspectionTaskMapper;
@@ -22,7 +23,10 @@ import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -34,11 +38,17 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId, Task task, List<Expert> experts) {
-		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
-		//List<Expert> experts = persons.getData();
-		experts.forEach( expert -> {
+	public boolean startProcess(Long taskId, Integer count, Integer type, String processDefinitionId, List<LabelTask> labelTasks) {
+		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.QUALITY_INSPECTION_KEY);
+		Random random = new Random();
+		HashSet<LabelTask> set = new HashSet<>();
+		do {
+			set.add(labelTasks.get(random.nextInt(labelTasks.size())));
+		} while (set.size() != count);
+		ArrayList<LabelTask> labelTasks1 = new ArrayList<>(set);
+		labelTasks1.forEach( labelTask -> {
 			QualityInspectionTask inspectionTask = new QualityInspectionTask();
+			inspectionTask.setProcessDefinitionId(processDefinitionId);
 			if (Func.isEmpty(inspectionTask.getId())) {
 				// 保存leave
 				inspectionTask.setCreateTime(DateUtil.now());
@@ -47,16 +57,18 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 				Kv variables = Kv.create()
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 					.set("taskUser", TaskUtil.getTaskUser(inspectionTask.getTaskUser()))
-					.set("priority", task.getPriority());
+					.set("type", type);
 					//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(processDefinitionId, FlowUtil.getBusinessKey(businessTable, String.valueOf(inspectionTask.getId())), variables);
 				if (result.isSuccess()) {
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 					// 返回流程id写入leave
 					inspectionTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					inspectionTask.setTemplateId(task.getTemplateId());
-					inspectionTask.setPersonId(expert.getId());
-					inspectionTask.setPersonName(expert.getName());
+					inspectionTask.setTemplateId(labelTask.getTemplateId());
+					inspectionTask.setTaskId(taskId);
+					inspectionTask.setPersonId(labelTask.getPersonId());
+					inspectionTask.setPersonName(labelTask.getPersonName());
+					inspectionTask.setType(type);
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");
