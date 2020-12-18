@@ -38,7 +38,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId,Integer count,Task task, List<LabelTask> labelTasks) {
+	public boolean startProcess(String processDefinitionId,Integer count,Integer inspectionType,Task task, List<LabelTask> labelTasks) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.QUALITY_INSPECTION_KEY);
 		Random random = new Random();
 		HashSet<LabelTask> set = new HashSet<>();
@@ -57,7 +57,8 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 				Kv variables = Kv.create()
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 					.set("taskUser", TaskUtil.getTaskUser(inspectionTask.getTaskUser()))
-					.set("type", task.getTaskType());
+					.set("type", inspectionType)
+				    .set("priority", task.getPriority());
 					//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(processDefinitionId, FlowUtil.getBusinessKey(businessTable, String.valueOf(inspectionTask.getId())), variables);
 				if (result.isSuccess()) {
@@ -68,8 +69,9 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					inspectionTask.setTaskId(task.getId());
 					inspectionTask.setPersonId(labelTask.getPersonId());
 					inspectionTask.setPersonName(labelTask.getPersonName());
-					inspectionTask.setType(task.getTaskType());
-					inspectionTask.setPriority(labelTask.getPriority());
+					inspectionTask.setTaskType(task.getTaskType());
+					inspectionTask.setInspectionType(inspectionType);
+					inspectionTask.setPriority(task.getPriority());
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");

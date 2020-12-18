@@ -16,7 +16,9 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.service.LabelTaskService;
@@ -44,14 +46,14 @@ public class TaskController extends BladeController {
 
 	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
-	public R inspectionSave(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
+	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
-		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
+		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
 		boolean save = taskService.save(task);
-		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(task.getId());
+		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(qualityInspectionDTO.getTaskId());
 		if (listR.isSuccess()){
 			List<LabelTask> labelTasks = listR.getData();
-			result = qualityInspectionTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(),expertBaseTaskDTO.getCount(),task,labelTasks);
+			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),qualityInspectionDTO.getCount(),qualityInspectionDTO.getInspectionType(),task,labelTasks);
 		}else {
 			return R.fail("获取标注完成的任务失败");
 		}
