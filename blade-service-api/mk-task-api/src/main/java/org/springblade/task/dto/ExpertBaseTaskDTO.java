@@ -40,5 +40,8 @@ public class ExpertBaseTaskDTO extends BaseEntity {
 	private Date endTime;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
+	@ApiModelProperty(value = "抽查数量")
+	private Integer count;
+
 
 }

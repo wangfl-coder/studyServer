@@ -9,5 +9,5 @@ import org.springblade.task.entity.Task;
 import java.util.List;
 
 public interface QualityInspectionTaskService extends BaseService<QualityInspectionTask> {
-	boolean startProcess(Long taskId, Integer count, Integer type, String processDefinitionId, List<LabelTask> labelTasks);
+	boolean startProcess(String processDefinitionId,Integer count,Task task,List<LabelTask> labelTasks);
 }

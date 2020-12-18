@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.task.entity.LabelTask;
 
 import java.util.Date;
 import java.util.List;
@@ -42,5 +43,6 @@ public class ExpertTaskDTO extends BaseEntity {
 	private Date endTime;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
+
 
 }

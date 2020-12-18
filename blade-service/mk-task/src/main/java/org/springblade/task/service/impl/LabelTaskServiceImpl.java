@@ -49,7 +49,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				Kv variables = Kv.create()
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 					.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
-					.set("priority", task.getPriority());
+					.set("priority", task.getPriority())
+					.set("complete",1);
 //					.set("taskPriority", task.getPriority());
 				//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
@@ -61,6 +62,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					labelTask.setTaskId(task.getId());
 					labelTask.setPersonId(expert.getId());
 					labelTask.setPersonName(expert.getName());
+					labelTask.setPriority(task.getPriority());
 					updateById(labelTask);
 				} else {
 					throw new ServiceException("开启流程失败");
