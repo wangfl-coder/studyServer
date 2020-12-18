@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.InspectionData;
 
 import java.util.List;
 
@@ -33,19 +34,19 @@ import java.util.List;
  */
 @Data
 @ApiModel(value = "AnnotationDataVO", description = "AnnotationDataVO")
-public class AnnotationDataVO {
+public class InspectionDataVO {
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 标注数据列表
+	 * 质检数据列表
 	 */
-	@ApiModelProperty(value = "标注数据列表")
-	private List<AnnotationData> annotationDataList;
+	@ApiModelProperty(value = "质检数据列表")
+	private List<InspectionData> inspectionDataList;
 
 	/**
-	 * 标注的用时
+	 * 质检的用时
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "标注的用时")
+	@ApiModelProperty(value = "质检的用时")
 	private Integer time;
 
 	/**
