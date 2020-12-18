@@ -41,7 +41,9 @@ import org.springblade.flow.engine.constant.FlowEngineConstant;
 import org.springblade.flow.engine.utils.FlowCache;
 
 import org.springblade.task.entity.LabelTask;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -60,6 +62,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final TaskService taskService;
 	private final HistoryService historyService;
 	private final ILabelTaskClient iLabelTaskClient;
+	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
 
 	@Override
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
@@ -121,10 +124,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setProcessDefinitionVersion(processDefinition.getVersion());
 				flow.setProcessInstanceId(task.getProcessInstanceId());
 				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
+				if (labelTask.getProcessInstanceId()==null){
+					QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
+					flow.setTemplateId(qualityInspectionTask.getTemplateId());
+					flow.setPersonId(qualityInspectionTask.getPersonId());
+					flow.setPersonName(qualityInspectionTask.getPersonName());
+					flow.setSubTaskId(qualityInspectionTask.getId());
+					flow.setPriority(qualityInspectionTask.getPriority());
+				}else{
+					flow.setTemplateId(labelTask.getTemplateId());
+					flow.setPersonId(labelTask.getPersonId());
+					flow.setPersonName(labelTask.getPersonName());
+					flow.setSubTaskId(labelTask.getId());
+					flow.setPriority(labelTask.getPriority());
+				}
 				return flow;
 		}else{
 			return new SingleFlow();
@@ -213,10 +226,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
 			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
-			flow.setTemplateId(labelTask.getTemplateId());
-			flow.setPersonId(labelTask.getPersonId());
-			flow.setPersonName(labelTask.getPersonName());
-			flow.setSubTaskId(labelTask.getId());
+			if (labelTask.getProcessInstanceId()==null){
+				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
+				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+				flow.setPersonId(qualityInspectionTask.getPersonId());
+				flow.setPersonName(qualityInspectionTask.getPersonName());
+				flow.setSubTaskId(qualityInspectionTask.getId());
+				flow.setPriority(qualityInspectionTask.getPriority());
+			}else{
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
+				flow.setPriority(labelTask.getPriority());
+			}
 			flowList.add(flow);
 		});
 
@@ -282,10 +305,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
 			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
-			flow.setTemplateId(labelTask.getTemplateId());
-			flow.setPersonId(labelTask.getPersonId());
-			flow.setPersonName(labelTask.getPersonName());
-			flow.setSubTaskId(labelTask.getId());
+			if (labelTask.getProcessInstanceId()==null){
+				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
+				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+				flow.setPersonId(qualityInspectionTask.getPersonId());
+				flow.setPersonName(qualityInspectionTask.getPersonName());
+				flow.setSubTaskId(qualityInspectionTask.getId());
+				flow.setPriority(qualityInspectionTask.getPriority());
+			}else{
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
+				flow.setPriority(labelTask.getPriority());
+			}
 			flowList.add(flow);
 		});
 		// 计算总数
@@ -368,10 +401,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setProcessInstanceId(task.getProcessInstanceId());
 			flow.setStatus(status);
 			LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-			flow.setTemplateId(labelTask.getTemplateId());
-			flow.setPersonId(labelTask.getPersonId());
-			flow.setPersonName(labelTask.getPersonName());
-			flow.setSubTaskId(labelTask.getId());
+			if (labelTask.getProcessInstanceId()==null){
+				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
+				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+				flow.setPersonId(qualityInspectionTask.getPersonId());
+				flow.setPersonName(qualityInspectionTask.getPersonName());
+				flow.setSubTaskId(qualityInspectionTask.getId());
+				flow.setPriority(qualityInspectionTask.getPriority());
+			}else{
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
+				flow.setPriority(labelTask.getPriority());
+			}
 			flowList.add(flow);
 		});
 	}

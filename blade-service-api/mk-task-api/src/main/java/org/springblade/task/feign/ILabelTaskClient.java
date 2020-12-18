@@ -34,5 +34,4 @@ public interface ILabelTaskClient {
 	R<List<LabelTask>> queryCompleteTask(@RequestParam(value = "taskId") Long taskId);
 
 
-
 }

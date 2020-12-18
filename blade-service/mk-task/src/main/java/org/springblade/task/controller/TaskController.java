@@ -42,7 +42,7 @@ public class TaskController extends BladeController {
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 
-	@GetMapping(value = "/inspection/save")
+	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
 	public R inspectionSave(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
 		Boolean result;
