@@ -16,8 +16,11 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
+import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,9 +37,26 @@ public class TaskController extends BladeController {
 	private TaskService taskService;
 	private IExpertClient expertClient;
 	private LabelTaskService labelTaskService;
+	private ILabelTaskClient iLabelTaskClient;
+	private QualityInspectionTaskService qualityInspectionTaskService;
+
+	@PostMapping(value = "/inspection/save")
+	@ApiOperation(value = "添加质检任务")
+	public R inspectionSave(@RequestParam(value = "taskId") Long taskId,@RequestParam(value = "count") Integer count,@RequestParam(value = "type") Integer type,@RequestParam(value = "processDefinitionId") String processDefinitionId) {
+		Boolean result;
+		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(taskId);
+		if (listR.isSuccess()){
+			List<LabelTask> labelTasks = listR.getData();
+			result = qualityInspectionTaskService.startProcess(taskId,count,type,processDefinitionId,labelTasks);
+		}else {
+			return R.fail("获取标注完成的任务失败");
+		}
+
+		return R.status(result);
+	}
 
 	@PostMapping(value = "/save")
-	@ApiOperation(value = "添加任务")
+	@ApiOperation(value = "添加标注任务")
 	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO){
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
