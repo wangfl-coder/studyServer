@@ -57,7 +57,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("task_id",taskId);
-		map.put("status",0);
+		map.put("status",2);
 		labelTaskQueryWrapper.allEq(map);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
 		return R.data(list);

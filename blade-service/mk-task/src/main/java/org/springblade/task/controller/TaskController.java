@@ -55,7 +55,6 @@ public class TaskController extends BladeController {
 		}else {
 			return R.fail("获取标注完成的任务失败");
 		}
-
 		return R.status(result);
 	}
 
