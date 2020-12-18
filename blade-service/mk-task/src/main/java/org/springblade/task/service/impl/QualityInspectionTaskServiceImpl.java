@@ -66,6 +66,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					inspectionTask.setProcessInstanceId(result.getData().getProcessInstanceId());
 					inspectionTask.setTemplateId(labelTask.getTemplateId());
 					inspectionTask.setTaskId(taskId);
+					inspectionTask.setPriority(labelTask.getPriority());
 					inspectionTask.setPersonId(labelTask.getPersonId());
 					inspectionTask.setPersonName(labelTask.getPersonName());
 					inspectionTask.setType(type);

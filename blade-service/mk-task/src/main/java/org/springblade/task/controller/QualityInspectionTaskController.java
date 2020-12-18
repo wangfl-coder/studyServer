@@ -18,13 +18,13 @@ import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
+
 
 @NonDS
 @RestController
 @RequestMapping(value = "/process/quality-inspection-task")
 @AllArgsConstructor
-@Api(value = "任务")
+@Api(value = "质检任务")
 public class QualityInspectionTaskController extends BladeController implements CacheNames {
 
 	private QualityInspectionTaskService service;

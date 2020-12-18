@@ -61,6 +61,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					labelTask.setTaskId(task.getId());
 					labelTask.setPersonId(expert.getId());
 					labelTask.setPersonName(expert.getName());
+					labelTask.setPriority(task.getPriority());
 					updateById(labelTask);
 				} else {
 					throw new ServiceException("开启流程失败");
