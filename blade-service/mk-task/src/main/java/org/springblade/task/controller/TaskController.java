@@ -40,7 +40,7 @@ public class TaskController extends BladeController {
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 
-	@GetMapping(value = "/inspection/save")
+	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
 	public R inspectionSave(@RequestParam(value = "taskId") Long taskId,@RequestParam(value = "count") Integer count,@RequestParam(value = "type") Integer type,@RequestParam(value = "processDefinitionId") String processDefinitionId) {
 		Boolean result;
