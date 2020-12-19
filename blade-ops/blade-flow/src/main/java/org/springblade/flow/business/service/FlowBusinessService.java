@@ -43,7 +43,7 @@ public interface FlowBusinessService {
 	 *
 	 * @return
 	 */
-	SingleFlow selectOneClaimPage();
+	SingleFlow selectOneClaimPage(String categoryName);
 
 	/**
 	 * 流程待办列表
