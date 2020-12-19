@@ -17,6 +17,7 @@
 package org.springblade.adata.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
@@ -24,6 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * 实体类
@@ -183,5 +187,28 @@ public class Expert extends BaseEntity {
 	@ApiModelProperty(value = "备注")
 	private String remark;
 
+	/**
+	 * 内部质检完成时间
+	 */
+	@DateTimeFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@JsonFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@ApiModelProperty("内部质检完成时间")
+	private Date innerInspectionTime;
+
+	/**
+	 * 交付质检完成时间
+	 */
+	@DateTimeFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@JsonFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@ApiModelProperty("交付质检完成时间")
+	private Date deliverInspectionTime;
 
 }

@@ -14,52 +14,80 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.vo;
+package org.springblade.composition.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springblade.composition.entity.AnnotationData;
-
-import java.util.List;
-
+import org.springblade.core.mp.base.BaseEntity;
 
 /**
- * 视图实体类
+ * 实体类
  *
- * @author Kailun
+ * @author Chill
  */
 @Data
-@ApiModel(value = "AnnotationDataVO", description = "AnnotationDataVO")
-public class AnnotationDataVO {
+@TableName("mk_inspection_data")
+@ApiModel(value = "InspectionData对象", description = "InspectionData对象")
+public class InspectionData extends BaseEntity {
+
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 标注数据列表
-	 */
-	@ApiModelProperty(value = "标注数据列表")
-	private List<AnnotationData> annotationDataList;
 
 	/**
-	 * 标注的用时
+	 * 主键
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "标注的用时")
-	private Integer time;
+	@ApiModelProperty(value = "主键")
+	@TableId(value = "id", type = IdType.ASSIGN_ID)
+	private Long id;
 
 	/**
-	 * 模板id
+	 * 租户ID
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "模板id")
-	private Long templateId;
+	@ApiModelProperty(value = "租户ID")
+	private String tenantId;
 
 	/**
-	 * 组合id
+	 * 子任务id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "组合id")
-	private Long compositionId;
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
+
+	/**
+	 * 学者id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "学者id")
+	private Long expertId;
+
+	/**
+	 * 质检字段
+	 */
+	@ApiModelProperty(value = "标注字段")
+	private String field;
+
+	/**
+	 * 质检值
+	 */
+	@ApiModelProperty(value = "标注值")
+	private String value;
+
+	/**
+	 * 备注
+	 */
+	@ApiModelProperty(value = "备注")
+	private String remark;
+
+	/**
+	 * 质检类型
+	 */
+	@ApiModelProperty(value = "质检类型")
+	private Integer type ;
 
 }
