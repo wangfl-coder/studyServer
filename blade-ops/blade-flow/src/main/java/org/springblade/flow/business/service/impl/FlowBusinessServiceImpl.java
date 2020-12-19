@@ -97,7 +97,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public SingleFlow selectOneClaimPage() {
+	public SingleFlow selectOneClaimPage(String categoryName) {
 //		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup = TaskUtil.getCandidateGroup();
 
@@ -123,22 +123,38 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setProcessDefinitionKey(processDefinition.getKey());
 				flow.setProcessDefinitionVersion(processDefinition.getVersion());
 				flow.setProcessInstanceId(task.getProcessInstanceId());
-				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-				if (labelTask.getProcessInstanceId()==null){
+//				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+//				if (labelTask.getProcessInstanceId()==null){
+//					QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
+//					flow.setTemplateId(qualityInspectionTask.getTemplateId());
+//					flow.setPersonId(qualityInspectionTask.getPersonId());
+//					flow.setPersonName(qualityInspectionTask.getPersonName());
+//					flow.setSubTaskId(qualityInspectionTask.getId());
+//					flow.setPriority(qualityInspectionTask.getPriority());
+//				}else{
+//					flow.setTemplateId(labelTask.getTemplateId());
+//					flow.setPersonId(labelTask.getPersonId());
+//					flow.setPersonName(labelTask.getPersonName());
+//					flow.setSubTaskId(labelTask.getId());
+//					flow.setPriority(labelTask.getPriority());
+//				}
+				if (categoryName.equals("标注流程")) {
+					LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+					flow.setTemplateId(labelTask.getTemplateId());
+					flow.setPersonId(labelTask.getPersonId());
+					flow.setPersonName(labelTask.getPersonName());
+					flow.setSubTaskId(labelTask.getId());
+					flow.setPriority(labelTask.getPriority());
+				} else if (categoryName.equals("质检流程")) {
 					QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
 					flow.setPersonId(qualityInspectionTask.getPersonId());
 					flow.setPersonName(qualityInspectionTask.getPersonName());
 					flow.setSubTaskId(qualityInspectionTask.getId());
 					flow.setPriority(qualityInspectionTask.getPriority());
-				}else{
-					flow.setTemplateId(labelTask.getTemplateId());
-					flow.setPersonId(labelTask.getPersonId());
-					flow.setPersonName(labelTask.getPersonName());
-					flow.setSubTaskId(labelTask.getId());
-					flow.setPriority(labelTask.getPriority());
 				}
 				return flow;
+
 		}else{
 			return new SingleFlow();
 		}
@@ -225,20 +241,35 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setProcessIsFinished(FlowEngineConstant.STATUS_UNFINISHED);
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
-			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
-			if (labelTask.getProcessInstanceId()==null){
+//			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
+//			if (labelTask.getProcessInstanceId()==null){
+//				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
+//				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+//				flow.setPersonId(qualityInspectionTask.getPersonId());
+//				flow.setPersonName(qualityInspectionTask.getPersonName());
+//				flow.setSubTaskId(qualityInspectionTask.getId());
+//				flow.setPriority(qualityInspectionTask.getPriority());
+//			}else{
+//				flow.setTemplateId(labelTask.getTemplateId());
+//				flow.setPersonId(labelTask.getPersonId());
+//				flow.setPersonName(labelTask.getPersonName());
+//				flow.setSubTaskId(labelTask.getId());
+//				flow.setPriority(labelTask.getPriority());
+//			}
+			if (bladeFlow.getCategoryName().equals("标注流程")) {
+				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
+				flow.setPriority(labelTask.getPriority());
+			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
 				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
 				flow.setTemplateId(qualityInspectionTask.getTemplateId());
 				flow.setPersonId(qualityInspectionTask.getPersonId());
 				flow.setPersonName(qualityInspectionTask.getPersonName());
 				flow.setSubTaskId(qualityInspectionTask.getId());
 				flow.setPriority(qualityInspectionTask.getPriority());
-			}else{
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
-				flow.setPriority(labelTask.getPriority());
 			}
 			flowList.add(flow);
 		});
@@ -304,21 +335,35 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				}
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
-
-			if ("质检流程" == bladeFlow.getCategoryName()){
-				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
-				flow.setTemplateId(qualityInspectionTask.getTemplateId());
-				flow.setPersonId(qualityInspectionTask.getPersonId());
-				flow.setPersonName(qualityInspectionTask.getPersonName());
-				flow.setSubTaskId(qualityInspectionTask.getId());
-				flow.setPriority(qualityInspectionTask.getPriority());
-			}else if("标注流程" == bladeFlow.getCategoryName()){
-				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
+//			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
+//			if (labelTask.getProcessInstanceId()==null){
+//				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
+//				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+//				flow.setPersonId(qualityInspectionTask.getPersonId());
+//				flow.setPersonName(qualityInspectionTask.getPersonName());
+//				flow.setSubTaskId(qualityInspectionTask.getId());
+//				flow.setPriority(qualityInspectionTask.getPriority());
+//			}else{
+//				flow.setTemplateId(labelTask.getTemplateId());
+//				flow.setPersonId(labelTask.getPersonId());
+//				flow.setPersonName(labelTask.getPersonName());
+//				flow.setSubTaskId(labelTask.getId());
+//				flow.setPriority(labelTask.getPriority());
+//			}
+			if (bladeFlow.getCategoryName().equals("标注流程")) {
+				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
 				flow.setTemplateId(labelTask.getTemplateId());
 				flow.setPersonId(labelTask.getPersonId());
 				flow.setPersonName(labelTask.getPersonName());
 				flow.setSubTaskId(labelTask.getId());
 				flow.setPriority(labelTask.getPriority());
+			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
+				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+				flow.setPersonId(qualityInspectionTask.getPersonId());
+				flow.setPersonName(qualityInspectionTask.getPersonName());
+				flow.setSubTaskId(qualityInspectionTask.getId());
+				flow.setPriority(qualityInspectionTask.getPriority());
 			}
 			flowList.add(flow);
 		});
@@ -401,20 +446,35 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setProcessDefinitionVersion(processDefinition.getVersion());
 			flow.setProcessInstanceId(task.getProcessInstanceId());
 			flow.setStatus(status);
-			LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-			if (labelTask.getProcessInstanceId()==null){
+//			LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+//			if (labelTask.getProcessInstanceId()==null){
+//				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
+//				flow.setTemplateId(qualityInspectionTask.getTemplateId());
+//				flow.setPersonId(qualityInspectionTask.getPersonId());
+//				flow.setPersonName(qualityInspectionTask.getPersonName());
+//				flow.setSubTaskId(qualityInspectionTask.getId());
+//				flow.setPriority(qualityInspectionTask.getPriority());
+//			}else{
+//				flow.setTemplateId(labelTask.getTemplateId());
+//				flow.setPersonId(labelTask.getPersonId());
+//				flow.setPersonName(labelTask.getPersonName());
+//				flow.setSubTaskId(labelTask.getId());
+//				flow.setPriority(labelTask.getPriority());
+//			}
+			if (bladeFlow.getCategoryName().equals("标注流程")) {
+				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+				flow.setTemplateId(labelTask.getTemplateId());
+				flow.setPersonId(labelTask.getPersonId());
+				flow.setPersonName(labelTask.getPersonName());
+				flow.setSubTaskId(labelTask.getId());
+				flow.setPriority(labelTask.getPriority());
+			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
 				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 				flow.setTemplateId(qualityInspectionTask.getTemplateId());
 				flow.setPersonId(qualityInspectionTask.getPersonId());
 				flow.setPersonName(qualityInspectionTask.getPersonName());
 				flow.setSubTaskId(qualityInspectionTask.getId());
 				flow.setPriority(qualityInspectionTask.getPriority());
-			}else{
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
-				flow.setPriority(labelTask.getPriority());
 			}
 			flowList.add(flow);
 		});
