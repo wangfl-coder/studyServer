@@ -79,4 +79,12 @@ public interface FlowBusinessService {
 	 * @return boolean
 	 */
 	boolean completeTask(BladeFlow leave);
+
+	/**
+	 * 修改任务评论
+	 *
+	 * @param flow 流程类
+	 * @return boolean
+	 */
+	boolean changeTaskComment(BladeFlow flow);
 }

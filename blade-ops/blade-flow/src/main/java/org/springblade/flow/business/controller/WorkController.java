@@ -27,6 +27,7 @@ import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
@@ -171,7 +172,11 @@ public class WorkController {
 	@ApiOperationSupport(order = 9)
 	@ApiOperation(value = "完成任务", notes = "传入流程信息")
 	public R completeTask(@ApiParam("任务信息") @RequestBody BladeFlow flow) {
-		return R.status(flowBusinessService.completeTask(flow));
+		if (!flow.getStatus().equals("finish")) {
+			return R.status(flowBusinessService.completeTask(flow));
+		}else {
+			return R.status(flowBusinessService.changeTaskComment(flow));
+		}
 	}
 
 	/**

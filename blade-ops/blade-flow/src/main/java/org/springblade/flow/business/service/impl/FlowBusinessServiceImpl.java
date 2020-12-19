@@ -20,13 +20,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
+import org.flowable.variable.api.history.HistoricVariableInstance;
+import org.flowable.variable.service.impl.persistence.entity.HistoricVariableInstanceEntity;
+import org.flowable.variable.service.impl.util.CommandContextUtil;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.Func;
@@ -46,6 +51,7 @@ import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -351,6 +357,25 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		variables.put(ProcessConstant.PASS_KEY, flow.isPass());
 		// 完成任务
 		taskService.complete(taskId, variables);
+		return true;
+	}
+
+	@Override
+	public boolean changeTaskComment(BladeFlow flow) {
+		String taskId = flow.getTaskId();
+		String processInstanceId = flow.getProcessInstanceId();
+		String taskGroup = TaskUtil.getCandidateGroup();
+
+		String commentMsg = Func.toStr(flow.getComment(), ProcessConstant.PASS_COMMENT);
+		// 修改评论
+		if (StringUtil.isNoneBlank(taskId, commentMsg)) {
+			List<Comment> commentList = taskService.getTaskComments(taskId);
+			if (commentList.size() > 0) {
+				Comment comment = commentList.get(0);
+				comment.setFullMessage(commentMsg);
+				taskService.saveComment(comment);
+			}
+		}
 		return true;
 	}
 
