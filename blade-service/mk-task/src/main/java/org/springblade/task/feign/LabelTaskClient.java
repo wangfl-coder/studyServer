@@ -46,7 +46,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@GetMapping(CHANGE_STATUS)
 	public R changeStatus(String processInstanceId) {
 		UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-		labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",0);
+		labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
 		boolean update = labelTaskService.update(labelTaskUpdateWrapper);
 		return R.status(update);
 	}
@@ -57,7 +57,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("task_id",taskId);
-		map.put("status",0);
+		map.put("status",2);
 		labelTaskQueryWrapper.allEq(map);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
 		return R.data(list);

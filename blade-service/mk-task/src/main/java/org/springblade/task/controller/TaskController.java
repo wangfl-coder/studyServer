@@ -16,15 +16,19 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -42,16 +46,17 @@ public class TaskController extends BladeController {
 
 	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
-	public R inspectionSave(@RequestParam(value = "taskId") Long taskId,@RequestParam(value = "count") Integer count,@RequestParam(value = "type") Integer type,@RequestParam(value = "processDefinitionId") String processDefinitionId) {
+	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
-		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(taskId);
+		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
+		boolean save = taskService.save(task);
+		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(qualityInspectionDTO.getTaskId());
 		if (listR.isSuccess()){
 			List<LabelTask> labelTasks = listR.getData();
-			result = qualityInspectionTaskService.startProcess(taskId,count,type,processDefinitionId,labelTasks);
+			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),qualityInspectionDTO.getCount(),qualityInspectionDTO.getInspectionType(),task,labelTasks);
 		}else {
 			return R.fail("获取标注完成的任务失败");
 		}
-
 		return R.status(result);
 	}
 
@@ -83,19 +88,29 @@ public class TaskController extends BladeController {
 		return R.data(taskService.getById(id));
 	}
 
+//	@GetMapping("/list")
+//	@ApiImplicitParams({
+//		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string")
+//	})
+//	@ApiOperation(value = "分页查询全部任务")
+//	public R<IPage<Task>> list(@RequestParam(value = "taskName",required = false) String taskName, Query query) {
+//		QueryWrapper<Task> compositionQueryWrapper = new QueryWrapper<>();
+//		if(taskName != null) {
+//			compositionQueryWrapper.like("task_name", "%"+taskName+"%").orderByDesc("create_time");
+//		} else{
+//			compositionQueryWrapper.orderByDesc("create_time");
+//		}
+//		IPage<Task> pages = taskService.page(Condition.getPage(query), compositionQueryWrapper);
+//		return R.data(pages);
+//	}
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "taskType", value = "任务类型", paramType = "query", dataType = "integer")
 	})
 	@ApiOperation(value = "分页查询全部任务")
-	public R<IPage<Task>> list(@RequestParam(value = "taskName",required = false) String taskName, Query query) {
-		QueryWrapper<Task> compositionQueryWrapper = new QueryWrapper<>();
-		if(taskName != null) {
-			compositionQueryWrapper.like("task_name", "%"+taskName+"%").orderByDesc("create_time");
-		} else{
-			compositionQueryWrapper.orderByDesc("create_time");
-		}
-		IPage<Task> pages = taskService.page(Condition.getPage(query), compositionQueryWrapper);
+	public R<IPage<Task>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
+		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class));
 		return R.data(pages);
 	}
 
