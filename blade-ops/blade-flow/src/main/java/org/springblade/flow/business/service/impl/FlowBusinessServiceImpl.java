@@ -159,6 +159,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setPersonName(qualityInspectionTask.getPersonName());
 					flow.setSubTaskId(qualityInspectionTask.getId());
 					flow.setPriority(qualityInspectionTask.getPriority());
+					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
 				}
 				return flow;
 
@@ -277,6 +280,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setPersonName(qualityInspectionTask.getPersonName());
 				flow.setSubTaskId(qualityInspectionTask.getId());
 				flow.setPriority(qualityInspectionTask.getPriority());
+				flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+				flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+				flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
 			}
 			flowList.add(flow);
 		});
@@ -361,13 +367,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 			if (bladeFlow.getCategoryName().equals("标注流程")){
 				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
-
 				flow.setTemplateId(labelTask.getTemplateId());
 				flow.setPersonId(labelTask.getPersonId());
 				flow.setPersonName(labelTask.getPersonName());
 				flow.setSubTaskId(labelTask.getId());
 				flow.setPriority(labelTask.getPriority());
-
 			} else if (bladeFlow.getCategoryName().equals("质检流程")){
 				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
 				flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -375,6 +379,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setPersonName(qualityInspectionTask.getPersonName());
 				flow.setSubTaskId(qualityInspectionTask.getId());
 				flow.setPriority(qualityInspectionTask.getPriority());
+				flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+				flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+				flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
 			}
 			flowList.add(flow);
 		});
@@ -505,6 +512,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setPersonName(qualityInspectionTask.getPersonName());
 				flow.setSubTaskId(qualityInspectionTask.getId());
 				flow.setPriority(qualityInspectionTask.getPriority());
+				flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+				flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+				flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
 			}
 			flowList.add(flow);
 		});
