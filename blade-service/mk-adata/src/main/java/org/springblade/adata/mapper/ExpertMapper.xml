@@ -35,6 +35,8 @@
         <result column="bio_zh" property="bioZh"/>
         <result column="remark" property="remark"/>
         <result column="expert_id" property="expertId"/>
+        <result column="inner_inspection_time" property="innerInspectionTime"/>
+        <result column="deliver_inspection_time" property="deliverInspectionTime"/>
     </resultMap>
 
 </mapper>

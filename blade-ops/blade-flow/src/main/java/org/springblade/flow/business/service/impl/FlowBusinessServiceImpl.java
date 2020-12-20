@@ -20,13 +20,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
+import org.flowable.variable.api.history.HistoricVariableInstance;
+import org.flowable.variable.service.impl.persistence.entity.HistoricVariableInstanceEntity;
+import org.flowable.variable.service.impl.util.CommandContextUtil;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.Func;
@@ -46,6 +51,7 @@ import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +129,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				flow.setProcessDefinitionKey(processDefinition.getKey());
 				flow.setProcessDefinitionVersion(processDefinition.getVersion());
 				flow.setProcessInstanceId(task.getProcessInstanceId());
+
 //				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 //				if (labelTask.getProcessInstanceId()==null){
 //					QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
@@ -335,6 +342,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				}
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
+
 //			LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
 //			if (labelTask.getProcessInstanceId()==null){
 //				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
@@ -350,15 +358,18 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //				flow.setSubTaskId(labelTask.getId());
 //				flow.setPriority(labelTask.getPriority());
 //			}
-			if (bladeFlow.getCategoryName().equals("标注流程")) {
-				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
+
+			if (bladeFlow.getCategoryName().equals("标注流程")){
+				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
+
 				flow.setTemplateId(labelTask.getTemplateId());
 				flow.setPersonId(labelTask.getPersonId());
 				flow.setPersonName(labelTask.getPersonName());
 				flow.setSubTaskId(labelTask.getId());
 				flow.setPriority(labelTask.getPriority());
-			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
-				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
+
+			} else if (bladeFlow.getCategoryName().equals("质检流程")){
+				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
 				flow.setTemplateId(qualityInspectionTask.getTemplateId());
 				flow.setPersonId(qualityInspectionTask.getPersonId());
 				flow.setPersonName(qualityInspectionTask.getPersonName());
@@ -396,6 +407,25 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		variables.put(ProcessConstant.PASS_KEY, flow.isPass());
 		// 完成任务
 		taskService.complete(taskId, variables);
+		return true;
+	}
+
+	@Override
+	public boolean changeTaskComment(BladeFlow flow) {
+		String taskId = flow.getTaskId();
+		String processInstanceId = flow.getProcessInstanceId();
+		String taskGroup = TaskUtil.getCandidateGroup();
+
+		String commentMsg = Func.toStr(flow.getComment(), ProcessConstant.PASS_COMMENT);
+		// 修改评论
+		if (StringUtil.isNoneBlank(taskId, commentMsg)) {
+			List<Comment> commentList = taskService.getTaskComments(taskId);
+			if (commentList.size() > 0) {
+				Comment comment = commentList.get(0);
+				comment.setFullMessage(commentMsg);
+				taskService.saveComment(comment);
+			}
+		}
 		return true;
 	}
 

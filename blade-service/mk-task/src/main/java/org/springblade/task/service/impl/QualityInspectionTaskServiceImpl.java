@@ -66,12 +66,15 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					// 返回流程id写入leave
 					inspectionTask.setProcessInstanceId(result.getData().getProcessInstanceId());
 					inspectionTask.setTemplateId(labelTask.getTemplateId());
-					inspectionTask.setTaskId(task.getId());
+					inspectionTask.setInspectionTaskId(task.getId());
 					inspectionTask.setPersonId(labelTask.getPersonId());
 					inspectionTask.setPersonName(labelTask.getPersonName());
+					inspectionTask.setLabelTaskId(labelTask.getId());
+					inspectionTask.setTaskId(labelTask.getTaskId());
 					inspectionTask.setTaskType(task.getTaskType());
 					inspectionTask.setInspectionType(inspectionType);
 					inspectionTask.setPriority(task.getPriority());
+
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");

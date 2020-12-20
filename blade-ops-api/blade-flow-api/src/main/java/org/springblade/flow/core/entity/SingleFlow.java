@@ -23,5 +23,4 @@ public class SingleFlow extends BladeFlow{
 	private Long subTaskId;
 
 
-
 }
