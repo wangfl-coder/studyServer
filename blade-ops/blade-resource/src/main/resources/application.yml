@@ -4,9 +4,14 @@ server:
 
 oss:
   enable: true
-  name: qiniu
-  tenant-mode: true
-  endpoint: prt1thnw3.bkt.clouddn.com
-  access-key: N_Loh1ngBqcJovwiAJqR91Ifj2vgOWHOf8AwBA_h
-  secret-key: AuzuA1KHAbkIndCU0dB3Zfii2O3crHNODDmpxHRS
-  bucket-name: bladex
+#  name: qiniu
+#  tenant-mode: true
+#  endpoint: prt1thnw3.bkt.clouddn.com
+#  access-key: N_Loh1ngBqcJovwiAJqR91Ifj2vgOWHOf8AwBA_h
+#  secret-key: AuzuA1KHAbkIndCU0dB3Zfii2O3crHNODDmpxHRS
+#  bucket-name: bladex
+  name: minio
+  tenant-mode: false
+  endpoint: http://192.168.6.202:9000
+  access-key: minio
+  secret-key: minio2020
