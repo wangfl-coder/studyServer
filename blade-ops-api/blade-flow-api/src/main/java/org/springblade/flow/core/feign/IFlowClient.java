@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +45,7 @@ public interface IFlowClient {
 	String COMPLETE_TASK = API_PREFIX + "/complete-task";
 	String TASK_VARIABLE = API_PREFIX + "/task-variable";
 	String TASK_VARIABLES = API_PREFIX + "/task-variables";
+	String IS_PROCESS_INSTANCES_FINISHED = API_PREFIX + "/is-process-instances-finished";
 
 	/**
 	 * 开启流程
@@ -97,4 +99,13 @@ public interface IFlowClient {
 	 */
 	@GetMapping(TASK_VARIABLES)
 	R<Map<String, Object>> taskVariables(@RequestParam("taskId") String taskId);
+
+	/**
+	 * 传入流程实例id列表，返回是否完成
+	 *
+	 * @param ids 流程实例id列表
+	 * @return R
+	 */
+	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
+	R<Map<String, Object>> isProcessInstancesFinished(@RequestParam("ids") List<String> ids);
 }

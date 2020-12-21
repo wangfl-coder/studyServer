@@ -20,6 +20,7 @@ public interface ILabelTaskClient {
 	String QUERY_LABEL_TASK = API_PREFIX + "/query-label-task";
 	String CHANGE_STATUS = API_PREFIX + "/change-status";
 	String QUERY_COMPLETE_LABEL_TASK = API_PREFIX + "/complete-label-task";
+	String QUERY_COMPLETE_LABEL_TASK2 = API_PREFIX + "/complete-label-task2";
 
 	@PostMapping(START_LABEL_PROCESS)
 	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
@@ -33,5 +34,6 @@ public interface ILabelTaskClient {
 	@GetMapping(QUERY_COMPLETE_LABEL_TASK)
 	R<List<LabelTask>> queryCompleteTask(@RequestParam(value = "taskId") Long taskId);
 
-
+	@GetMapping(QUERY_COMPLETE_LABEL_TASK2)
+	R<List<LabelTask>> queryCompleteTask2(@RequestParam(value = "taskId") Long taskId);
 }

@@ -3,10 +3,12 @@ package org.springblade.task.feign;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
@@ -14,9 +16,11 @@ import org.springblade.task.service.LabelTaskService;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+
 
 @NonDS
 @ApiIgnore()
@@ -24,7 +28,9 @@ import java.util.Objects;
 @AllArgsConstructor
 public class LabelTaskClient implements ILabelTaskClient {
 
-	private LabelTaskService labelTaskService;
+	private final LabelTaskService labelTaskService;
+	private final IFlowClient flowClient;
+
 	@Override
 	@PostMapping(START_LABEL_PROCESS)
 	public R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO) {
@@ -60,6 +66,16 @@ public class LabelTaskClient implements ILabelTaskClient {
 		map.put("status",2);
 		labelTaskQueryWrapper.allEq(map);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
+		return R.data(list);
+	}
+
+	@Override
+	@GetMapping(QUERY_COMPLETE_LABEL_TASK2)
+	public R<List<LabelTask>> queryCompleteTask2(Long taskId) {
+		List<LabelTask> list = labelTaskService.list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R res = flowClient.isProcessInstancesFinished(ids);
 		return R.data(list);
 	}
 

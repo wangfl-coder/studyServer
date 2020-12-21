@@ -17,9 +17,9 @@
 package org.springblade.flow.business.feign;
 
 import lombok.AllArgsConstructor;
-import org.flowable.engine.IdentityService;
-import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
+import org.flowable.engine.*;
+import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.runtime.ExecutionQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
@@ -31,6 +31,8 @@ import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.system.cache.DictCache;
+import org.springblade.system.enums.DictEnum;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +54,7 @@ public class FlowClient implements IFlowClient {
 	private final RuntimeService runtimeService;
 	private final IdentityService identityService;
 	private final TaskService taskService;
+	private final HistoryService historyService;
 
 	@Override
 	@PostMapping(START_PROCESS_INSTANCE_BY_ID)
@@ -115,4 +118,21 @@ public class FlowClient implements IFlowClient {
 		return R.data(taskService.getVariables(taskId));
 	}
 
+	@Override
+	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
+	public R<Map<String, Object>> isProcessInstancesFinished(List<String> ids) {
+		Kv kv = Kv.create();
+		ids.forEach(id -> {
+			HistoricProcessInstance historicProcessInstance = historyService
+				.createHistoricProcessInstanceQuery()
+				.processInstanceId(id)
+				.singleResult();
+			if (historicProcessInstance.getEndActivityId() != null) {
+				kv.set(id, true);
+			} else {
+				kv.set(id, false);
+			}
+		});
+		return R.data(kv);
+	}
 }

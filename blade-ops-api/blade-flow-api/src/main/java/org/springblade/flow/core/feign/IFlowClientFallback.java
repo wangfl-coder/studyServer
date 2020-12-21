@@ -20,6 +20,7 @@ import org.springblade.core.tool.api.R;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,4 +56,8 @@ public class IFlowClientFallback implements IFlowClient {
 		return R.fail("远程调用失败");
 	}
 
+	@Override
+	public R<Map<String, Object>> isProcessInstancesFinished(List<String> ids) {
+		return R.fail("远程调用失败");
+	}
 }
