@@ -398,9 +398,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		String taskId = flow.getTaskId();
 		String processInstanceId = flow.getProcessInstanceId();
 		String taskGroup = TaskUtil.getCandidateGroup();
-		if (taskGroup.equals("ci")){
-			iLabelTaskClient.changeStatus(processInstanceId);
-		}
+//		if (taskGroup.equals("ci")){
+//			iLabelTaskClient.changeStatus(processInstanceId);
+//		}
 		String comment = Func.toStr(flow.getComment(), ProcessConstant.PASS_COMMENT);
 		// 增加评论
 		if (StringUtil.isNoneBlank(processInstanceId, comment)) {
