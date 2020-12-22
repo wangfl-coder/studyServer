@@ -17,6 +17,7 @@
 package org.springblade.adata.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springblade.adata.entity.ExpertBase;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
@@ -28,7 +29,7 @@ import java.util.Map;
  *
  * @author Chill
  */
-public interface IExpertBaseService {
+public interface IExpertBaseService extends BaseService<ExpertBase> {
 
 	/**
 	 * 详情
