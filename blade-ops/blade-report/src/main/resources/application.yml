@@ -1,6 +1,6 @@
 #服务器端口
 server:
-  port: 8108
+  port: 18108
 
 #报表配置
 report:
