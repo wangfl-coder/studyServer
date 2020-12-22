@@ -62,7 +62,7 @@ public class TaskController extends BladeController {
 
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加标注任务")
-	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO){
+	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
 		boolean save = taskService.save(task);
