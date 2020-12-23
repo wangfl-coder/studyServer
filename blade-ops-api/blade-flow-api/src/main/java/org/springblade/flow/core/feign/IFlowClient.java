@@ -18,6 +18,7 @@ package org.springblade.flow.core.feign;
 
 import org.springblade.core.launch.constant.AppConstant;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,5 +108,5 @@ public interface IFlowClient {
 	 * @return R
 	 */
 	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
-	R<Map<String, Object>> isProcessInstancesFinished(@RequestParam("ids") List<String> ids);
+	R<Kv> isProcessInstancesFinished(@RequestParam("ids") List<String> ids);
 }

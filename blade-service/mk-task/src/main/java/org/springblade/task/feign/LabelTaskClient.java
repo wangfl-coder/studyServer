@@ -1,12 +1,12 @@
 package org.springblade.task.feign;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.dto.ExpertTaskDTO;
@@ -71,13 +71,37 @@ public class LabelTaskClient implements ILabelTaskClient {
 
 	@Override
 	@GetMapping(QUERY_COMPLETE_LABEL_TASK2)
-	public R<List<LabelTask>> queryCompleteTask2(Long taskId) {
+	public R<ArrayList<LabelTask>> queryCompleteTask2(Long taskId) {
 		List<LabelTask> list = labelTaskService.list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
 		List<String> ids = new ArrayList<>();
 		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-		R res = flowClient.isProcessInstancesFinished(ids);
-		return R.data(list);
+		R<Kv> processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		ArrayList<LabelTask> labelTasks = new ArrayList<>();
+		if (processInstancesFinished.isSuccess()) {
+			Kv kv = processInstancesFinished.getData();
+			list.forEach(labelTask -> {
+				String processInstanceId = labelTask.getProcessInstanceId();
+				if ((boolean)kv.get(processInstanceId)) {
+					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+					labelTaskService.update(labelTaskUpdateWrapper);
+					labelTasks.add(labelTask);
+				}
+			});
+		}
+		return R.data(labelTasks);
 	}
 
-
+	@Override
+	public R queryCompleteTaskCount(Long taskId) {
+		int count=0;
+		List<LabelTask> list = labelTaskService.list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R<Kv> processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		if (processInstancesFinished.isSuccess()) {
+			count+=1;
+		}
+		return R.data(count);
+	}
 }

@@ -91,6 +91,7 @@ public class ExpertBaseController extends BladeController {
 		return expertBaseService.list(params, query);
 	}
 
+
 	/**
 	 * 详情
 	 */
@@ -132,6 +133,7 @@ public class ExpertBaseController extends BladeController {
 		List<ExpertBaseVO> list = expertBaseService.lazyList(bladeUser.getTenantId(), parentId, expertBase);
 		return R.data(ExpertBaseWrapper.build().listNodeLazyVO(list));
 	}
+
 
 	/**
 	 * 获取部门树形结构

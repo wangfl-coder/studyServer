@@ -27,6 +27,7 @@ import org.springblade.task.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,13 +45,27 @@ public class TaskController extends BladeController {
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 
+	@PostMapping(value = "/complete/count")
+	@ApiOperation(value = "查询已经完成的标注任务的数量")
+	public R queryCompleteTaskCount(@RequestParam(value = "taskId") Long taskId) {
+		R r = iLabelTaskClient.queryCompleteTaskCount(taskId);
+		return r;
+	}
+
+	@PostMapping(value = "/complete/list")
+	@ApiOperation(value = "查询已经完成的标注任务")
+	public R<List<LabelTask>> inspectionSave(@RequestParam(value = "taskId") Long taskId) {
+		ArrayList<LabelTask> arrayList = iLabelTaskClient.queryCompleteTask2(taskId).getData();
+		return R.data(arrayList);
+	}
+
 	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
 	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
 		boolean save = taskService.save(task);
-		R<List<LabelTask>> listR = iLabelTaskClient.queryCompleteTask(qualityInspectionDTO.getTaskId());
+		R<ArrayList<LabelTask>> listR = iLabelTaskClient.queryCompleteTask2(qualityInspectionDTO.getTaskId());
 		if (listR.isSuccess()){
 			List<LabelTask> labelTasks = listR.getData();
 			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),qualityInspectionDTO.getCount(),qualityInspectionDTO.getInspectionType(),task,labelTasks);
