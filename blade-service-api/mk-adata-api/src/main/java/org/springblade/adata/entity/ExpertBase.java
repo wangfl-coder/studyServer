@@ -16,6 +16,9 @@
  */
 package org.springblade.adata.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -27,6 +30,7 @@ import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -36,150 +40,61 @@ import java.util.Date;
  */
 @Data
 @TableName("mk_adata_expert")
-@EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Expert对象", description = "Expert对象")
-public class ExpertBase extends BaseEntity {
+@ApiModel(value = "ExpertBase对象", description = "ExpertBase对象")
+public class ExpertBase implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 任务id
+	 * 主键
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "任务id")
-	private Long taskId;
+	@ApiModelProperty(value = "主键")
+	@TableId(value = "id", type = IdType.ASSIGN_ID)
+	private Long id;
 
 	/**
-	 * Aminer库中的原始学者ID
+	 * 租户ID
 	 */
-	@ApiModelProperty(value = "Aminer库中的原始学者ID")
-	private String expertId;
+	@ApiModelProperty(value = "租户ID")
+	private String tenantId;
 
 	/**
-	 * 姓名
+	 * 父主键
 	 */
-	@ApiModelProperty(value = "姓名")
-	private String name;
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "父主键")
+	private Long parentId;
 
 	/**
-	 * 中文姓名
+	 * 智库名
 	 */
-	@ApiModelProperty(value = "中文姓名")
-	private String nameZh;
+	@ApiModelProperty(value = "智库名")
+	private String expertBaseName;
 
 	/**
-	 * 职称
+	 * 智库全称
 	 */
-	@ApiModelProperty(value = "职称")
-	private String titles;
+	@ApiModelProperty(value = "智库全称")
+	private String fullName;
 
 	/**
-	 * 职称描述
+	 * 祖级智库主键
 	 */
-	@ApiModelProperty(value = "职称描述")
-	private String titlesDesc;
+	@ApiModelProperty(value = "祖级智库主键")
+	private String ancestors;
 
 	/**
-	 * 联系电话
+	 * 智库类型
 	 */
-	@ApiModelProperty(value = "联系电话")
-	private String phone;
+	@ApiModelProperty(value = "智库类型")
+	private Integer expertBaseCategory;
 
 	/**
-	 * 传真
+	 * 排序
 	 */
-	@ApiModelProperty(value = "传真")
-	private String fax;
-
-	/**
-	 * 电子邮件
-	 */
-	@ApiModelProperty(value = "电子邮件")
-	private String email;
-
-	/**
-	 * 英文单位
-	 */
-	@ApiModelProperty(value = "英文单位")
-	private String affiliation;
-
-	/**
-	 * 中文单位
-	 */
-	@ApiModelProperty(value = "中文单位")
-	private String affiliationZh;
-
-	/**
-	 * 地址
-	 */
-	@ApiModelProperty(value = "地址")
-	private String address;
-
-	/**
-	 * 个人主页
-	 */
-	@ApiModelProperty(value = "个人主页")
-	private String homepage;
-
-	/**
-	 * 官方主页
-	 */
-	@ApiModelProperty(value = "官方主页")
-	private String hp;
-
-	/**
-	 * Google
-	 */
-	@ApiModelProperty(value = "Google")
-	private String gs;
-
-	/**
-	 * dblp
-	 */
-	@ApiModelProperty(value = "dblp")
-	private String dblp;
-
-	/**
-	 * 性别
-	 */
-	@ApiModelProperty(value = "性别")
-	private String gender;
-
-	/**
-	 * 语言
-	 */
-	@ApiModelProperty(value = "语言")
-	private String language;
-
-	/**
-	 * 头像
-	 */
-	@ApiModelProperty(value = "头像")
-	private String avatar;
-
-	/**
-	 * 教育背景
-	 */
-	@ApiModelProperty(value = "教育背景")
-	private String edu;
-
-	/**
-	 * 工作经历
-	 */
-	@ApiModelProperty(value = "工作经历")
-	private String work;
-
-	/**
-	 * 英文简介
-	 */
-	@ApiModelProperty(value = "英文简介")
-	private String bio;
-
-	/**
-	 * 中文简介
-	 */
-	@ApiModelProperty(value = "中文简介")
-	private String bioZh;
+	@ApiModelProperty(value = "排序")
+	private Integer sort;
 
 	/**
 	 * 备注
@@ -188,27 +103,11 @@ public class ExpertBase extends BaseEntity {
 	private String remark;
 
 	/**
-	 * 内部质检完成时间
+	 * 是否已删除
 	 */
-	@DateTimeFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@JsonFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@ApiModelProperty("内部质检完成时间")
-	private Date innerInspectionTime;
+	@TableLogic
+	@ApiModelProperty(value = "是否已删除")
+	private Integer isDeleted;
 
-	/**
-	 * 交付质检完成时间
-	 */
-	@DateTimeFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@JsonFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@ApiModelProperty("交付质检完成时间")
-	private Date deliverInspectionTime;
 
 }
