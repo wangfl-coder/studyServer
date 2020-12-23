@@ -14,40 +14,21 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.adata.service;
+package org.springblade.adata.mapper;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springblade.adata.entity.ExpertBase;
 import org.springblade.adata.vo.ExpertBaseVO;
-import org.springblade.core.mp.support.Query;
-import org.springblade.core.tool.api.R;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * 服务类
+ * ExpertBaseMapper 接口
  *
  * @author Chill
  */
-public interface IExpertBaseService extends IService<ExpertBase> {
-
-	/**
-	 * 详情
-	 * @param id
-	 * @return
-	 */
-	R<String> detail(String id);
-
-	/**
-	 * 列表
-	 * @param params
-	 * @param query
-	 * @return
-	 */
-	R<String> list(Map<String, Object> params, Query query);
-
+public interface ExpertBaseMapper extends BaseMapper<ExpertBase> {
 
 	/**
 	 * 懒加载部门列表
@@ -60,7 +41,7 @@ public interface IExpertBaseService extends IService<ExpertBase> {
 	List<ExpertBaseVO> lazyList(String tenantId, Long parentId, Map<String, Object> param);
 
 	/**
-	 * 树形结构
+	 * 获取树形节点
 	 *
 	 * @param tenantId
 	 * @return
@@ -68,7 +49,7 @@ public interface IExpertBaseService extends IService<ExpertBase> {
 	List<ExpertBaseVO> tree(String tenantId);
 
 	/**
-	 * 懒加载树形结构
+	 * 懒加载获取树形节点
 	 *
 	 * @param tenantId
 	 * @param parentId
@@ -77,43 +58,11 @@ public interface IExpertBaseService extends IService<ExpertBase> {
 	List<ExpertBaseVO> lazyTree(String tenantId, Long parentId);
 
 	/**
-	 * 获取部门ID
-	 *
-	 * @param tenantId
-	 * @param deptNames
-	 * @return
-	 */
-	String getExpertBaseIds(String tenantId, String deptNames);
-
-	/**
 	 * 获取部门名
-	 *
-	 * @param deptIds
-	 * @return
-	 */
-	List<String> getExpertBaseNames(String deptIds);
-
-	/**
-	 * 获取子部门
-	 *
-	 * @param deptId
-	 * @return
-	 */
-	List<ExpertBase> getExpertBaseChild(Long deptId);
-
-	/**
-	 * 删除部门
 	 *
 	 * @param ids
 	 * @return
 	 */
-	boolean removeExpertBase(String ids);
+	List<String> getExpertBaseNames(Long[] ids);
 
-	/**
-	 * 提交
-	 *
-	 * @param dept
-	 * @return
-	 */
-	boolean submit(ExpertBase dept);
 }

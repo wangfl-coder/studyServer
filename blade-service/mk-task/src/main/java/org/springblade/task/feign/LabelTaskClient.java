@@ -91,4 +91,17 @@ public class LabelTaskClient implements ILabelTaskClient {
 		}
 		return R.data(labelTasks);
 	}
+
+	@Override
+	public R queryCompleteTaskCount(Long taskId) {
+		int count=0;
+		List<LabelTask> list = labelTaskService.list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R<Kv> processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		if (processInstancesFinished.isSuccess()) {
+			count+=1;
+		}
+		return R.data(count);
+	}
 }

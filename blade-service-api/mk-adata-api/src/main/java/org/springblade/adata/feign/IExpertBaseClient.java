@@ -17,6 +17,7 @@
 package org.springblade.adata.feign;
 
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertBase;
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -38,42 +39,56 @@ import java.util.List;
 public interface IExpertBaseClient {
 
 	String API_PREFIX = "/client";
-	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
-	String GET_EXPERT_IDS = API_PREFIX + "/mk-adata/expert-ids";
-	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
-	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
-	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
+	String EXPERTBASE = API_PREFIX + "/dept";
+	String EXPERTBASE_IDS = API_PREFIX + "/dept-ids";
+	String EXPERTBASE_NAME = API_PREFIX + "/dept-name";
+	String EXPERTBASE_NAMES = API_PREFIX + "/dept-names";
+	String EXPERTBASE_CHILD = API_PREFIX + "/dept-child";
 
 	/**
-	 * 获取学者信息
+	 * 获取部门
 	 *
-	 * @param expert 学者实体
+	 * @param id 主键
+	 * @return ExpertBase
+	 */
+	@GetMapping(EXPERTBASE)
+	R<ExpertBase> getExpertBase(@RequestParam("id") Long id);
+
+	/**
+	 * 获取部门id
+	 *
+	 * @param tenantId  租户id
+	 * @param deptNames 部门名
+	 * @return 部门id
+	 */
+	@GetMapping(EXPERTBASE_IDS)
+	R<String> getExpertBaseIds(@RequestParam("tenantId") String tenantId, @RequestParam("deptNames") String deptNames);
+
+	/**
+	 * 获取部门名
+	 *
+	 * @param id 主键
+	 * @return 部门名
+	 */
+	@GetMapping(EXPERTBASE_NAME)
+	R<String> getExpertBaseName(@RequestParam("id") Long id);
+
+	/**
+	 * 获取部门名
+	 *
+	 * @param deptIds 主键
 	 * @return
 	 */
-	@PostMapping(GET_EXPERT)
-	R<Expert> detail(@RequestBody Expert expert);
+	@GetMapping(EXPERTBASE_NAMES)
+	R<List<String>> getExpertBaseNames(@RequestParam("deptIds") String deptIds);
 
 	/**
-	 * 通过任务id获取学者id列表
+	 * 获取子部门ID
 	 *
-	 * @param taskId 任务id
+	 * @param deptId
 	 * @return
 	 */
-	@GetMapping(GET_EXPERT_IDS)
-	R<List<Expert>> getExpertIds(@RequestParam Long taskId);
+	@GetMapping(EXPERTBASE_CHILD)
+	R<List<ExpertBase>> getExpertBaseChild(@RequestParam("deptId") Long deptId);
 
-	/**
-	 * 保存学者信息
-	 *
-	 * @param expert 学者实体
-	 * @return
-	 */
-	@PostMapping(SAVE_EXPERT)
-	R saveExpert(@RequestBody Expert expert);
-
-	/**
-	 * 导入智库中所有学者
-	 */
-	@GetMapping(SAVE_EXPERT_BASE)
-	R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId);
 }
