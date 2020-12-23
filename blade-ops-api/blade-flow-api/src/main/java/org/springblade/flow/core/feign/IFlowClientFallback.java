@@ -17,6 +17,7 @@
 package org.springblade.flow.core.feign;
 
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +58,7 @@ public class IFlowClientFallback implements IFlowClient {
 	}
 
 	@Override
-	public R<Map<String, Object>> isProcessInstancesFinished(List<String> ids) {
+	public R<Kv> isProcessInstancesFinished(List<String> ids) {
 		return R.fail("远程调用失败");
 	}
 }

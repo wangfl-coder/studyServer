@@ -79,20 +79,20 @@ public class ExpertBaseController extends BladeController {
 		return expertBaseService.list(params, query);
 	}
 
-	/**
-	 * 多表联合查询自定义分页
-	 */
-	@GetMapping("/page")
-	@ApiImplicitParams({
-		@ApiImplicitParam(name = "category", value = "公告类型", paramType = "query", dataType = "integer"),
-		@ApiImplicitParam(name = "title", value = "公告标题", paramType = "query", dataType = "string")
-	})
-	@ApiOperationSupport(order = 3)
-	@ApiOperation(value = "分页", notes = "传入expertBase")
-	public R<IPage<ExpertBaseVO>> page(@ApiIgnore ExpertBaseVO expertBase, Query query) {
-		IPage<ExpertBaseVO> pages = expertBaseService.selectExpertBasePage(Condition.getPage(query), expertBase);
-		return R.data(pages);
-	}
+//	/**
+//	 * 多表联合查询自定义分页
+//	 */
+//	@GetMapping("/page")
+//	@ApiImplicitParams({
+//		@ApiImplicitParam(name = "category", value = "公告类型", paramType = "query", dataType = "integer"),
+//		@ApiImplicitParam(name = "title", value = "公告标题", paramType = "query", dataType = "string")
+//	})
+//	@ApiOperationSupport(order = 3)
+//	@ApiOperation(value = "分页", notes = "传入expertBase")
+//	public R<IPage<ExpertBaseVO>> page(@ApiIgnore ExpertBaseVO expertBase, Query query) {
+//		IPage<ExpertBaseVO> pages = expertBaseService.selectExpertBasePage(Condition.getPage(query), expertBase);
+//		return R.data(pages);
+//	}
 
 	/**
 	 * 新增

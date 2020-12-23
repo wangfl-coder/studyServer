@@ -32,9 +32,9 @@ import java.util.Map;
  * @author Chill
  */
 @Service
-public class ExpertBaseServiceImpl implements IExpertBaseService {
+public class ExpertBaseServiceImpl {
 
-	@Override
+	//@Override
 	public R<String> detail(String id) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
@@ -80,7 +80,7 @@ public class ExpertBaseServiceImpl implements IExpertBaseService {
 		return R.data(res);
 	}
 
-	@Override
+	//@Override
 	public R<String> list(Map<String, Object> params, Query query) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();

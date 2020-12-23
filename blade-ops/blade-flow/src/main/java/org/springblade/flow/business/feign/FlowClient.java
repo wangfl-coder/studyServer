@@ -120,7 +120,7 @@ public class FlowClient implements IFlowClient {
 
 	@Override
 	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
-	public R<Map<String, Object>> isProcessInstancesFinished(List<String> ids) {
+		public R<Kv> isProcessInstancesFinished(List<String> ids) {
 		Kv kv = Kv.create();
 		ids.forEach(id -> {
 			HistoricProcessInstance historicProcessInstance = historyService
