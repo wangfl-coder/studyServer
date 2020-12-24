@@ -82,9 +82,9 @@ public class LabelTaskClient implements ILabelTaskClient {
 			list.forEach(labelTask -> {
 				String processInstanceId = labelTask.getProcessInstanceId();
 				if ((boolean)kv.get(processInstanceId)) {
-					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
-					labelTaskService.update(labelTaskUpdateWrapper);
+//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+//					labelTaskService.update(labelTaskUpdateWrapper);
 					labelTasks.add(labelTask);
 				}
 			});
@@ -94,14 +94,23 @@ public class LabelTaskClient implements ILabelTaskClient {
 
 	@Override
 	public R queryCompleteTaskCount(Long taskId) {
-		int count=0;
 		List<LabelTask> list = labelTaskService.list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
 		List<String> ids = new ArrayList<>();
 		list.forEach(task -> ids.add(task.getProcessInstanceId()));
 		R<Kv> processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		ArrayList<LabelTask> labelTasks = new ArrayList<>();
 		if (processInstancesFinished.isSuccess()) {
-			count+=1;
+			Kv kv = processInstancesFinished.getData();
+			list.forEach(labelTask -> {
+				String processInstanceId = labelTask.getProcessInstanceId();
+				if ((boolean)kv.get(processInstanceId)) {
+					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+					labelTaskService.update(labelTaskUpdateWrapper);
+					labelTasks.add(labelTask);
+				}
+			});
 		}
-		return R.data(count);
+		return R.data(labelTasks.size());
 	}
 }

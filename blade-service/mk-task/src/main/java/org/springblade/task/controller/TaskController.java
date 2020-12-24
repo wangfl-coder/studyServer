@@ -45,19 +45,20 @@ public class TaskController extends BladeController {
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 
-	@PostMapping(value = "/complete/count")
+	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的标注任务的数量")
 	public R queryCompleteTaskCount(@RequestParam(value = "taskId") Long taskId) {
 		R r = iLabelTaskClient.queryCompleteTaskCount(taskId);
 		return r;
 	}
 
-	@PostMapping(value = "/complete/list")
+	@GetMapping(value = "/complete/list")
 	@ApiOperation(value = "查询已经完成的标注任务")
-	public R<List<LabelTask>> inspectionSave(@RequestParam(value = "taskId") Long taskId) {
+	public R<List<LabelTask>> queryCompleteTask(@RequestParam(value = "taskId") Long taskId) {
 		ArrayList<LabelTask> arrayList = iLabelTaskClient.queryCompleteTask2(taskId).getData();
 		return R.data(arrayList);
 	}
+
 
 	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
@@ -65,10 +66,10 @@ public class TaskController extends BladeController {
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
 		boolean save = taskService.save(task);
-		R<ArrayList<LabelTask>> listR = iLabelTaskClient.queryCompleteTask2(qualityInspectionDTO.getTaskId());
+		R<ArrayList<LabelTask>> listR = iLabelTaskClient.queryCompleteTask2(task.getAnnotationTaskId());
 		if (listR.isSuccess()){
 			List<LabelTask> labelTasks = listR.getData();
-			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),qualityInspectionDTO.getCount(),qualityInspectionDTO.getInspectionType(),task,labelTasks);
+			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),task.getCount(),task.getInspectionType(),task,labelTasks);
 		}else {
 			return R.fail("获取标注完成的任务失败");
 		}
