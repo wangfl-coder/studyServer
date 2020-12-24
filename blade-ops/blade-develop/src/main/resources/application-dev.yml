@@ -1,6 +1,6 @@
 #服务器端口
 server:
-  port: 17007
+  port: 7007
 
 #数据源配置
 spring:
