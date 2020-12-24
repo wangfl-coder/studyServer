@@ -63,7 +63,7 @@ public interface LauncherConstant {
 	/**
 	 * nacos prod 地址
 	 */
-	String NACOS_PROD_ADDR = "172.30.0.48:8848";
+	String NACOS_PROD_ADDR = "127.0.0.1:8848";
 
 	/**
 	 * nacos test 地址
@@ -78,7 +78,7 @@ public interface LauncherConstant {
 	/**
 	 * sentinel prod 地址
 	 */
-	String SENTINEL_PROD_ADDR = "172.30.0.58:8858";
+	String SENTINEL_PROD_ADDR = "127.0.0.1:8858";
 
 	/**
 	 * sentinel test 地址
@@ -93,7 +93,7 @@ public interface LauncherConstant {
 	/**
 	 * seata prod 地址
 	 */
-	String SEATA_PROD_ADDR = "172.30.0.68:8091";
+	String SEATA_PROD_ADDR = "127.0.0.1:8091";
 
 	/**
 	 * seata test 地址
@@ -123,7 +123,7 @@ public interface LauncherConstant {
 	/**
 	 * elk prod 地址
 	 */
-	String ELK_PROD_ADDR = "172.30.0.72:9000";
+	String ELK_PROD_ADDR = "127.0.0.1:9000";
 
 	/**
 	 * elk test 地址
