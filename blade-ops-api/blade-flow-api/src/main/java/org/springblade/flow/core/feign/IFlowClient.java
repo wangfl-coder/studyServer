@@ -108,5 +108,5 @@ public interface IFlowClient {
 	 * @return R
 	 */
 	@PostMapping(IS_PROCESS_INSTANCES_FINISHED)
-	R<Kv> isProcessInstancesFinished(@RequestBody List<String> ids);
+	R isProcessInstancesFinished(@RequestBody List<String> ids);
 }

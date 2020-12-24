@@ -59,7 +59,7 @@ public class IFlowClientFallback implements IFlowClient {
 	}
 
 	@Override
-	public R<Kv> isProcessInstancesFinished(@RequestBody List<String> ids) {
+	public R isProcessInstancesFinished(@RequestBody List<String> ids) {
 		return R.fail("远程调用失败");
 	}
 }

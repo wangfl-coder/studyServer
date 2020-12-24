@@ -127,10 +127,14 @@ public class FlowClient implements IFlowClient {
 				.createHistoricProcessInstanceQuery()
 				.processInstanceId(id)
 				.singleResult();
-			if (historicProcessInstance.getEndActivityId() != null) {
-				kv.set(id, true);
-			} else {
+			if (historicProcessInstance == null) {
 				kv.set(id, false);
+			} else {
+				if (historicProcessInstance.getEndActivityId() != null) {
+					kv.set(id, true);
+				} else {
+					kv.set(id, false);
+				}
 			}
 		});
 		return R.data(kv);

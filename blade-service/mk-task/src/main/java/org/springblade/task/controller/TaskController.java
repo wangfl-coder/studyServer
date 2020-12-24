@@ -46,15 +46,21 @@ public class TaskController extends BladeController {
 	private QualityInspectionTaskService qualityInspectionTaskService;
 
 	@GetMapping(value = "/complete/count")
-	@ApiOperation(value = "查询已经完成的标注任务的数量")
-	public R queryCompleteTaskCount(@RequestParam(value = "taskId") Long taskId) {
-		R r = iLabelTaskClient.queryCompleteTaskCount(taskId);
-		return r;
+	@ApiOperation(value = "查询已经完成的任务的数量")
+	public R queryCompleteTaskCount(@RequestParam("taskId") Long taskId, @RequestParam("categoryName") String categoryName) {
+		if (categoryName.equals("标注流程")) {
+			int res = labelTaskService.queryCompleteTaskCount(taskId);
+			int k = 0;
+		} else if (categoryName.equals("质检流程")) {
+//			qualityInspectionTaskService.queryCompleteTaskCount(taskId);
+		}
+//		R r = iLabelTaskClient.queryCompleteTaskCount(taskId);
+		return R.success("");
 	}
 
 	@GetMapping(value = "/complete/list")
-	@ApiOperation(value = "查询已经完成的标注任务")
-	public R<List<LabelTask>> queryCompleteTask(@RequestParam(value = "taskId") Long taskId) {
+	@ApiOperation(value = "查询已经完成的任务列表")
+	public R queryCompleteTask(@RequestParam("taskId") Long taskId) {
 		ArrayList<LabelTask> arrayList = iLabelTaskClient.queryCompleteTask2(taskId).getData();
 		return R.data(arrayList);
 	}
