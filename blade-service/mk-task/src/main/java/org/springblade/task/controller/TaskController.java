@@ -47,22 +47,21 @@ public class TaskController extends BladeController {
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
-	public R queryCompleteTaskCount(@RequestParam("taskId") Long taskId, @RequestParam("categoryName") String categoryName) {
+	public R queryCompleteTaskCount(@RequestParam("taskId") Long taskId/*, @RequestParam("categoryName") String categoryName*/) {
 		int res = 0;
-		if (categoryName.equals("标注流程")) {
+//		if (categoryName.equals("标注流程")) {
 			res = labelTaskService.queryCompleteTaskCount(taskId);
-		} else if (categoryName.equals("质检流程")) {
+//		} else if (categoryName.equals("质检流程")) {
 //			qualityInspectionTaskService.queryCompleteTaskCount(taskId);
-		}
-//		R r = iLabelTaskClient.queryCompleteTaskCount(taskId);
+//		}
 		return R.data(res);
 	}
 
 	@GetMapping(value = "/complete/list")
 	@ApiOperation(value = "查询已经完成的任务列表")
 	public R queryCompleteTask(@RequestParam("taskId") Long taskId) {
-		ArrayList<LabelTask> arrayList = iLabelTaskClient.queryCompleteTask2(taskId).getData();
-		return R.data(arrayList);
+		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
+		return R.data(labelTasks);
 	}
 
 
@@ -71,13 +70,12 @@ public class TaskController extends BladeController {
 	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
-		boolean save = taskService.save(task);
-		R<ArrayList<LabelTask>> listR = iLabelTaskClient.queryCompleteTask2(task.getAnnotationTaskId());
-		if (listR.isSuccess()){
-			List<LabelTask> labelTasks = listR.getData();
+		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
+		if (labelTasks.size() > 0){
+			boolean save = taskService.save(task);
 			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),task.getCount(),task.getInspectionType(),task,labelTasks);
 		}else {
-			return R.fail("获取标注完成的任务失败");
+			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
 		}
 		return R.status(result);
 	}
