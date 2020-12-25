@@ -24,6 +24,7 @@ import org.springblade.task.service.LabelTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -99,6 +100,28 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			});
 		}
 		return labelTasks.size();
+	}
+
+	@Override
+	public List<LabelTask> queryCompleteTask(Long taskId) {
+		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		List<LabelTask> labelTasks = new ArrayList<>();
+		if (processInstancesFinished.isSuccess()) {
+			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
+			list.forEach(labelTask -> {
+				String processInstanceId = labelTask.getProcessInstanceId();
+				if ((boolean)kv.get(processInstanceId)) {
+//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+//					labelTaskService.update(labelTaskUpdateWrapper);
+					labelTasks.add(labelTask);
+				}
+			});
+		}
+		return labelTasks;
 	}
 
 }

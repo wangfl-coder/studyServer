@@ -15,4 +15,6 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 	boolean startProcess(String ProcessDefinitionId, Task task, List<Expert> experts);
 
 	int queryCompleteTaskCount(Long taskId);
+
+	List<LabelTask> queryCompleteTask(Long taskId);
 }
