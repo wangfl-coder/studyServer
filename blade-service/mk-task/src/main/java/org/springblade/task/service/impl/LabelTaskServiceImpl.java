@@ -1,5 +1,7 @@
 package org.springblade.task.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
@@ -21,7 +23,10 @@ import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.service.LabelTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
@@ -72,6 +77,28 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			}
 		});
 		return true;
-
 	}
+
+	@Override
+	public int queryCompleteTaskCount(Long taskId) {
+		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		ArrayList<LabelTask> labelTasks = new ArrayList<>();
+		if (processInstancesFinished.isSuccess()) {
+			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
+			list.forEach(labelTask -> {
+				String processInstanceId = labelTask.getProcessInstanceId();
+				if ((boolean)kv.get(processInstanceId)) {
+					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+					update(labelTaskUpdateWrapper);
+					labelTasks.add(labelTask);
+				}
+			});
+		}
+		return labelTasks.size();
+	}
+
 }

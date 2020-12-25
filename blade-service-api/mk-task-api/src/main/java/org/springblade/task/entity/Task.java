@@ -39,5 +39,15 @@ public class Task extends BaseEntity {
 	private Date endTime;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
+	@ApiModelProperty(value = "质检类型")
+	private Integer inspectionType;
+	@ApiModelProperty(value = "质检数量")
+	private Integer count;
+	@ApiModelProperty(value = "标注大任务id")
+	@JsonSerialize(using = ToStringSerializer.class)
+	private Long annotationTaskId;
+
+
+
 
 }
