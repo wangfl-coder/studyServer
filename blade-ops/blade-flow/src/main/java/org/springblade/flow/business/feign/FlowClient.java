@@ -119,18 +119,22 @@ public class FlowClient implements IFlowClient {
 	}
 
 	@Override
-	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
-		public R<Kv> isProcessInstancesFinished(List<String> ids) {
+	@PostMapping(IS_PROCESS_INSTANCES_FINISHED)
+	public R<Kv> isProcessInstancesFinished(@RequestBody List<String> ids) {
 		Kv kv = Kv.create();
 		ids.forEach(id -> {
 			HistoricProcessInstance historicProcessInstance = historyService
 				.createHistoricProcessInstanceQuery()
 				.processInstanceId(id)
 				.singleResult();
-			if (historicProcessInstance.getEndActivityId() != null) {
-				kv.set(id, true);
-			} else {
+			if (historicProcessInstance == null) {
 				kv.set(id, false);
+			} else {
+				if (historicProcessInstance.getEndActivityId() != null) {
+					kv.set(id, true);
+				} else {
+					kv.set(id, false);
+				}
 			}
 		});
 		return R.data(kv);

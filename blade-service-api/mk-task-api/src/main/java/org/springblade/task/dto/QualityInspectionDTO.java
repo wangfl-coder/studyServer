@@ -21,7 +21,7 @@ public class QualityInspectionDTO {
 	private String ebId;
 	@ApiModelProperty(value = "质检任务名字")
 	private String taskName;
-	@ApiModelProperty(value = "质检任务类型")
+	@ApiModelProperty(value = "任务类型")
 	private Integer taskType;
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模版id")
@@ -38,7 +38,7 @@ public class QualityInspectionDTO {
 	private Integer priority;
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "标注大任务id")
-	private Long taskId;
+	private Long annotationTaskId;
 	@ApiModelProperty(value = "抽查数量")
 	private Integer count;
 	@ApiModelProperty(value = "质检类型")

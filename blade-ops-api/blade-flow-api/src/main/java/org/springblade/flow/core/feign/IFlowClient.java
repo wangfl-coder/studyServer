@@ -107,6 +107,6 @@ public interface IFlowClient {
 	 * @param ids 流程实例id列表
 	 * @return R
 	 */
-	@GetMapping(IS_PROCESS_INSTANCES_FINISHED)
-	R<Kv> isProcessInstancesFinished(@RequestParam("ids") List<String> ids);
+	@PostMapping(IS_PROCESS_INSTANCES_FINISHED)
+	R isProcessInstancesFinished(@RequestBody List<String> ids);
 }
