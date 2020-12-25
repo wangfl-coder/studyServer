@@ -104,4 +104,12 @@ public class LabelTaskClient implements ILabelTaskClient {
 		}
 		return R.data(count);
 	}
+
+	@Override
+	public R<List<LabelTask>> queryLabelTask(Long taskId) {
+		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+		labelTaskQueryWrapper.eq("task_id",taskId);
+		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
+		return R.data(list);
+	}
 }
