@@ -20,8 +20,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.Composition;
 
 import java.util.List;
 
@@ -40,21 +42,20 @@ public class TaskProgressVO {
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "标注总数")
-	private Long annotationTotal;
+	private Integer annotationTotal;
 
 	/**
 	 * 完成数量
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "完成数量")
-	private Long finishCount;
+	private Integer finishCount;
 
 	/**
-	 * 已完成与正在进行的数量
+	 * 组合的完成情况
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "已完成与正在进行的数量")
-	private Long startCount;
+	@ApiModelProperty(value = "组合的完成情况")
+	private List<Composition> compositionList;
 
 
 

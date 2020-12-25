@@ -3,6 +3,7 @@ package org.springblade.task.feign;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
@@ -65,13 +66,15 @@ public class LabelTaskClient implements ILabelTaskClient {
 	}
 
 	@Override
-	public R queryCompleteTaskCount(Long taskId) {
-		int res = labelTaskService.queryCompleteTaskCount(taskId);
+	@GetMapping(QUERY_COMPLETE_LABEL_TASK_COUNT)
+	public R<Integer> queryCompleteTaskCount(Long taskId) {
+		Integer res = labelTaskService.queryCompleteTaskCount(taskId);
 		return R.data(res);
 	}
 
 	@Override
-	public R<List<LabelTask>> queryLabelTask(Long taskId) {
+	@GetMapping(QUERY_LABEL_TASK_ALL)
+	public R<List<LabelTask>> queryLabelTaskAll(Long taskId) {
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
 		labelTaskQueryWrapper.eq("task_id",taskId);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);

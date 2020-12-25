@@ -16,6 +16,7 @@
  */
 package org.springblade.composition.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
@@ -27,7 +28,9 @@ import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.service.CompositionService;
 import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
@@ -63,6 +66,7 @@ public class StatisticsController extends BladeController {
 
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
+	private final CompositionService compositionService;
 
 	/**
 	 * 查询标注数据
@@ -72,16 +76,41 @@ public class StatisticsController extends BladeController {
 	@ApiOperation(value = "查询智库任务完成情况", notes = "传入智库任务id")
 	public R<TaskProgressVO> statisticsTaskProgress(Long taskId) {
 		TaskProgressVO taskProgressVO = new TaskProgressVO();
-		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTask(taskId);
+		// 查询一个智库下有多少任务（人）
+		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
+		List<Long> labelTaskIds = new ArrayList<>();
 		if (labelTaskListResult.isSuccess()){
 			List<LabelTask> labelTaskList = labelTaskListResult.getData();
-			taskProgressVO.setAnnotationTotal(Long.valueOf(labelTaskList.size()));
-			List<Long> labelTaskIds = new ArrayList();
-			labelTaskList.forEach(labelTask -> labelTaskIds.add(labelTask.getTaskId()));
-			List<Statistics> statisticsList = statisticsService.list(Wrappers.<Statistics>query().in("sub_task_id",labelTaskIds));
-			taskProgressVO.setFinishCount(statisticsList.stream().filter(statistics -> statistics.getCompositionId()==-1).count());
-			return R.data(taskProgressVO);
+			labelTaskList.forEach(labelTask -> labelTaskIds.add(labelTask.getId()));
+			taskProgressVO.setAnnotationTotal(labelTaskList.size());
+			// 查询完成的任务
+			R<Integer> result = labelTaskClient.queryCompleteTaskCount(taskId);
+			if (result.isSuccess()){
+				taskProgressVO.setFinishCount(result.getData());
+			}
 		}
+		// 统计每种组合的完成（提交）个数
+		List<Composition> compositionList = new ArrayList<>();
+		QueryWrapper<Statistics> wrapper = new QueryWrapper<>();
+		wrapper.groupBy("composition_id");
+		wrapper.select("composition_id,count(*) as composition_submit_count");
+		wrapper.in("sub_task_id",labelTaskIds);
+		List<Statistics> statisticsList = statisticsService.list(wrapper);
+		statisticsList.forEach(statistics -> {
+			Composition composition = compositionService.getById(statistics.getCompositionId());
+			// 现在因为补充信息没有composition_id，所以需要加一个非空判断。
+			if(composition != null) {
+				composition.setSubmitCount(statistics.getCompositionSubmitCount());
+				compositionList.add(composition);
+			} else {
+				Composition composition_supplement = new Composition();
+				composition_supplement.setSubmitCount(statistics.getCompositionSubmitCount());
+				composition_supplement.setName("补充信息");
+				compositionList.add(composition_supplement);
+			}
+
+		});
+		taskProgressVO.setCompositionList(compositionList);
 		return R.data(taskProgressVO);
 	}
 
