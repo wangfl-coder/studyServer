@@ -63,4 +63,17 @@ public class InspectionDataVO {
 	@ApiModelProperty(value = "组合id")
 	private Long compositionId;
 
+	/**
+	 * sub_task_id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
+
+	/**
+	 * 学者id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "学者id")
+	private Long expertId;
 }
