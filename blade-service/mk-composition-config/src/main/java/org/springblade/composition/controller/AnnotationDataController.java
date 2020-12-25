@@ -101,7 +101,7 @@ public class AnnotationDataController extends BladeController {
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
 	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
-		Long subTaskId = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
+		Long subTaskId  = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		// 删除原来的标注数据
 		List<Long> annotationDataIds = new ArrayList<>();

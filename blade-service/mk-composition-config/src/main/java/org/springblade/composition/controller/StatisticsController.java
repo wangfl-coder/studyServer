@@ -75,15 +75,14 @@ public class StatisticsController extends BladeController {
 		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTask(taskId);
 		if (labelTaskListResult.isSuccess()){
 			List<LabelTask> labelTaskList = labelTaskListResult.getData();
-			taskProgressVO.setAnnotationTotal(labelTaskList.size());
+			taskProgressVO.setAnnotationTotal(Long.valueOf(labelTaskList.size()));
 			List<Long> labelTaskIds = new ArrayList();
 			labelTaskList.forEach(labelTask -> labelTaskIds.add(labelTask.getTaskId()));
 			List<Statistics> statisticsList = statisticsService.list(Wrappers.<Statistics>query().in("sub_task_id",labelTaskIds));
-			Set<Long> startSubTaskId = new HashSet<>();
 			taskProgressVO.setFinishCount(statisticsList.stream().filter(statistics -> statistics.getCompositionId()==-1).count());
-			statisticsList.stream().filter(statistics -> statistics.getCompositionId() != null).forEach(statistics -> startSubTaskId.add(statistics.getSubTaskId()));
-			taskProgressVO.setStartCount(startSubTaskId.size());
+			return R.data(taskProgressVO);
 		}
+		return R.data(taskProgressVO);
 	}
 
 
