@@ -24,7 +24,9 @@ import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.service.CompositionService;
 import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
@@ -63,6 +65,7 @@ public class AnnotationDataController extends BladeController {
 	private final IExpertClient expertClient;
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
+	private final CompositionService compositionService;
 
 	/**
 	 * 查询标注数据
@@ -103,8 +106,23 @@ public class AnnotationDataController extends BladeController {
 	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
+		//获得之前标注的数据
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+
+
 		// 删除原来的标注数据
 		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+
+		// 注意补充信息角色
+		Expert expert = new Expert();
+		expert.setId(annotationDataVO.getExpertId());
+		if (oldAnnotationDataList != null) {
+			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
+		}
+		if (annotationDataList != null){
+			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
+		}
+		expertClient.saveExpert(expert);
 
 		//更新统计表，记录标注用时
 		Statistics statistics_query = new Statistics();
