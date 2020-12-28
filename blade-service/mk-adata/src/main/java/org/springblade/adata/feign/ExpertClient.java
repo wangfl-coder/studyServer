@@ -29,6 +29,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.service.IExpertService;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.system.user.entity.User;
 import org.springblade.system.user.entity.UserInfo;
 import org.springblade.system.user.entity.UserOauth;
@@ -77,6 +78,13 @@ public class ExpertClient implements IExpertClient {
 	public R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId) {
 		Boolean res = service.importExpertBase(expertBaseId, taskId);
 		return R.status(res);
+	}
+
+	@Override
+	@GetMapping(IS_INFO_COMPLETE)
+	public R<Kv> isInfoComplete(@RequestParam("expertId") Long expertId, @RequestParam("templateId") Long templateId) {
+		Kv kv = service.isInfoComplete(expertId, templateId);
+		return R.data(kv);
 	}
 
 }

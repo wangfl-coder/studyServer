@@ -68,4 +68,13 @@ public interface ProcessConstant {
 	 */
 	String TASK_VARIABLE_CREATE_USER = "createUser";
 
+	/**
+	 * 主页是否完整标识
+	 */
+	String HOMEPAGE_COMPLETE_KEY = "isHpComplete";
+
+	/**
+	 * 基本信息是否完整标识
+	 */
+	String BASICINFO_COMPLETE_KEY = "isBiComplete";
 }

@@ -20,11 +20,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import liquibase.pro.packaged.F;
+import liquibase.pro.packaged.S;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
-import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
 import org.flowable.editor.language.json.converter.BpmnJsonConverter;
 import org.flowable.engine.HistoryService;
@@ -41,6 +43,9 @@ import org.flowable.engine.repository.ProcessDefinitionQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.runtime.ProcessInstanceQuery;
 import org.flowable.engine.task.Comment;
+import org.springblade.composition.dto.TemplateCompositionDTO;
+import org.springblade.composition.dto.TemplateDTO;
+import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.utils.DateUtil;
@@ -65,6 +70,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 工作流服务实现类
@@ -312,6 +319,127 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 	}
 
 	@Override
+	public String deployModelByTemplate(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO) {
+		FlowModel model = this.getById(modelId);
+		if (model == null) {
+			throw new ServiceException("No model found with the given id: " + modelId);
+		}
+		BpmnModel bpmnModel = getBpmnModel(model);
+
+		// filter
+		String[] filterArr = {"biFlow*", "biPassFlow*", "basicInfoTask*"};
+		Process process = bpmnModel.getProcesses().get(0);
+		List<FlowElement> flowElementList = (List<FlowElement>) process.getFlowElements();
+		flowElementList.removeIf(flowElement -> StringUtil.simpleMatch(filterArr, flowElement.getId()) );
+
+		Map<String,FlowElement> flowElementMap = process.getFlowElementMap();
+		Map<String,FlowElement> filteredElementMap = flowElementMap.entrySet().stream()
+			.filter(flowElement -> !StringUtil.simpleMatch(filterArr, flowElement.getKey()) )
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		// add
+		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
+		final AtomicInteger counter = new AtomicInteger(1);
+		templateCompositions.forEach(templateComposition -> {
+			if (1 == templateComposition.getCompositionType()) {	//主页标注
+				flowElementList.stream().forEach(flowElement -> {
+					if (flowElement.getId().equals("homepageTask")) {
+						UserTask userTask =  (UserTask)flowElement;
+						userTask.setId("comp-"+templateComposition.getCompositionId());
+						SequenceFlow incomingFlow = userTask.getIncomingFlows().get(0);
+						incomingFlow.setTargetRef(userTask.getId());
+						SequenceFlow outgoingFlow = userTask.getOutgoingFlows().get(0);
+						outgoingFlow.setSourceRef(userTask.getId());
+						userTask.setName(templateComposition.getCompositionName());
+						List<String> candidateGroups = new ArrayList<>();
+						candidateGroups.add(templateComposition.getRoleName());
+						userTask.setCandidateGroups(candidateGroups);
+					}
+				});
+				UserTask userTask =  (UserTask)filteredElementMap.get("homepageTask");
+				userTask.setId("comp-"+templateComposition.getCompositionId());
+				SequenceFlow incomingFlow = userTask.getIncomingFlows().get(0);
+				incomingFlow.setTargetRef(userTask.getId());
+				SequenceFlow outgoingFlow = userTask.getOutgoingFlows().get(0);
+				outgoingFlow.setSourceRef(userTask.getId());
+				userTask.setName(templateComposition.getCompositionName());
+				List<String> candidateGroups = new ArrayList<>();
+				candidateGroups.add(templateComposition.getRoleName());
+				userTask.setCandidateGroups(candidateGroups);
+				filteredElementMap.remove("homepageTask");
+				filteredElementMap.put(userTask.getId(), userTask);
+			}else {
+				SequenceFlow incomingFlow = new SequenceFlow();
+				incomingFlow.setSourceRef("distributeTaskGateway");
+				incomingFlow.setTargetRef("comp-"+templateComposition.getCompositionId());
+				incomingFlow.setId("biFlow"+counter.get());
+				incomingFlow.setParentContainer(process);
+				List<SequenceFlow> incomingFlows = new ArrayList<>();
+				incomingFlows.add(incomingFlow);
+
+				SequenceFlow outgoingFlow = new SequenceFlow();
+				outgoingFlow.setConditionExpression("${pass}");
+				outgoingFlow.setSourceRef("comp-"+templateComposition.getCompositionId());
+				outgoingFlow.setTargetRef("collectTaskGateway");
+				outgoingFlow.setName("完成");
+				outgoingFlow.setId("biPassFlow"+counter.get());
+				outgoingFlow.setParentContainer(process);
+				List<SequenceFlow> outgoingFlows = new ArrayList<>();
+				outgoingFlows.add(outgoingFlow);
+
+				UserTask basicInfoTask = new UserTask();
+				basicInfoTask.setId("comp-"+templateComposition.getCompositionId());
+				basicInfoTask.setName(templateComposition.getCompositionName());
+				List<String> candidateGroups = new ArrayList<>();
+				candidateGroups.add(templateComposition.getRoleName());
+				basicInfoTask.setCandidateGroups(candidateGroups);
+				basicInfoTask.setIncomingFlows(incomingFlows);
+				basicInfoTask.setOutgoingFlows(outgoingFlows);
+
+				flowElementList.add(incomingFlow);
+				flowElementList.add(outgoingFlow);
+				flowElementList.add(basicInfoTask);
+				filteredElementMap.put(incomingFlow.getId(), incomingFlow);
+				filteredElementMap.put(outgoingFlow.getId(), outgoingFlow);
+				filteredElementMap.put(basicInfoTask.getId(), basicInfoTask);
+				counter.getAndIncrement();
+			}
+		});
+
+		flowElementList.stream().forEach(flowElement -> {
+			if (flowElement.getId().equals("complementInfoTask")) {
+				UserTask userTask =  (UserTask)flowElement;
+				List<String> candidateGroups = new ArrayList<>();
+				candidateGroups.add(templateDTO.getMoreMessageRoleName());
+				userTask.setCandidateGroups(candidateGroups);
+			}
+		});
+		UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
+		List<String> candidateGroups = new ArrayList<>();
+		candidateGroups.add(templateDTO.getMoreMessageRoleName());
+		userTask.setCandidateGroups(candidateGroups);
+		filteredElementMap.put("complementInfoTask", userTask);
+
+		process.setFlowElementMap(filteredElementMap);
+		byte[] bytes = getBpmnXML(bpmnModel);
+		String processName = model.getName();
+		if (!StringUtil.endsWithIgnoreCase(processName, FlowEngineConstant.SUFFIX)) {
+			processName += FlowEngineConstant.SUFFIX;
+		}
+		String finalProcessName = processName;
+		if (Func.isNotEmpty(tenantIdList)) {
+			tenantIdList.forEach(tenantId -> {
+				Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
+				deployTemplate(deployment, category);
+			});
+		} else {
+			Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
+			return deployTemplate(deployment, category);
+		}
+		return null;
+	}
+
+	@Override
 	public boolean deleteProcessInstance(String processInstanceId, String deleteReason) {
 		runtimeService.deleteProcessInstance(processInstanceId, deleteReason);
 		return true;
@@ -336,6 +464,29 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			log.info(logBuilder.toString(), logArgs.toArray());
 			return true;
 		}
+	}
+
+	private String deployTemplate(Deployment deployment, String category) {
+		log.debug("流程部署--------deploy:  " + deployment + "  分类---------->" + category);
+		List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery().deploymentId(deployment.getId()).list();
+		StringBuilder logBuilder = new StringBuilder(500);
+		List<Object> logArgs = new ArrayList<>();
+		// 设置流程分类
+		for (ProcessDefinition processDefinition : list) {
+			if (StringUtil.isNotBlank(category)) {
+				repositoryService.setProcessDefinitionCategory(processDefinition.getId(), category);
+			}
+			logBuilder.append("部署成功,流程ID={} \n");
+			logArgs.add(processDefinition.getId());
+			return processDefinition.getId();
+		}
+		if (list.size() == 0) {
+			throw new ServiceException("部署失败,未找到流程");
+		} else {
+			log.info(logBuilder.toString(), logArgs.toArray());
+//			return true;
+		}
+		return null;
 	}
 
 	private byte[] getBpmnXML(FlowModel model) {
