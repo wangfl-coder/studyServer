@@ -25,6 +25,8 @@ import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
+import org.springblade.task.vo.TaskVO;
+import org.springblade.task.wrapper.TaskWrapper;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -132,9 +134,9 @@ public class TaskController extends BladeController {
 		@ApiImplicitParam(name = "taskType", value = "任务类型", paramType = "query", dataType = "integer")
 	})
 	@ApiOperation(value = "分页查询全部任务")
-	public R<IPage<Task>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
+	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
 		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class));
-		return R.data(pages);
+		return R.data(TaskWrapper.build().pageVO(pages));
 	}
 
 	@PostMapping(value = "/update")
