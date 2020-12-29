@@ -111,8 +111,8 @@ public class InspectionDataController extends BladeController {
 		Long subTaskId  = inspectionDataVO.getSubTaskId();
 		List<InspectionData> inspectionDataList = inspectionDataVO.getInspectionDataList();
 
-		//获得之前标注的数据
-//		List<AnnotationData> oldAnnotationDataList = inspectionDataVODataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+		//获得之前质检的数据
+		List<InspectionData> oldInspectionDataList = inspectionDataService.list(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
 
 
 		// 删除原来质检数据

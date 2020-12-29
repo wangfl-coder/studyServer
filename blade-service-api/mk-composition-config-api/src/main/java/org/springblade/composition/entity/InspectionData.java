@@ -90,4 +90,12 @@ public class InspectionData extends BaseEntity {
 	@ApiModelProperty(value = "质检类型")
 	private Integer type ;
 
+	/**
+	 * label_task_id(标注的子任务id）
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "标注子任务id")
+	private Long labelTaskId;
+
+
 }
