@@ -347,6 +347,9 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		parameters.put("searchType", "all");
 		parameters.put("offset", offset);
 		parameters.put("size", size);
+		JSONArray sorts = new JSONArray();
+		sorts.add("_id");
+		parameters.put("sorts",sorts);
 
 
 		JSONObject schema = new JSONObject();
