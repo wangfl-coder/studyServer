@@ -1,5 +1,6 @@
 package org.springblade.composition.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,6 +30,10 @@ public class Composition extends BaseEntity {
 	private String description;
 	@ApiModelProperty("标注类型")
 	private Integer annotationType;
+
+	@TableField(exist = false)
+	@ApiModelProperty("提交（完成）的数量")
+	private Integer submitCount;
 //	@TableLogic
 //	private Integer isDel;
 //	private Date createTime;

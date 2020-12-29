@@ -17,6 +17,7 @@
 package org.springblade.composition.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -99,5 +100,13 @@ public class Statistics extends BaseEntity {
 	 */
 	@ApiModelProperty(value = "备注")
 	private String remark;
+
+	/**
+	 * 一个任务中组合提交（完成）数量
+	 */
+	@TableField(exist = false)
+	@ApiModelProperty(value = "一个任务中组合提交（完成）数量")
+	private Integer compositionSubmitCount;
+
 
 }

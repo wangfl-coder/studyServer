@@ -98,49 +98,51 @@ public class InspectionDataController extends BladeController {
 	}
 
 	/**
-	 * 批量新增或修改标注数据
-	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
+	 * 批量新增或修改质检数据
+	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与用户id来查询删除数据
 	 * 每次修改后同时更新mk_adata_expert表中的数据
 	 */
 	@PostMapping("/submit")
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入InspectionDataVO对象")
-	public R submit(@Valid @RequestBody InspectionDataVO inspectDataVO) {
-		Long subTaskId = inspectDataVO.getInspectionDataList().get(0).getSubTaskId();
-		List<InspectionData> inspectionDataList = inspectDataVO.getInspectionDataList();
-		// 删除原来的标注数据
-		Expert expert = new Expert();
-		expert.setId(inspectionDataList.get(0).getExpertId());
-		inspectionDataList.forEach(inspectionData -> {
-			inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionData.getSubTaskId()).and(i->i.eq(InspectionData::getField, inspectionData.getField())));
-			BeanUtil.setProperty(expert, inspectionData.getField(),inspectionData.getValue());
-		});
-		expertClient.saveExpert(expert);
+	public R submit(@Valid @RequestBody InspectionDataVO inspectionDataVO) {
 
-		//更新统计表，记录质检用时
-		Statistics statistics_query = new Statistics();
-		statistics_query.setSubTaskId(subTaskId);
-		statistics_query.setCompositionId(inspectDataVO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
+		Long subTaskId  = inspectionDataVO.getSubTaskId();
+		List<InspectionData> inspectionDataList = inspectionDataVO.getInspectionDataList();
 
-		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-		if (statistics != null){
-			statistics.setTime(statistics.getTime() + inspectDataVO.getTime());
-		} else {
-			statistics = new Statistics();
-			//设置类型为质检
-			statistics.setType(1);
-			statistics.setTime(inspectDataVO.getTime());
-			statistics.setUserId(AuthUtil.getUserId());
-			statistics.setCompositionId(inspectDataVO.getCompositionId());
-			statistics.setSubTaskId(subTaskId);
-			statistics.setTemplateId(inspectDataVO.getTemplateId());
+		//获得之前标注的数据
+//		List<AnnotationData> oldAnnotationDataList = inspectionDataVODataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+
+
+		// 删除原来质检数据
+		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getUpdateUser, AuthUtil.getUserId())));
+
+//		//更新统计表，记录标注用时
+//		Statistics statistics_query = new Statistics();
+//		statistics_query.setSubTaskId(subTaskId);
+//		statistics_query.setCompositionId(inspectionDataVO.getCompositionId());
+//		statistics_query.setUserId(AuthUtil.getUserId());
+//
+//		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+//		if (statistics != null){
+//			statistics.setTime(statistics.getTime() + inspectionDataVO.getTime());
+//		} else {
+//			statistics = new Statistics();
+//			statistics.setType(1);
+//			statistics.setTime(inspectionDataVO.getTime());
+//			statistics.setUserId(AuthUtil.getUserId());
+//			statistics.setCompositionId(inspectionDataVO.getCompositionId());
+//			statistics.setSubTaskId(subTaskId);
+//			statistics.setTemplateId(inspectionDataVO.getTemplateId());
+//		}
+//		statisticsService.saveOrUpdate(statistics);
+		if(inspectionDataList != null){
+			return R.status(inspectionDataService.saveBatch(inspectionDataList));
+		}else{
+			return R.success("没有数据保存");
 		}
-		statisticsService.saveOrUpdate(statistics);
-		return R.status(inspectionDataService.saveBatch(inspectionDataList));
+
 	}
-
-
 
 }

@@ -44,6 +44,7 @@ public class LauncherServiceImpl implements LauncherService {
 		PropsUtil.setProperty(props, "spring.datasource.dynamic.enabled", "false");
 
 		// 开启elk日志
+
 		// PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
 		if (profile.equals(AppConstant.PROD_CODE)) {
 			PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));

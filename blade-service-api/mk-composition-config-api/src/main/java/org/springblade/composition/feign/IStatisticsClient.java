@@ -14,16 +14,32 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service;
+package org.springblade.composition.feign;
 
-import org.springblade.composition.entity.Statistics;
-import org.springblade.core.mp.base.BaseService;
-import org.springblade.task.feign.ILabelTaskClient;
+
+import org.springblade.common.constant.LauncherConstant;
+import org.springblade.composition.entity.Composition;
+import org.springblade.core.tool.api.R;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
- * 服务类
+ * Notice Feign接口类
  *
- * @author KaiLun
+ * @author Chill
  */
-public interface IStatisticsService extends BaseService<Statistics> {
+@FeignClient(value = LauncherConstant.MKAPP_COMPOSITION_CONFIG_NAME)
+public interface IStatisticsClient {
+
+	String API_PREFIX = "/client";
+	String STATISTICS_INITIALIZE = API_PREFIX + "/statistics/initialize";
+
+	/**
+	 * 学者信息是否完整
+	 */
+	@GetMapping(STATISTICS_INITIALIZE)
+	R initialize(@RequestParam("taskId") Long taskId);
 }

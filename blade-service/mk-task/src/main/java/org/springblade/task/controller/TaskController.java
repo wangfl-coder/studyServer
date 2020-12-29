@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
@@ -44,6 +45,7 @@ public class TaskController extends BladeController {
 	private LabelTaskService labelTaskService;
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
+	private IStatisticsClient statisticsClient;
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
@@ -99,6 +101,7 @@ public class TaskController extends BladeController {
 			taskService.removeById(task.getId());
 			return R.fail("导入智库失败");
 		}
+		statisticsClient.initialize(task.getId());
 		return R.status(result);
 	}
 

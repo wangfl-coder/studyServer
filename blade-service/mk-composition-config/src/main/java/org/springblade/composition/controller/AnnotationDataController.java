@@ -26,6 +26,7 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.service.IAnnotationDataService;
+import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
@@ -42,7 +43,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +63,7 @@ public class AnnotationDataController extends BladeController {
 	private final IExpertClient expertClient;
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
+	private final ICompositionService compositionService;
 
 	/**
 	 * 查询标注数据
@@ -101,89 +102,52 @@ public class AnnotationDataController extends BladeController {
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
 	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
-		Long subTaskId = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
+		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
+		//获得之前标注的数据
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
+
+
 		// 删除原来的标注数据
-		List<Long> annotationDataIds = new ArrayList<>();
+		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
+
+		// 注意补充信息角色
 		Expert expert = new Expert();
-		expert.setId(annotationDataList.get(0).getExpertId());
-		annotationDataList.forEach(annotationData -> {
-			annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationData.getSubTaskId()).and(i->i.eq(AnnotationData::getField, annotationData.getField())));
-			BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue());
-		});
+		expert.setId(annotationDataVO.getExpertId());
+		if (oldAnnotationDataList != null) {
+			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
+		}
+		if (annotationDataList != null){
+			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
+		}
 		expertClient.saveExpert(expert);
-		//因为前端不传id，所以这一步其实不需要了
-//		annotationDataList.forEach(annotationData -> {
-//			annotationData.setId(null);
-//		});
 
 		//更新统计表，记录标注用时
 		Statistics statistics_query = new Statistics();
 		statistics_query.setSubTaskId(subTaskId);
 		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
 
 		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
 		if (statistics != null){
 			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
+			statistics.setStatus(2);
+			statistics.setUserId(AuthUtil.getUserId());
 		} else {
 			statistics = new Statistics();
-			statistics.setTime(annotationDataVO.getTime());
+			statistics.setTime(annotationDataVO.getTime()+ statistics.getTime());
+			statistics.setStatus(2);
 			statistics.setUserId(AuthUtil.getUserId());
 			statistics.setCompositionId(annotationDataVO.getCompositionId());
 			statistics.setSubTaskId(subTaskId);
 			statistics.setTemplateId(annotationDataVO.getTemplateId());
 		}
 		statisticsService.saveOrUpdate(statistics);
-		return R.status(annotationDataService.saveBatch(annotationDataList));
+		if(annotationDataList != null){
+			return R.status(annotationDataService.saveBatch(annotationDataList));
+		}else{
+			return R.success("没有数据保存");
+		}
+
 	}
-
-//	/**
-//	 * 批量新增或修改标注数据
-//	 * 每次都会逻辑删除之前的数据，但是要有id
-//	 * 每次修改后同时更新mk_adata_expert表中的数据
-//	 */
-//	@PostMapping("/submit")
-//	@ApiOperationSupport(order = 3)
-//	@Transactional(rollbackFor = Exception.class)
-//	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
-//	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
-//		Long subTaskId = annotationDataVO.getAnnotationDataList().get(0).getSubTaskId();
-//		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
-//		// 删除原来的标注数据
-//		List<Long> annotationDataIds = new ArrayList<>();
-//		Expert expert = new Expert();
-//		expert.setId(annotationDataList.get(0).getExpertId());
-//		annotationDataList.forEach(annotationData -> {
-//			annotationDataIds.add(annotationData.getId());
-//			BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue());
-//		});
-//		expertClient.saveExpert(expert);
-//		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().in(AnnotationData::getId, annotationDataIds));
-//		annotationDataList.forEach(annotationData -> {
-//			annotationData.setId(null);
-//		});
-//
-//		//更新统计表，记录标注用时
-//		Statistics statistics_query = new Statistics();
-//		statistics_query.setSubTaskId(subTaskId);
-//		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
-//		statistics_query.setUserId(AuthUtil.getUserId());
-//
-//		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-//		if (statistics != null){
-//			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
-//		} else {
-//			statistics = new Statistics();
-//			statistics.setTime(annotationDataVO.getTime());
-//			statistics.setUserId(AuthUtil.getUserId());
-//			statistics.setCompositionId(annotationDataVO.getCompositionId());
-//			statistics.setSubTaskId(subTaskId);
-//			statistics.setTemplateId(annotationDataVO.getTemplateId());
-//		}
-//		statisticsService.saveOrUpdate(statistics);
-//		return R.status(annotationDataService.saveBatch(annotationDataList));
-//	}
-
 
 }

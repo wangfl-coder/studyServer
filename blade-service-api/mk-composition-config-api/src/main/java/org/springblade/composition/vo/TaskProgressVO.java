@@ -20,9 +20,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.InspectionData;
+import org.springblade.composition.entity.Composition;
 
 import java.util.List;
 
@@ -33,42 +34,30 @@ import java.util.List;
  * @author Kailun
  */
 @Data
-@ApiModel(value = "AnnotationDataVO", description = "AnnotationDataVO")
-public class InspectionDataVO {
+@ApiModel(value = "TaskProgressVO", description = "任务进度")
+public class TaskProgressVO {
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 质检数据列表
-	 */
-	@ApiModelProperty(value = "质检数据列表")
-	private List<InspectionData> inspectionDataList;
-
-	/**
-	 * 质检的用时
+	 * 标注总数
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "质检的用时")
-	private Integer time;
-
-
-	/**
-	 * sub_task_id(质检的子任务）
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "子任务id")
-	private Long subTaskId;
+	@ApiModelProperty(value = "标注总数")
+	private Integer annotationTotal;
 
 	/**
-	 * 学者id
+	 * 完成数量
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "学者id")
-	private Long expertId;
+	@ApiModelProperty(value = "完成数量")
+	private Integer finishCount;
 
 	/**
-	 * label_task_id(标注的子任务）
+	 * 组合的完成情况
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "标注子任务id")
-	private Long labelTaskId;
+	@ApiModelProperty(value = "组合的完成情况")
+	private List<Composition> compositionList;
+
+
+
 
 }
