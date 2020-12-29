@@ -425,14 +425,22 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		variables.put(ProcessConstant.PASS_KEY, flow.isPass());
 		if (flow.getCategoryName().equals("标注流程")) {
 			LabelTask labelTask = iLabelTaskClient.queryLabelTask(processInstanceId).getData();
-			Expert expert = new Expert();
-			expert.setId(labelTask.getPersonId());
-			Kv kv = iExpertClient.isInfoComplete(labelTask.getPersonId(), labelTask.getTemplateId()).getData();
+			R<Kv> res = iExpertClient.isInfoComplete(labelTask.getPersonId(), labelTask.getTemplateId());
+			if (res.isSuccess()) {
+				Kv kv = res.getData();
+				variables.put("priority", labelTask.getPriority());
+				log.error(ProcessConstant.BASICINFO_COMPLETE_KEY+ kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
+				log.error(ProcessConstant.HOMEPAGE_COMPLETE_KEY+ kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
+				variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
+				variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
+			}else {
+				log.error("获取专家信息是否完成失败！");
+				return false;
+			}
 //			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
-			variables.put("priority", labelTask.getPriority());
-			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
-			variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
 		}
+		log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));
+		log.error("ProcessConstant.HOMEPAGE_COMPLETE_KEY:"+variables.get(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
 		// 完成任务
 		taskService.complete(taskId, variables);
 		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
