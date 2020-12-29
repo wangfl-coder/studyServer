@@ -19,6 +19,7 @@ package org.springblade.adata.feign;
 import org.springblade.adata.entity.Expert;
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,7 @@ public interface IExpertClient {
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
 	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
+	String IS_INFO_COMPLETE = API_PREFIX + "/mk-adata/is-info-complete";
 
 	/**
 	 * 获取学者信息
@@ -75,5 +77,11 @@ public interface IExpertClient {
 	 * 导入智库中所有学者
 	 */
 	@GetMapping(SAVE_EXPERT_BASE)
-	R importExpertBase(@RequestParam(value = "ebId") String expertBaseId, @RequestParam(value = "taskId") Long taskId);
+	R importExpertBase(@RequestParam("ebId") String expertBaseId, @RequestParam("taskId") Long taskId);
+
+	/**
+	 * 学者信息是否完整
+	 */
+	@GetMapping(IS_INFO_COMPLETE)
+	R<Kv> isInfoComplete(@RequestParam("expertId") Long expertId, @RequestParam("templateId") Long templateId);
 }

@@ -14,43 +14,34 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service;
+package org.springblade.composition.feign;
 
+
+import org.springblade.common.constant.LauncherConstant;
 import org.springblade.composition.entity.Composition;
-import org.springblade.composition.entity.Template;
-import org.springblade.composition.entity.TemplateComposition;
-import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.tool.api.R;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-
 /**
- * 服务类
+ * Notice Feign接口类
  *
- * @author Kailun
+ * @author Chill
  */
-public interface ITemplateService extends BaseService<Template> {
-	/**
-	 * 构建模板下的组合
-	 *
-	 * @param templateCompositions templateComposition集合
-	 * @return 是否成功
-	 */
-	boolean compose(@NotEmpty List<TemplateComposition> templateCompositions);
+@FeignClient(value = LauncherConstant.MKAPP_COMPOSITION_CONFIG_NAME)
+public interface ITemplateClient {
+
+	String API_PREFIX = "/client";
+	String ALL_COMPOSITIONS = API_PREFIX + "/mk-composition-config/all-compositions";
 
 	/**
-	 * 删除模板
-	 * @param ids
-	 * @return
+	 * 学者信息是否完整
 	 */
-	boolean remove(String ids);
-
-	/**
-	 * 模板对应的所有组合
-	 * @param templateId 模版Id
-	 * @return
-	 */
-	List<Composition> allCompositions(Long templateId);
+	@GetMapping(ALL_COMPOSITIONS)
+	R<List<Composition>> allCompositions(@RequestParam("id") Long templateId);
 }

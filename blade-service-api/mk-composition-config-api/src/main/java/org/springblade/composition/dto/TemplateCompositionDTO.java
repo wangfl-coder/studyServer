@@ -14,30 +14,42 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.vo;
+package org.springblade.composition.dto;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.entity.TemplateComposition;
-
-import java.util.List;
-
+import org.springblade.core.mp.base.BaseEntity;
 
 /**
- * 视图实体类
+ * 实体类
  *
  * @author Chill
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "TemplateVO对象", description = "TemplateVO对象")
-public class TemplateVO extends Template{
-	private static final long serialVersionUID = 1L;
-	/**
-	 * 模板的所有组合
-	 */
-	private List<TemplateComposition> templateCompositions;
+@ApiModel(value = "TemplateComposition对象", description = "TemplateComposition对象")
+public class TemplateCompositionDTO extends TemplateComposition {
 
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 组合名
+	 */
+	@ApiModelProperty(value = "组合名")
+	private String compositionName;
+
+	/**
+	 * 组合类型：1.主页标注；2.基本信息标注
+	 */
+	@ApiModelProperty(value = "组合类型")
+	private int compositionType;
 }

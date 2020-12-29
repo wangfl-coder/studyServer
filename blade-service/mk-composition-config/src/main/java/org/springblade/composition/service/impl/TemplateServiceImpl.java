@@ -19,13 +19,18 @@ package org.springblade.composition.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.composition.mapper.TemplateMapper;
+import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.ITemplateCompositionService;
 import org.springblade.composition.service.ITemplateService;
 
 import org.springblade.core.mp.base.BaseServiceImpl;
+import org.springblade.core.mp.support.Condition;
+import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.utils.Func;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +51,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TemplateServiceImpl extends BaseServiceImpl<TemplateMapper, Template> implements ITemplateService {
 	private final ITemplateCompositionService templateCompositionService;
+	private final ICompositionService compositionService;
 
 	/**
 	 * 构建模板下的组合
@@ -81,4 +87,21 @@ public class TemplateServiceImpl extends BaseServiceImpl<TemplateMapper, Templat
 		return true;
 	}
 
+
+	@Override
+	public List<Composition> allCompositions(Long templateId) {
+		TemplateComposition templateComposition = new TemplateComposition();
+		templateComposition.setTemplateId(templateId);
+		List<TemplateComposition> templateCompositionList = templateCompositionService.list(Condition.getQueryWrapper(templateComposition));
+		if (templateCompositionList.isEmpty()){
+			return null;
+		}
+		List<Long> compositionIdList = new ArrayList<>();
+		templateCompositionList.forEach(templateComposition1 -> compositionIdList.add(templateComposition1.getCompositionId()));
+		List<Composition> compositionList = compositionService.listByIds(compositionIdList);
+		if (compositionList.isEmpty()){
+			return null;
+		}
+		return compositionList;
+	}
 }

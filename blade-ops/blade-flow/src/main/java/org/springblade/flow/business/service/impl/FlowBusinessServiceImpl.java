@@ -33,7 +33,10 @@ import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.variable.service.impl.persistence.entity.HistoricVariableInstanceEntity;
 import org.flowable.variable.service.impl.util.CommandContextUtil;
+import org.springblade.adata.entity.Expert;
+import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.secure.utils.AuthUtil;
+import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringPool;
@@ -71,6 +74,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final HistoryService historyService;
 	private final ILabelTaskClient iLabelTaskClient;
 	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
+	private final IExpertClient iExpertClient;
 
 	@Override
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
@@ -419,8 +423,26 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			variables = Kv.create();
 		}
 		variables.put(ProcessConstant.PASS_KEY, flow.isPass());
+		if (flow.getCategoryName().equals("标注流程")) {
+			LabelTask labelTask = iLabelTaskClient.queryLabelTask(processInstanceId).getData();
+			Expert expert = new Expert();
+			expert.setId(labelTask.getPersonId());
+			Kv kv = iExpertClient.isInfoComplete(labelTask.getPersonId(), labelTask.getTemplateId()).getData();
+//			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
+			variables.put("priority", labelTask.getPriority());
+			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
+			variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
+		}
 		// 完成任务
 		taskService.complete(taskId, variables);
+		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+		if(variables.get("priority")!=null){
+			Map<String, Object> finalVariables = variables;
+			tasks.forEach(t -> {
+				int p = (int) finalVariables.get("priority");
+				taskService.setPriority(t.getId(), p);
+			});
+		}
 		return true;
 	}
 
