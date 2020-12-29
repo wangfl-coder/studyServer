@@ -107,11 +107,11 @@ public class AnnotationDataController extends BladeController {
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
-		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
 
 
 		// 删除原来的标注数据
-		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
 
 		// 注意补充信息角色
 		Expert expert = new Expert();

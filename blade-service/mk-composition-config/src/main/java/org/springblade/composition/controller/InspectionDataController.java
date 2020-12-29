@@ -110,28 +110,33 @@ public class InspectionDataController extends BladeController {
 
 		Long subTaskId  = inspectionDataVO.getSubTaskId();
 		List<InspectionData> inspectionDataList = inspectionDataVO.getInspectionDataList();
-		// 删除原来的标注数据
+
+		//获得之前标注的数据
+//		List<AnnotationData> oldAnnotationDataList = inspectionDataVODataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+
+
+		// 删除原来质检数据
 		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getUpdateUser, AuthUtil.getUserId())));
 
-		//更新统计表，记录标注用时
-		Statistics statistics_query = new Statistics();
-		statistics_query.setSubTaskId(subTaskId);
-		statistics_query.setCompositionId(inspectionDataVO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
-
-		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-		if (statistics != null){
-			statistics.setTime(statistics.getTime() + inspectionDataVO.getTime());
-		} else {
-			statistics = new Statistics();
-			statistics.setType(1);
-			statistics.setTime(inspectionDataVO.getTime());
-			statistics.setUserId(AuthUtil.getUserId());
-			statistics.setCompositionId(inspectionDataVO.getCompositionId());
-			statistics.setSubTaskId(subTaskId);
-			statistics.setTemplateId(inspectionDataVO.getTemplateId());
-		}
-		statisticsService.saveOrUpdate(statistics);
+//		//更新统计表，记录标注用时
+//		Statistics statistics_query = new Statistics();
+//		statistics_query.setSubTaskId(subTaskId);
+//		statistics_query.setCompositionId(inspectionDataVO.getCompositionId());
+//		statistics_query.setUserId(AuthUtil.getUserId());
+//
+//		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+//		if (statistics != null){
+//			statistics.setTime(statistics.getTime() + inspectionDataVO.getTime());
+//		} else {
+//			statistics = new Statistics();
+//			statistics.setType(1);
+//			statistics.setTime(inspectionDataVO.getTime());
+//			statistics.setUserId(AuthUtil.getUserId());
+//			statistics.setCompositionId(inspectionDataVO.getCompositionId());
+//			statistics.setSubTaskId(subTaskId);
+//			statistics.setTemplateId(inspectionDataVO.getTemplateId());
+//		}
+//		statisticsService.saveOrUpdate(statistics);
 		if(inspectionDataList != null){
 			return R.status(inspectionDataService.saveBatch(inspectionDataList));
 		}else{
@@ -139,7 +144,5 @@ public class InspectionDataController extends BladeController {
 		}
 
 	}
-
-
 
 }

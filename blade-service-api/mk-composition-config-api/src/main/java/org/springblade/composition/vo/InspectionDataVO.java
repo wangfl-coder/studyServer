@@ -49,22 +49,9 @@ public class InspectionDataVO {
 	@ApiModelProperty(value = "质检的用时")
 	private Integer time;
 
-	/**
-	 * 模板id
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "模板id")
-	private Long templateId;
 
 	/**
-	 * 组合id
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "组合id")
-	private Long compositionId;
-
-	/**
-	 * sub_task_id
+	 * sub_task_id(质检的子任务）
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "子任务id")
@@ -76,4 +63,12 @@ public class InspectionDataVO {
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "学者id")
 	private Long expertId;
+
+	/**
+	 * label_task_id(标注的子任务）
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "标注子任务id")
+	private Long labelTaskId;
+
 }
