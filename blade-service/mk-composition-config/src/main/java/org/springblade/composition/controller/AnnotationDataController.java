@@ -24,10 +24,9 @@ import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
-import org.springblade.composition.service.CompositionService;
 import org.springblade.composition.service.IAnnotationDataService;
+import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +63,7 @@ public class AnnotationDataController extends BladeController {
 	private final IExpertClient expertClient;
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
-	private final CompositionService compositionService;
+	private final ICompositionService compositionService;
 
 	/**
 	 * 查询标注数据
@@ -128,14 +126,16 @@ public class AnnotationDataController extends BladeController {
 		Statistics statistics_query = new Statistics();
 		statistics_query.setSubTaskId(subTaskId);
 		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
 
 		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
 		if (statistics != null){
 			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
+			statistics.setStatus(2);
+			statistics.setUserId(AuthUtil.getUserId());
 		} else {
 			statistics = new Statistics();
-			statistics.setTime(annotationDataVO.getTime());
+			statistics.setTime(annotationDataVO.getTime()+ statistics.getTime());
+			statistics.setStatus(2);
 			statistics.setUserId(AuthUtil.getUserId());
 			statistics.setCompositionId(annotationDataVO.getCompositionId());
 			statistics.setSubTaskId(subTaskId);

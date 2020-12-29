@@ -30,9 +30,10 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
-import org.springblade.composition.service.CompositionService;
 import org.springblade.composition.service.IAnnotationDataService;
+import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
+import org.springblade.composition.service.ITemplateService;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.composition.vo.TaskProgressVO;
 import org.springblade.core.boot.ctrl.BladeController;
@@ -66,7 +67,8 @@ public class StatisticsController extends BladeController {
 
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
-	private final CompositionService compositionService;
+	private final ICompositionService compositionService;
+	private final ITemplateService templateService;
 
 	/**
 	 * 查询标注数据
@@ -112,6 +114,39 @@ public class StatisticsController extends BladeController {
 		});
 		taskProgressVO.setCompositionList(compositionList);
 		return R.data(taskProgressVO);
+	}
+
+	/**
+	 * 初始化mk_statistics表
+	 */
+	@PostMapping("/submit")
+	@ApiOperationSupport(order = 3)
+	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "批量新增或修改", notes = "传入大任务id")
+	public R submit(@RequestParam Long taskId) {
+		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
+		if (labelTaskListResult.isSuccess()){
+			List<LabelTask> labelTaskList = labelTaskListResult.getData();
+			// 默认至少有一个要标注的人
+			Long templateId = labelTaskList.get(0).getTemplateId();
+			List<Composition> compositionList = templateService.allCompositions(templateId);
+			labelTaskList.forEach(labelTask -> {
+				compositionList.forEach(composition ->{
+					Statistics statistics = new Statistics();
+					statistics.setSubTaskId(labelTask.getId());
+					statistics.setCompositionId(composition.getId());
+					statistics.setTemplateId(templateId);
+					statisticsService.save(statistics);
+				});
+				// 初始化补充信息
+				Statistics statistics = new Statistics();
+				statistics.setSubTaskId(labelTask.getId());
+				statistics.setCompositionId(-1L);
+				statistics.setTemplateId(templateId);
+				statisticsService.save(statistics);
+			});
+		}
+		return R.success("初始化Statistics表成功");
 	}
 
 
