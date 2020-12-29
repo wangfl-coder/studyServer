@@ -134,7 +134,7 @@ public class AnnotationDataController extends BladeController {
 			statistics.setUserId(AuthUtil.getUserId());
 		} else {
 			statistics = new Statistics();
-			statistics.setTime(annotationDataVO.getTime()+ statistics.getTime());
+			statistics.setTime(annotationDataVO.getTime());
 			statistics.setStatus(2);
 			statistics.setUserId(AuthUtil.getUserId());
 			statistics.setCompositionId(annotationDataVO.getCompositionId());
