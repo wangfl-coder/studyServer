@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
-import org.springblade.composition.service.CompositionService;
+import org.springblade.composition.service.ICompositionService;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
@@ -25,18 +25,18 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "组合接口")
 public class CompositionController extends BladeController {
 
-	private CompositionService compositionService;
+	private ICompositionService ICompositionService;
 
 	@PostMapping("/save")
 	@ApiOperation(value = "添加组合")
 	public R add(@RequestBody Composition composition){
-		return R.status(compositionService.save(composition));
+		return R.status(ICompositionService.save(composition));
 	}
 
 	@RequestMapping(value = "/detail/{id}" , method = RequestMethod.GET)
 	@ApiOperation(value = "根据id查询组合")
 	public R<Composition> detail(@PathVariable Long id){
-		return R.data(compositionService.getById(id));
+		return R.data(ICompositionService.getById(id));
 	}
 
 	@GetMapping("/list")
@@ -52,19 +52,19 @@ public class CompositionController extends BladeController {
 		} else{
 			compositionQueryWrapper = null;
 		}
-		IPage<Composition> pages = compositionService.page(Condition.getPage(query), compositionQueryWrapper);
+		IPage<Composition> pages = ICompositionService.page(Condition.getPage(query), compositionQueryWrapper);
 		return R.data(pages);
 	}
 
 	@PostMapping(value = "/update")
 	@ApiOperation(value = "更新组合")
 	public R update(@RequestBody Composition composition){
-		return R.status(compositionService.updateById(composition));
+		return R.status(ICompositionService.updateById(composition));
 	}
 
 	@PostMapping(value = "/remove")
 	@ApiOperation(value = "删除组合")
 	public R delete(@RequestParam String ids){
-		return R.status(compositionService.deleteLogic(Func.toLongList(ids)));
+		return R.status(ICompositionService.deleteLogic(Func.toLongList(ids)));
 	}
 }

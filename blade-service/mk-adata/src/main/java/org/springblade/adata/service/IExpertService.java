@@ -21,6 +21,7 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 
 
 import java.util.Map;
@@ -60,4 +61,11 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @return
 	 */
 	Boolean importExpertBase(String id, Long taskId);
+
+	/**
+	 * 学者信息是否完整
+	 * @param expertId
+	 * @return
+	 */
+	Kv isInfoComplete(Long expertId, Long templateId);
 }

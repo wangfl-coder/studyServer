@@ -18,6 +18,7 @@ package org.springblade.flow.engine.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springblade.composition.dto.TemplateDTO;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.engine.entity.FlowExecution;
 import org.springblade.flow.engine.entity.FlowModel;
@@ -108,6 +109,16 @@ public interface FlowEngineService extends IService<FlowModel> {
 	 * @return
 	 */
 	boolean deployModel(String modelId, String category, List<String> tenantIdList);
+
+	/**
+	 * 通过模版部署流程
+	 *
+	 * @param modelId      模型id
+	 * @param category     分类
+	 * @param tenantIdList 租户id集合
+	 * @return
+	 */
+	String deployModelByTemplate(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO);
 
 	/**
 	 * 删除流程实例

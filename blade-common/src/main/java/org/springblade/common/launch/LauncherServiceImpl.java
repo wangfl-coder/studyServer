@@ -18,6 +18,7 @@ package org.springblade.common.launch;
 
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.auto.service.AutoService;
+import org.springblade.core.launch.constant.AppConstant;
 import org.springblade.core.launch.service.LauncherService;
 import org.springblade.core.launch.utils.PropsUtil;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -43,7 +44,11 @@ public class LauncherServiceImpl implements LauncherService {
 		PropsUtil.setProperty(props, "spring.datasource.dynamic.enabled", "false");
 
 		// 开启elk日志
-		PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
+
+		// PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
+		if (profile.equals(AppConstant.PROD_CODE)) {
+			PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
+		}
 
 		// seata注册地址
 		// PropsUtil.setProperty(props, "seata.service.grouplist.default", LauncherConstant.seataAddr(profile));

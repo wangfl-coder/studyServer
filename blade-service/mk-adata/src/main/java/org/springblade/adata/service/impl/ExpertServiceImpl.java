@@ -20,20 +20,29 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
 import org.springblade.adata.service.IExpertService;
+import org.springblade.composition.entity.Composition;
+import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 
+import org.springblade.core.tool.support.Kv;
+import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 服务实现类
@@ -41,7 +50,10 @@ import java.util.Map;
  * @author Chill
  */
 @Service
+@AllArgsConstructor
 public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> implements IExpertService {
+
+	private final ITemplateClient iTemplateClient;
 
 	@Override
 	public String fetchDetail(String id) {
@@ -339,6 +351,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		sorts.add("_id");
 		parameters.put("sorts",sorts);
 
+
 		JSONObject schema = new JSONObject();
 		JSONArray expert = new JSONArray();
 		expert.add("id");
@@ -384,4 +397,43 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		return true;
 	}
 
+
+	@Override
+	public Kv isInfoComplete(Long expertId, Long templateId) {
+		Expert expert = getById(expertId);
+		Kv kv = Kv.create();
+		if (expert == null) {
+			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, false)
+				.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
+			return kv;
+		}
+		if (StringUtil.isAllBlank(
+			expert.getHomepage(),
+			expert.getHp(),
+			expert.getGs(),
+			expert.getDblp()
+		)) {
+			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, false);
+		} else {
+			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, true);
+		}
+		List<Composition> compositions = (List<Composition>)iTemplateClient.allCompositions(templateId).getData();
+		List<String> allFields = new ArrayList<>();
+		compositions.forEach(composition -> {
+			String[] fields = composition.getField().split(",");
+			allFields.addAll(Arrays.asList(fields));
+		});
+		AtomicInteger counter = new AtomicInteger(0);
+		allFields.forEach(field -> {
+			if (StringUtil.isBlank((String)BeanUtil.getProperty(expert, field))){
+				counter.getAndIncrement();
+			}
+		});
+		if (counter.get() > 0) {
+			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
+		} else {
+			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, true);
+		}
+		return kv;
+	}
 }

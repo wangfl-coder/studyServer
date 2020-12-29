@@ -16,9 +16,13 @@
  */
 package org.springblade.composition.dto;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.composition.entity.Template;
+import org.springblade.composition.entity.TemplateComposition;
+
+import java.util.List;
 
 /**
  * 数据传输对象实体类
@@ -27,7 +31,11 @@ import org.springblade.composition.entity.Template;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "TemplateDTO对象", description = "TemplateDTO对象")
 public class TemplateDTO extends Template {
 	private static final long serialVersionUID = 1L;
-
+	/**
+	 * 模板的所有组合
+	 */
+	private List<TemplateCompositionDTO> templateCompositions;
 }
