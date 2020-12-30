@@ -140,7 +140,11 @@ public class InspectionDataController extends BladeController {
 				annotation.setSubTaskId(inspectionDataVO.getLabelTaskId());
 				annotation.setField(oldInspectionData.getField());
 				annotation = annotationDataService.getOne(Condition.getQueryWrapper(annotation));
-				BeanUtil.setProperty(expert, oldInspectionData.getField(),annotation.getValue());
+				if (annotation != null) {
+					BeanUtil.setProperty(expert, oldInspectionData.getField(), annotation.getValue());
+				}else{
+					BeanUtil.setProperty(expert, oldInspectionData.getField(), null);
+				}
 			});
 			// 2 是质检正确
 			qualityInspectionTask.setStatus(2);
