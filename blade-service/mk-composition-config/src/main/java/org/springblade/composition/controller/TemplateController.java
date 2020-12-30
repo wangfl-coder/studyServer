@@ -146,7 +146,7 @@ public class TemplateController extends BladeController {
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入template")
 	public R<IPage<Template>> list(@ApiIgnore @RequestParam Map<String, Object> template, Query query) {
-		IPage<Template> pages = templateService.page(Condition.getPage(query), Condition.getQueryWrapper(template, Template.class));
+		IPage<Template> pages = templateService.page(Condition.getPage(query), Condition.getQueryWrapper(template, Template.class).orderByDesc("update_Time"));
 		return R.data(pages);
 	}
 

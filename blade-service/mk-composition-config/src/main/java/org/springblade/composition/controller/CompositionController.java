@@ -48,9 +48,9 @@ public class CompositionController extends BladeController {
 		QueryWrapper<Composition> compositionQueryWrapper;
 		compositionQueryWrapper = new QueryWrapper<>();
 		if(name != null) {
-			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("create_time");
+			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
 		} else{
-			compositionQueryWrapper.orderByDesc("create_time");
+			compositionQueryWrapper.orderByDesc("update_time");
 		}
 		IPage<Composition> pages = ICompositionService.page(Condition.getPage(query), compositionQueryWrapper);
 		return R.data(pages);

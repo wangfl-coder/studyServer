@@ -140,7 +140,7 @@ public class TaskController extends BladeController {
 	})
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
-		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class));
+		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
 		return R.data(TaskWrapper.build().pageVO(pages));
 	}
 
