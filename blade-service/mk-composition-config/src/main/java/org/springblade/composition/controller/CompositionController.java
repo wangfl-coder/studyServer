@@ -46,11 +46,11 @@ public class CompositionController extends BladeController {
 	@ApiOperation(value = "分页查询全部组合")
 	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,Query query) {
 		QueryWrapper<Composition> compositionQueryWrapper;
+		compositionQueryWrapper = new QueryWrapper<>();
 		if(name != null) {
-			compositionQueryWrapper = new QueryWrapper<>();
-			compositionQueryWrapper.like("name", "%"+name+"%");
+			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("create_time");
 		} else{
-			compositionQueryWrapper = null;
+			compositionQueryWrapper.orderByDesc("create_time");
 		}
 		IPage<Composition> pages = ICompositionService.page(Condition.getPage(query), compositionQueryWrapper);
 		return R.data(pages);
