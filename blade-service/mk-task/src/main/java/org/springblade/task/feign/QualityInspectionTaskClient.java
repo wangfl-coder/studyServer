@@ -1,6 +1,7 @@
 package org.springblade.task.feign;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
@@ -25,4 +26,21 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskService.getOne(labelTaskQueryWrapper);
 		return R.data(qualityInspectionTask);
 	}
+
+	@Override
+	public R<QualityInspectionTask> queryQualityInspectionTaskById(Long inspectionId) {
+		QueryWrapper<QualityInspectionTask> labelTaskQueryWrapper = new QueryWrapper<>();
+		labelTaskQueryWrapper.eq("id",inspectionId);
+		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskService.getOne(labelTaskQueryWrapper);
+		return R.data(qualityInspectionTask);
+	}
+
+	@Override
+	public R updateQualityInspectionTaskById(QualityInspectionTask qualityInspectionTask) {
+		UpdateWrapper<QualityInspectionTask> qualityInspectionTaskUpdateWrapper = new UpdateWrapper<>();
+		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture()).set("status",qualityInspectionTask.getStatus());
+		boolean update = qualityInspectionTaskService.update(qualityInspectionTaskUpdateWrapper);
+		return R.status(update);
+	}
+
 }

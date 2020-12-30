@@ -71,4 +71,16 @@ public class InspectionDataVO {
 	@ApiModelProperty(value = "标注子任务id")
 	private Long labelTaskId;
 
+	/**
+	 * 质检类型
+	 */
+	@ApiModelProperty(value = "质检类型")
+	private Integer type ;
+
+	/**
+	 * 质检图片链接
+	 */
+	@ApiModelProperty(value = "质检图片链接")
+	private String picture;
+
 }

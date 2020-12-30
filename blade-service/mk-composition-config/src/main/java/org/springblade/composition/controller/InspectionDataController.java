@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
@@ -42,7 +43,9 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -67,8 +70,10 @@ public class InspectionDataController extends BladeController {
 
 	private final IInspectionDataService inspectionDataService;
 	private final IExpertClient expertClient;
+	private final IAnnotationDataService annotationDataService;
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
+	private final IQualityInspectionTaskClient qualityInspectionTaskClient;
 
 	/**
 	 * 查询质检数据
@@ -100,7 +105,7 @@ public class InspectionDataController extends BladeController {
 	/**
 	 * 批量新增或修改质检数据
 	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与用户id来查询删除数据
-	 * 每次修改后同时更新mk_adata_expert表中的数据
+	 * 每次修改后同时更新mk_task_quality_inspection表中的数据
 	 */
 	@PostMapping("/submit")
 	@ApiOperationSupport(order = 3)
@@ -111,35 +116,50 @@ public class InspectionDataController extends BladeController {
 		Long subTaskId  = inspectionDataVO.getSubTaskId();
 		List<InspectionData> inspectionDataList = inspectionDataVO.getInspectionDataList();
 
-		//获得之前标注的数据
-//		List<AnnotationData> oldAnnotationDataList = inspectionDataVODataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getUpdateUser, AuthUtil.getUserId())));
+		//获得之前质检的数据
+		List<InspectionData> oldInspectionDataList = inspectionDataService.list(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getCreateUser, AuthUtil.getUserId())));
 
 
 		// 删除原来质检数据
-		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getUpdateUser, AuthUtil.getUserId())));
+		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getCreateUser, AuthUtil.getUserId())));
 
-//		//更新统计表，记录标注用时
-//		Statistics statistics_query = new Statistics();
-//		statistics_query.setSubTaskId(subTaskId);
-//		statistics_query.setCompositionId(inspectionDataVO.getCompositionId());
-//		statistics_query.setUserId(AuthUtil.getUserId());
-//
-//		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-//		if (statistics != null){
-//			statistics.setTime(statistics.getTime() + inspectionDataVO.getTime());
-//		} else {
-//			statistics = new Statistics();
-//			statistics.setType(1);
-//			statistics.setTime(inspectionDataVO.getTime());
-//			statistics.setUserId(AuthUtil.getUserId());
-//			statistics.setCompositionId(inspectionDataVO.getCompositionId());
-//			statistics.setSubTaskId(subTaskId);
-//			statistics.setTemplateId(inspectionDataVO.getTemplateId());
-//		}
-//		statisticsService.saveOrUpdate(statistics);
+		// 更新质检任务表
+		R<QualityInspectionTask> qualityInspectionTaskR = qualityInspectionTaskClient.queryQualityInspectionTaskById(subTaskId);
+		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskR.getData();
+		qualityInspectionTask.setTime(qualityInspectionTask.getTime() + inspectionDataVO.getTime());
+		qualityInspectionTask.setPicture(inspectionDataVO.getPicture());
+
+		// 更新学者表
+		Expert expert = new Expert();
+		expert.setId(inspectionDataVO.getExpertId());
+		if (oldInspectionDataList != null) {
+			// 如果质检后来修改为正确，需要把专家表中的字段改成标注人员标注的。
+			oldInspectionDataList.forEach(oldInspectionData->{
+				AnnotationData annotation = new AnnotationData();
+				annotation.setSubTaskId(inspectionDataVO.getLabelTaskId());
+				annotation.setField(oldInspectionData.getField());
+				annotation = annotationDataService.getOne(Condition.getQueryWrapper(annotation));
+				BeanUtil.setProperty(expert, oldInspectionData.getField(),annotation.getValue());
+			});
+			// 2 是质检正确
+			qualityInspectionTask.setStatus(2);
+
+		}
+		if (inspectionDataList != null){
+			inspectionDataList.forEach(inspectionData->BeanUtil.setProperty(expert, inspectionData.getField(),inspectionData.getValue()));
+			// 3 是质检错误
+			qualityInspectionTask.setStatus(3);
+		}
+
+		expertClient.saveExpert(expert);
+
 		if(inspectionDataList != null){
+			qualityInspectionTaskClient.updateQualityInspectionTaskById(qualityInspectionTask);
 			return R.status(inspectionDataService.saveBatch(inspectionDataList));
 		}else{
+			// 2 是质检正确
+			qualityInspectionTask.setStatus(2);
+			qualityInspectionTaskClient.updateQualityInspectionTaskById(qualityInspectionTask);
 			return R.success("没有数据保存");
 		}
 
