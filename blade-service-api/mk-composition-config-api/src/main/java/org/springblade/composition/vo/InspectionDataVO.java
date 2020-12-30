@@ -77,4 +77,10 @@ public class InspectionDataVO {
 	@ApiModelProperty(value = "质检类型")
 	private Integer type ;
 
+	/**
+	 * 质检图片链接
+	 */
+	@ApiModelProperty(value = "质检图片链接")
+	private String picture;
+
 }

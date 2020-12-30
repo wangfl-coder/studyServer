@@ -43,7 +43,9 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -71,6 +73,7 @@ public class InspectionDataController extends BladeController {
 	private final IAnnotationDataService annotationDataService;
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
+	private final IQualityInspectionTaskClient qualityInspectionTaskClient;
 
 	/**
 	 * 查询质检数据
@@ -120,40 +123,43 @@ public class InspectionDataController extends BladeController {
 		// 删除原来质检数据
 		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getCreateUser, AuthUtil.getUserId())));
 
+		// 更新质检任务表
+		R<QualityInspectionTask> qualityInspectionTaskR = qualityInspectionTaskClient.queryQualityInspectionTaskById(subTaskId);
+		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskR.getData();
+		qualityInspectionTask.setTime(qualityInspectionTask.getTime() + inspectionDataVO.getTime());
+		qualityInspectionTask.setPicture(inspectionDataVO.getPicture());
+
+		// 更新学者表
 		Expert expert = new Expert();
 		expert.setId(inspectionDataVO.getExpertId());
-		R<Expert> expertResult = expertClient.detail(expert);
-		Expert oldExpert = expertResult.getData();
 		if (oldInspectionDataList != null) {
 			// 如果质检后来修改为正确，需要把专家表中的字段改成标注人员标注的。
 			oldInspectionDataList.forEach(oldInspectionData->{
 				AnnotationData annotation = new AnnotationData();
-				annotation.setSubTaskId(inspectionDataVO.getSubTaskId());
+				annotation.setSubTaskId(inspectionDataVO.getLabelTaskId());
 				annotation.setField(oldInspectionData.getField());
 				annotation = annotationDataService.getOne(Condition.getQueryWrapper(annotation));
 				BeanUtil.setProperty(expert, oldInspectionData.getField(),annotation.getValue());
 			});
-			// 2 代表这个专家没有标注错误的字段
-			expert.setStatus(2);
+			// 2 是质检正确
+			qualityInspectionTask.setStatus(2);
 
 		}
 		if (inspectionDataList != null){
 			inspectionDataList.forEach(inspectionData->BeanUtil.setProperty(expert, inspectionData.getField(),inspectionData.getValue()));
-			// 3 代表这个专家有标注错误的字段
-			expert.setStatus(3);
+			// 3 是质检错误
+			qualityInspectionTask.setStatus(3);
 		}
-		// 1 是内部质检, 2 是交付质检
-		if (inspectionDataVO.getType() == 1) {
-			expert.setInnerInspectionTime(oldExpert.getInnerInspectionTime()+inspectionDataVO.getTime());
-		} else if (inspectionDataVO.getType() == 2) {
-			expert.setInnerInspectionTime(oldExpert.getDeliverInspectionTime()+inspectionDataVO.getTime());
-		}
+
 		expertClient.saveExpert(expert);
 
 		if(inspectionDataList != null){
+			qualityInspectionTaskClient.updateQualityInspectionTaskById(qualityInspectionTask);
 			return R.status(inspectionDataService.saveBatch(inspectionDataList));
 		}else{
-			expert.setStatus(2);
+			// 2 是质检正确
+			qualityInspectionTask.setStatus(2);
+			qualityInspectionTaskClient.updateQualityInspectionTaskById(qualityInspectionTask);
 			return R.success("没有数据保存");
 		}
 

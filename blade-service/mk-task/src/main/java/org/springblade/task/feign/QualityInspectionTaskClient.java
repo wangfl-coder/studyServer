@@ -38,7 +38,7 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 	@Override
 	public R updateQualityInspectionTaskById(QualityInspectionTask qualityInspectionTask) {
 		UpdateWrapper<QualityInspectionTask> qualityInspectionTaskUpdateWrapper = new UpdateWrapper<>();
-		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture());
+		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture()).set("status",qualityInspectionTask.getStatus());
 		boolean update = qualityInspectionTaskService.update(qualityInspectionTaskUpdateWrapper);
 		return R.status(update);
 	}
