@@ -69,13 +69,13 @@ public class InspectionData extends BaseEntity {
 	/**
 	 * 质检字段
 	 */
-	@ApiModelProperty(value = "标注字段")
+	@ApiModelProperty(value = "质检字段")
 	private String field;
 
 	/**
 	 * 质检值
 	 */
-	@ApiModelProperty(value = "标注值")
+	@ApiModelProperty(value = "修改值")
 	private String value;
 
 	/**
