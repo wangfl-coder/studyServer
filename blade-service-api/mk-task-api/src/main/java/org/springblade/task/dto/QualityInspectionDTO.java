@@ -40,10 +40,14 @@ public class QualityInspectionDTO {
 	@ApiModelProperty(value = "标注大任务id")
 	private Long annotationTaskId;
 	@ApiModelProperty(value = "抽查数量")
-	private Integer count;
+	private Integer inspectionCount;
 	@ApiModelProperty(value = "质检类型")
 	private Integer inspectionType;
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;
+	@ApiModelProperty(value = "时间")
+	private Integer time;
+	@ApiModelProperty(value = "质检截图")
+	private String picture;
 
 }
