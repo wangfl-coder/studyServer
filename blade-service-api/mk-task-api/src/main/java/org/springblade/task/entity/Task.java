@@ -42,7 +42,7 @@ public class Task extends BaseEntity {
 	@ApiModelProperty(value = "质检类型")
 	private Integer inspectionType;
 	@ApiModelProperty(value = "质检数量")
-	private Integer count;
+	private Integer inspectionCount;
 	@ApiModelProperty(value = "标注大任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long annotationTaskId;
