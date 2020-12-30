@@ -128,6 +128,7 @@ public class InspectionDataController extends BladeController {
 		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskR.getData();
 		qualityInspectionTask.setTime(qualityInspectionTask.getTime() + inspectionDataVO.getTime());
 		qualityInspectionTask.setPicture(inspectionDataVO.getPicture());
+		qualityInspectionTask.setRemark(inspectionDataVO.getRemark());
 
 		// 更新学者表
 		Expert expert = new Expert();
