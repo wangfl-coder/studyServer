@@ -61,6 +61,10 @@ public class QualityInspectionTask extends FlowEntity {
 	private Integer inspectionType;
 	@ApiModelProperty(value = "任务类型")
 	private Integer taskType;
+	@ApiModelProperty(value = "时间")
+	private Integer time;
+	@ApiModelProperty(value = "质检截图")
+	private String picture;
 
 
 
