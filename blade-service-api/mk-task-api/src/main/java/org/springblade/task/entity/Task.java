@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 import java.util.Date;
 
@@ -17,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "Task对象", description = "Task对象")
-public class Task extends BaseEntity {
+public class Task extends TenantEntity {
 
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "智库id")
@@ -26,6 +27,10 @@ public class Task extends BaseEntity {
 	private String taskName;
 	@ApiModelProperty(value = "任务类型")
 	private Integer taskType;
+	@ApiModelProperty(value = "质检类型")
+	private Integer inspectionType;
+	@ApiModelProperty(value = "质检数量")
+	private Integer count;
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模版id")
 	private Long templateId;
@@ -39,10 +44,6 @@ public class Task extends BaseEntity {
 	private Date endTime;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
-	@ApiModelProperty(value = "质检类型")
-	private Integer inspectionType;
-	@ApiModelProperty(value = "质检数量")
-	private Integer inspectionCount;
 	@ApiModelProperty(value = "标注大任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long annotationTaskId;

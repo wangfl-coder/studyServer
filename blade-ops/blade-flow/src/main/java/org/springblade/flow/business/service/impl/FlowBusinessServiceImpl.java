@@ -377,12 +377,18 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //			}
 
 			if (bladeFlow.getCategoryName().equals("标注流程")){
-				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
-				flow.setPriority(labelTask.getPriority());
+				log.error("===processinstanceId:"+historicTaskInstance.getProcessInstanceId());
+				R<LabelTask> res = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId());
+				if (res.isSuccess()) {
+					LabelTask labelTask = res.getData();
+					flow.setTemplateId(labelTask.getTemplateId());
+					flow.setPersonId(labelTask.getPersonId());
+					flow.setPersonName(labelTask.getPersonName());
+					flow.setSubTaskId(labelTask.getId());
+					flow.setPriority(labelTask.getPriority());
+				} else {
+					log.error("根据ProcessInstanceId获取历史标注任务出错！");
+				}
 			} else if (bladeFlow.getCategoryName().equals("质检流程")){
 				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
 				flow.setTemplateId(qualityInspectionTask.getTemplateId());

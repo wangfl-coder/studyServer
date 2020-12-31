@@ -25,10 +25,8 @@ import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -88,25 +86,29 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 		return true;
 	}
 
-//	public int queryCompleteTaskCount(Long taskId) {
-//		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
-//		List<String> ids = new ArrayList<>();
-//		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-//		R<Kv> processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
-//		ArrayList<LabelTask> labelTasks = new ArrayList<>();
-//		if (processInstancesFinished.isSuccess()) {
-//			Kv kv = processInstancesFinished.getData();
-//			list.forEach(labelTask -> {
-//				String processInstanceId = labelTask.getProcessInstanceId();
-//				if ((boolean)kv.get(processInstanceId)) {
+	@Override
+	public int queryCompleteTaskCount(Long taskId) {
+		List<QualityInspectionTask> list = list(Wrappers.<QualityInspectionTask>query().lambda().eq(QualityInspectionTask::getInspectionTaskId, taskId));
+		List<String> ids = new ArrayList<>();
+		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+		ArrayList<QualityInspectionTask> QualityInspectionTask = new ArrayList<>();
+		if (processInstancesFinished.isSuccess()) {
+			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
+			AtomicInteger counter = new AtomicInteger(0);
+			list.forEach(qualityInspectionTask -> {
+				String processInstanceId = qualityInspectionTask.getProcessInstanceId();
+				if ((boolean)kv.get(processInstanceId)) {
 //					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
 //					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
 //					update(labelTaskUpdateWrapper);
 //					labelTasks.add(labelTask);
-//				}
-//			});
-//		}
-//		return labelTasks.size();
-//	}
+					counter.getAndIncrement();
+				}
+			});
+			return counter.get();
+		}
+		return 0;
+	}
 
 }

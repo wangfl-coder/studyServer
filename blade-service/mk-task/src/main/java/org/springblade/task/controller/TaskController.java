@@ -2,6 +2,7 @@ package org.springblade.task.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -16,6 +17,7 @@ import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -101,6 +104,8 @@ public class TaskController extends BladeController {
 			if (rexperts.isSuccess()) {
 				List<Expert> experts = rexperts.getData();
 				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, experts);
+				task.setCount(experts.size());
+				taskService.saveOrUpdate(task);
 			} else {
 				return R.fail("读取专家列表失败");
 			}
@@ -141,7 +146,10 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
 		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
-		return R.data(TaskWrapper.build().pageVO(pages));
+		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
+		IPage<TaskVO> pageVo = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
+		pageVo.setRecords(records);
+		return R.data(pageVo);
 	}
 
 	@PostMapping(value = "/update")
