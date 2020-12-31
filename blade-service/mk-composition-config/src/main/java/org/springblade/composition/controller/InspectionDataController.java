@@ -121,7 +121,11 @@ public class InspectionDataController extends BladeController {
 
 
 		// 删除原来质检数据
-		inspectionDataService.remove(Wrappers.<InspectionData>update().lambda().eq(InspectionData::getSubTaskId, inspectionDataVO.getSubTaskId()).and(i->i.eq(InspectionData::getCreateUser, AuthUtil.getUserId())));
+		if (oldInspectionDataList.size() != 0) {
+			List<Long> oldInspectionDataIds = new ArrayList<>();
+			oldInspectionDataList.forEach(oldInspectionData -> oldInspectionDataIds.add(oldInspectionData.getId()));
+			inspectionDataService.deleteLogic(oldInspectionDataIds);
+		}
 
 		// 更新质检任务表
 		R<QualityInspectionTask> qualityInspectionTaskR = qualityInspectionTaskClient.queryQualityInspectionTaskById(subTaskId);
@@ -133,7 +137,7 @@ public class InspectionDataController extends BladeController {
 		// 更新学者表
 		Expert expert = new Expert();
 		expert.setId(inspectionDataVO.getExpertId());
-		if (oldInspectionDataList != null) {
+		if (oldInspectionDataList.size() != 0) {
 			// 如果质检后来修改为正确，需要把专家表中的字段改成标注人员标注的
 			oldInspectionDataList.forEach(oldInspectionData->{
 				AnnotationData annotation = new AnnotationData();
