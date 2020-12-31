@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -108,13 +109,16 @@ public class AnnotationDataController extends BladeController {
 		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
 
 
-		// 删除原来的标注数据
-		annotationDataService.remove(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
-
+		// 删除原来的标注数据,同时更新修改时间
+		if (oldAnnotationDataList.size() != 0) {
+			List<Long> oldAnnotationDataIds = new ArrayList<>();
+			oldAnnotationDataList.forEach(oldAnnotationData -> oldAnnotationDataIds.add(oldAnnotationData.getId()));
+			annotationDataService.deleteLogic(oldAnnotationDataIds);
+		}
 		// 注意补充信息角色
 		Expert expert = new Expert();
 		expert.setId(annotationDataVO.getExpertId());
-		if (oldAnnotationDataList != null) {
+		if (oldAnnotationDataList.size() != 0) {
 			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
 		}
 		if (annotationDataList != null){

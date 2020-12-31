@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.service.QualityInspectionTaskService;
@@ -38,7 +39,7 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 	@Override
 	public R updateQualityInspectionTaskById(QualityInspectionTask qualityInspectionTask) {
 		UpdateWrapper<QualityInspectionTask> qualityInspectionTaskUpdateWrapper = new UpdateWrapper<>();
-		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture()).set("status",qualityInspectionTask.getStatus()).set("remark",qualityInspectionTask.getRemark());
+		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture()).set("status",qualityInspectionTask.getStatus()).set("remark",qualityInspectionTask.getRemark()).set("update_time", DateUtil.now());
 		boolean update = qualityInspectionTaskService.update(qualityInspectionTaskUpdateWrapper);
 		return R.status(update);
 	}
