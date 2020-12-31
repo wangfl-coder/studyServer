@@ -77,11 +77,16 @@ public class TaskController extends BladeController {
 		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
 		if (labelTasks.size() > 0){
 			boolean save = taskService.save(task);
-			result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(),task.getInspectionCount(),task.getInspectionType(),task,labelTasks);
+			try {
+				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getInspectionCount(), task.getInspectionType(), task, labelTasks);
+				return R.status(result);
+			}catch (Exception e){
+				taskService.removeById(task.getId());
+				return R.fail("创建质检小任务失败");
+			}
 		}else {
 			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
 		}
-		return R.status(result);
 	}
 
 	@PostMapping(value = "/save")
@@ -135,7 +140,7 @@ public class TaskController extends BladeController {
 	})
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
-		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class));
+		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
 		return R.data(TaskWrapper.build().pageVO(pages));
 	}
 

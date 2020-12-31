@@ -97,5 +97,4 @@ public class InspectionData extends BaseEntity {
 	@ApiModelProperty(value = "标注子任务id")
 	private Long labelTaskId;
 
-
 }

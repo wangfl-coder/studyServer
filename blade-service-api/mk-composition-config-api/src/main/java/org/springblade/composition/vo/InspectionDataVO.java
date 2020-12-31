@@ -83,4 +83,10 @@ public class InspectionDataVO {
 	@ApiModelProperty(value = "质检图片链接")
 	private String picture;
 
+	/**
+	 * 备注
+	 */
+	@ApiModelProperty(value = "备注")
+	private String remark;
+
 }
