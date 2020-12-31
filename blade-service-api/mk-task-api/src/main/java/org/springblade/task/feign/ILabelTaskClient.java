@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(value = LauncherConstant.MKAPP_TASK_NAME)
 public interface ILabelTaskClient {
@@ -21,6 +22,7 @@ public interface ILabelTaskClient {
 	String CHANGE_STATUS = API_PREFIX + "/change-status";
 	String QUERY_COMPLETE_LABEL_TASK = API_PREFIX + "/complete-label-task";
 	String QUERY_COMPLETE_LABEL_TASK_COUNT = API_PREFIX + "/complete-label-task-count";
+	String QUERY_COMPLETE_LABEL_TASK_COUNT_LIST = API_PREFIX + "/complete-label-task-count-list";
 	String QUERY_LABEL_TASK_ALL = API_PREFIX + "/query-label-task-all";
 
 	@PostMapping(START_LABEL_PROCESS)

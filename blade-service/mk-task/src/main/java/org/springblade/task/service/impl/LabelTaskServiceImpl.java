@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -89,18 +91,51 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		ArrayList<LabelTask> labelTasks = new ArrayList<>();
 		if (processInstancesFinished.isSuccess()) {
 			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
+			AtomicInteger counter = new AtomicInteger(0);
 			list.forEach(labelTask -> {
 				String processInstanceId = labelTask.getProcessInstanceId();
 				if ((boolean)kv.get(processInstanceId)) {
-					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
-					update(labelTaskUpdateWrapper);
-					labelTasks.add(labelTask);
+//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+//					update(labelTaskUpdateWrapper);
+//					labelTasks.add(labelTask);
+					counter.getAndIncrement();
 				}
 			});
+			return counter.get();
 		}
-		return labelTasks.size();
+		return 0;
 	}
+
+//	@Override
+//	public Map<Long, Integer> batchQueryCompleteTaskCount(List<Long> taskIds) {
+//		List<String> ids = new ArrayList<>();
+//		Map<Long, List<LabelTask>> taskIdMap = new LinkedHashMap<>();
+//		taskIds.forEach(taskId -> {
+//			List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+//			list.forEach(task -> ids.add(task.getProcessInstanceId()));
+//			taskIdMap.put(taskId, list);
+//		});
+//		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+//		if (processInstancesFinished.isSuccess()) {
+//			LinkedHashMap kv = (LinkedHashMap) processInstancesFinished.getData();
+//			Map<Long, Integer> resultMap = new LinkedHashMap<>();
+//			taskIdMap.entrySet().stream().forEach(ele -> {
+//				AtomicInteger counter = new AtomicInteger(0);
+//				List<LabelTask> labelTasks = ele.getValue();
+//				labelTasks.forEach(labelTask -> {
+//					String processInstanceId = labelTask.getProcessInstanceId();
+//					if ((boolean) kv.get(processInstanceId)) {
+//						counter.getAndIncrement();
+//					}
+//				});
+//				resultMap.put(ele.getKey(), counter.get());
+//			});
+//			return resultMap;
+//
+//		}
+//		return null;
+//	}
 
 	@Override
 	public List<LabelTask> queryCompleteTask(Long taskId) {

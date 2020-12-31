@@ -5,9 +5,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.TaskService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 
@@ -25,4 +23,11 @@ public class TaskClient implements ITaskClient{
 		boolean save = taskService.save(task);
 		return R.status(save);
 	}
+
+//	@Override
+//	@GetMapping(GET_SUBTASK_COUNT)
+//	public R<Integer> getSubTaskCount(@RequestParam("id") Long id) {
+//		int count = taskService.getSubTaskCount(id);
+//		return R.data(count);
+//	}
 }
