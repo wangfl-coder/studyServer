@@ -49,8 +49,8 @@ public class QualityInspectionTask extends FlowEntity {
 	private Date startTime;
 	@ApiModelProperty(value = "完成时间")
 	private Date endTime;
-	@ApiModelProperty(value = "请假理由")
-	private String reason;
+	@ApiModelProperty(value = "备注")
+	private String remark;
 	@ApiModelProperty(value = "流程申请时间")
 	private String applyTime;
 	@ApiModelProperty(value = "持续时间")
@@ -61,6 +61,10 @@ public class QualityInspectionTask extends FlowEntity {
 	private Integer inspectionType;
 	@ApiModelProperty(value = "任务类型")
 	private Integer taskType;
+	@ApiModelProperty(value = "时间")
+	private Integer time;
+	@ApiModelProperty(value = "质检截图")
+	private String picture;
 
 
 

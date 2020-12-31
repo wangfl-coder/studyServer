@@ -97,6 +97,7 @@ public class StatisticsController extends BladeController {
 		wrapper.groupBy("composition_id");
 		wrapper.select("composition_id,count(*) as composition_submit_count");
 		wrapper.in("sub_task_id",labelTaskIds);
+		wrapper.eq("status",2);
 		List<Statistics> statisticsList = statisticsService.list(wrapper);
 		statisticsList.forEach(statistics -> {
 			Composition composition = compositionService.getById(statistics.getCompositionId());

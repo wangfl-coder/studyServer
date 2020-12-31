@@ -62,7 +62,7 @@ public class LabelTaskController extends BladeController implements CacheNames {
 	})
 	@ApiOperation(value = "分页查询列表", notes = "传入param")
 	public R<IPage<LabelTask>> list(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {
-		IPage<LabelTask> pages = labelTaskService.page(Condition.getPage(query), Condition.getQueryWrapper(param, LabelTask.class));
+		IPage<LabelTask> pages = labelTaskService.page(Condition.getPage(query), Condition.getQueryWrapper(param, LabelTask.class).orderByDesc("update_time"));
 		return R.data(pages);
 	}
 

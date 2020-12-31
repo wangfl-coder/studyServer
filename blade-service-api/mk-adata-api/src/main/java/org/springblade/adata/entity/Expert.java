@@ -188,27 +188,17 @@ public class Expert extends BaseEntity {
 	private String remark;
 
 	/**
-	 * 内部质检完成时间
+	 * 内部质检时间
 	 */
-	@DateTimeFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@JsonFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@ApiModelProperty("内部质检完成时间")
-	private Date innerInspectionTime;
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty("内部质检时间")
+	private Integer innerInspectionTime;
 
 	/**
-	 * 交付质检完成时间
+	 * 交付质检时间
 	 */
-	@DateTimeFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@JsonFormat(
-		pattern = "yyyy-MM-dd HH:mm:ss"
-	)
-	@ApiModelProperty("交付质检完成时间")
-	private Date deliverInspectionTime;
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty("交付质检时间")
+	private Integer deliverInspectionTime;
 
 }

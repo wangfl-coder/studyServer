@@ -69,13 +69,13 @@ public class InspectionData extends BaseEntity {
 	/**
 	 * 质检字段
 	 */
-	@ApiModelProperty(value = "标注字段")
+	@ApiModelProperty(value = "质检字段")
 	private String field;
 
 	/**
 	 * 质检值
 	 */
-	@ApiModelProperty(value = "标注值")
+	@ApiModelProperty(value = "修改值")
 	private String value;
 
 	/**
@@ -89,5 +89,12 @@ public class InspectionData extends BaseEntity {
 	 */
 	@ApiModelProperty(value = "质检类型")
 	private Integer type ;
+
+	/**
+	 * label_task_id(标注的子任务id）
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "标注子任务id")
+	private Long labelTaskId;
 
 }
