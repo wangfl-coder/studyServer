@@ -47,6 +47,8 @@ public class Task extends TenantEntity {
 	@ApiModelProperty(value = "标注大任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long annotationTaskId;
+	@ApiModelProperty(value = "流程定义id")
+	private String processDefinitionId;
 
 
 

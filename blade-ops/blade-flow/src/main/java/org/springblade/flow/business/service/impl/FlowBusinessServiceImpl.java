@@ -57,10 +57,7 @@ import org.springblade.task.feign.ITaskClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 流程业务实现类
@@ -218,9 +215,32 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (bladeFlow.getEndDate() != null) {
 			historyQuery.startedBefore(bladeFlow.getEndDate());
 		}
+		if (bladeFlow.getTaskId() != null) {
+			R<org.springblade.task.entity.Task> taskRes = iTaskClient.getById(Long.valueOf(bladeFlow.getTaskId()));
+			if (!taskRes.isSuccess()){
+				log.error("获取任务信息失败！");
+				return null;
+			}
+			org.springblade.task.entity.Task task = taskRes.getData();
+			historyQuery.processDefinitionId(task.getProcessDefinitionId());
+		}
+		String taskName = bladeFlow.getTaskName();
+		if (bladeFlow.getProcessIsFinished() != null) {
+			if (bladeFlow.getProcessIsFinished().equals(FlowEngineConstant.STATUS_FINISHED)) {
+				historyQuery.finished();
+			} else if (bladeFlow.getProcessIsFinished().equals(FlowEngineConstant.STATUS_UNFINISHED)) {
+				historyQuery.unfinished();
+			}
+		}
 
 		// 查询列表
-		List<HistoricProcessInstance> historyList = historyQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
+		List<HistoricProcessInstance> historyList = new ArrayList<>();
+		if (null == taskName) {
+			historyList = historyQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
+		} else {
+			historyList = historyQuery.list();
+		}
+
 
 		historyList.forEach(historicProcessInstance -> {
 			SingleFlow flow = new SingleFlow();
@@ -249,6 +269,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<HistoricTaskInstance> historyTasks = historyService.createHistoricTaskInstanceQuery().processInstanceId(historicProcessInstance.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
 			if (Func.isNotEmpty(historyTasks)) {
 				HistoricTaskInstance historyTask = historyTasks.iterator().next();
+				if (null != taskName && !taskName.equals(historyTask.getName()))
+					return;
 				flow.setTaskId(historyTask.getId());
 				flow.setTaskName(historyTask.getName());
 				flow.setTaskDefinitionKey(historyTask.getTaskDefinitionKey());
@@ -299,10 +321,21 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		});
 
 		// 计算总数
-		long count = historyQuery.count();
-		// 设置总数
-		page.setTotal(count);
-		page.setRecords(flowList);
+		long count = 0;
+		if (null == taskName) {
+			count = historyQuery.count();
+			// 设置总数
+			page.setTotal(count);
+			page.setRecords(flowList);
+		} else {
+			count = flowList.size();
+			// 设置总数
+			page.setTotal(count);
+			int start = Func.toInt((page.getCurrent() - 1) * page.getSize());
+			long end = (start + page.getSize()) > flowList.size() ? flowList.size() : (start + page.getSize());
+			page.setRecords(flowList.subList(start, (int)end));
+			page.setRecords(flowList);
+		}
 		return page;
 	}
 
