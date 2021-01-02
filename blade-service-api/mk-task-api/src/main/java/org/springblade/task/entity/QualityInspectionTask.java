@@ -35,6 +35,8 @@ public class QualityInspectionTask extends FlowEntity {
 	@ApiModelProperty(value = "标注子任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long labelTaskId;
+	@ApiModelProperty(value = "标注流程实例id")
+	private String labelProcessInstanceId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
 	@ApiModelProperty(value = "组合id")

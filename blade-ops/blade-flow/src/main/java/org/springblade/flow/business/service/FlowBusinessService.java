@@ -17,9 +17,12 @@
 package org.springblade.flow.business.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springblade.core.tool.api.R;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.task.entity.Task;
+
+import java.util.List;
 
 /**
  * 流程业务类
@@ -87,4 +90,22 @@ public interface FlowBusinessService {
 	 * @return boolean
 	 */
 	boolean changeTaskComment(BladeFlow flow);
+
+	/**
+	 * 修改流程实例中所有任务的优先级
+	 *
+	 * @param processInstanceId 流程实例Id
+	 * @param priority 			优先级
+	 * @return boolean
+	 */
+	boolean setTaskPriorityByProcessInstanceId(String processInstanceId, int priority);
+
+	/**
+	 * 修改流程实例中所有任务的优先级
+	 *
+	 * @param processInstanceIds 流程实例Id列表
+	 * @param priority 			 优先级
+	 * @return boolean
+	 */
+	boolean setTaskPriorityByProcessInstanceIds(List<String> processInstanceIds, int priority);
 }

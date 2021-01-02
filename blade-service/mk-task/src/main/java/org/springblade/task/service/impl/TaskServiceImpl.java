@@ -21,18 +21,16 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implements TaskService {
 
-	private LabelTaskService labelTaskService;
-	private QualityInspectionTaskService qualityInspectionTaskService;
 
 	@Override
 	public List<TaskVO> batchSetCompletedCount(List<Task> tasks) {
 		List<TaskVO> records = tasks.stream().map(task -> {
 			TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
 			if (1 == task.getTaskType()) {
-				int count = labelTaskService.queryCompleteTaskCount(task.getId());
+				int count = baseMapper.labelTaskCompleteCount(task.getId(), "end");
 				taskVO.setCompleted(count);
 			}else if (2 == task.getTaskType()){
-				int count = qualityInspectionTaskService.queryCompleteTaskCount(task.getId());
+				int count = baseMapper.qualityInspectionTaskCompleteCount(task.getId(), "end");
 				taskVO.setCompleted(count);
 			}
 			return taskVO;

@@ -70,11 +70,10 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					inspectionTask.setPersonId(labelTask.getPersonId());
 					inspectionTask.setPersonName(labelTask.getPersonName());
 					inspectionTask.setLabelTaskId(labelTask.getId());
+					inspectionTask.setLabelProcessInstanceId(labelTask.getProcessInstanceId());
 					inspectionTask.setTaskId(labelTask.getTaskId());
 					inspectionTask.setTaskType(task.getTaskType());
 					inspectionTask.setInspectionType(inspectionType);
-					inspectionTask.setPriority(task.getPriority());
-
 					updateById(inspectionTask);
 				} else {
 					throw new ServiceException("开启流程失败");
@@ -87,28 +86,8 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	}
 
 	@Override
-	public int queryCompleteTaskCount(Long taskId) {
-		List<QualityInspectionTask> list = list(Wrappers.<QualityInspectionTask>query().lambda().eq(QualityInspectionTask::getInspectionTaskId, taskId));
-		List<String> ids = new ArrayList<>();
-		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
-		ArrayList<QualityInspectionTask> QualityInspectionTask = new ArrayList<>();
-		if (processInstancesFinished.isSuccess()) {
-			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
-			AtomicInteger counter = new AtomicInteger(0);
-			list.forEach(qualityInspectionTask -> {
-				String processInstanceId = qualityInspectionTask.getProcessInstanceId();
-				if ((boolean)kv.get(processInstanceId)) {
-//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
-//					update(labelTaskUpdateWrapper);
-//					labelTasks.add(labelTask);
-					counter.getAndIncrement();
-				}
-			});
-			return counter.get();
-		}
-		return 0;
+	public int completeCount(Long taskId, String endActId) {
+		return baseMapper.completeCount(taskId, endActId);
 	}
 
 }

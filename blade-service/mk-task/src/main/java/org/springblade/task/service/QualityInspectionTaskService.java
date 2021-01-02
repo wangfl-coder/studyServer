@@ -12,5 +12,5 @@ import java.util.List;
 public interface QualityInspectionTaskService extends BaseService<QualityInspectionTask> {
 	boolean startProcess(String processDefinitionId, Integer count, Integer inspectionType,Task task, List<LabelTask> labelTasks);
 
-	int queryCompleteTaskCount(Long taskId);
+	int completeCount(Long taskId, String endActId);
 }

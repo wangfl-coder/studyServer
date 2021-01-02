@@ -28,15 +28,13 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.system.cache.DictCache;
 import org.springblade.system.enums.DictEnum;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +53,7 @@ public class FlowClient implements IFlowClient {
 	private final IdentityService identityService;
 	private final TaskService taskService;
 	private final HistoryService historyService;
+	private final FlowBusinessService flowBusinessService;
 
 	@Override
 	@PostMapping(START_PROCESS_INSTANCE_BY_ID)
@@ -138,5 +137,19 @@ public class FlowClient implements IFlowClient {
 			}
 		});
 		return R.data(kv);
+	}
+
+	@Override
+	@PostMapping(SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_ID)
+	public R<Boolean> setTaskPriorityByProcessInstanceId(String processInstanceId, int priority) {
+		Boolean res = flowBusinessService.setTaskPriorityByProcessInstanceId(processInstanceId, priority);
+		return R.status(res);
+	}
+
+	@Override
+	@PostMapping(SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_IDS)
+	public R<Boolean> setTaskPriorityByProcessInstanceIds(List<String> processInstanceIds, int priority) {
+		Boolean res = flowBusinessService.setTaskPriorityByProcessInstanceIds(processInstanceIds, priority);
+		return R.status(res);
 	}
 }

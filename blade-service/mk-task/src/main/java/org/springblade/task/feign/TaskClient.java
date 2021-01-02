@@ -24,6 +24,13 @@ public class TaskClient implements ITaskClient{
 		return R.status(save);
 	}
 
+	@Override
+	@GetMapping(GET_TASK_BY_ID)
+	public R<Task> getById(@RequestParam("id") Long id) {
+		Task task = taskService.getById(id);
+		return R.data(task);
+	}
+
 //	@Override
 //	@GetMapping(GET_SUBTASK_COUNT)
 //	public R<Integer> getSubTaskCount(@RequestParam("id") Long id) {

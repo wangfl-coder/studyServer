@@ -30,5 +30,7 @@ public class SingleFlow extends BladeFlow{
 	@ApiModelProperty(value = "标注子任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long labelTaskId;
+	@ApiModelProperty(value = "标注流程实例id")
+	private String labelProcessInstanceId;
 
 }

@@ -2,6 +2,7 @@ package org.springblade.task.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,6 +18,7 @@ import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
@@ -51,17 +53,19 @@ public class TaskController extends BladeController {
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 	private IStatisticsClient statisticsClient;
+	private IFlowClient flowClient;
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
-	public R queryCompleteTaskCount(@RequestParam("taskId") Long taskId/*, @RequestParam("categoryName") String categoryName*/) {
-		int res = 0;
-//		if (categoryName.equals("标注流程")) {
-			res = labelTaskService.queryCompleteTaskCount(taskId);
-//		} else if (categoryName.equals("质检流程")) {
-//			qualityInspectionTaskService.queryCompleteTaskCount(taskId);
-//		}
-		return R.data(res);
+	public R queryCompleteTaskCount(@RequestParam("taskId") Long taskId) {
+		Task task = taskService.getById(taskId);
+		int count = 0;
+		if (1 == task.getTaskType()) {
+			count = labelTaskService.completeCount(task.getId(), "end");
+		}else if (2 == task.getTaskType()){
+			count = qualityInspectionTaskService.completeCount(task.getId(), "end");
+		}
+		return R.data(count);
 	}
 
 	@GetMapping(value = "/complete/list")
@@ -81,7 +85,7 @@ public class TaskController extends BladeController {
 		if (labelTasks.size() > 0){
 			boolean save = taskService.save(task);
 			try {
-				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getInspectionCount(), task.getInspectionType(), task, labelTasks);
+				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getCount(), task.getInspectionType(), task, labelTasks);
 				return R.status(result);
 			}catch (Exception e){
 				taskService.removeById(task.getId());
@@ -155,6 +159,16 @@ public class TaskController extends BladeController {
 	@PostMapping(value = "/update")
 	@ApiOperation(value = "更新任务")
 	public R update(@RequestBody Task task){
+		Task originTask = taskService.getById(task.getId());
+		if (!task.getPriority().equals(originTask.getPriority())) {
+			List<LabelTask> labelTasks = labelTaskService.getByTaskId(task.getId());
+			List<String> processInstanceIds = new ArrayList<>();
+			labelTasks.forEach(labelTask -> {
+				processInstanceIds.add(labelTask.getProcessInstanceId());
+			});
+			flowClient.setTaskPriorityByProcessInstanceIds(processInstanceIds, task.getPriority());
+		}
+
 		return R.status(taskService.updateById(task));
 	}
 

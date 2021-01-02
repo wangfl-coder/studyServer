@@ -54,5 +54,19 @@ g/dtd/mybatis-3-mapper.dtd">
         <result column="total" property="total"/>
     </resultMap>
 
+    <select id="labelTaskCompleteCount" resultType="int">
+        SELECT COUNT(*) FROM bladex_dev.mk_task_label t
+        left join bladex_flow_dev.ACT_HI_PROCINST flow
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE t.task_id = #{param1} AND flow.END_ACT_ID_ = #{param2}
+    </select>
+
+    <select id="qualityInspectionTaskCompleteCount" resultType="int">
+        SELECT COUNT(*) FROM bladex_dev.mk_task_quality_inspection t
+        left join bladex_flow_dev.ACT_HI_PROCINST flow
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE t.task_id = #{param1} AND flow.END_ACT_ID_ = #{param2}
+    </select>
+
 
 </mapper>

@@ -58,9 +58,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 					.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
 					.set("priority", task.getPriority());
-					//.set("complete",1);
-//					.set("taskPriority", task.getPriority());
-				//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
 				if (result.isSuccess()) {
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
@@ -70,7 +67,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 					labelTask.setTaskId(task.getId());
 					labelTask.setPersonId(expert.getId());
 					labelTask.setPersonName(expert.getName());
-					labelTask.setPriority(task.getPriority());
 					updateById(labelTask);
 				} else {
 					throw new ServiceException("开启流程失败");
@@ -83,28 +79,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	}
 
 	@Override
-	public int queryCompleteTaskCount(Long taskId) {
-		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
-		List<String> ids = new ArrayList<>();
-		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
-		ArrayList<LabelTask> labelTasks = new ArrayList<>();
-		if (processInstancesFinished.isSuccess()) {
-			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
-			AtomicInteger counter = new AtomicInteger(0);
-			list.forEach(labelTask -> {
-				String processInstanceId = labelTask.getProcessInstanceId();
-				if ((boolean)kv.get(processInstanceId)) {
-//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
-//					update(labelTaskUpdateWrapper);
-//					labelTasks.add(labelTask);
-					counter.getAndIncrement();
-				}
-			});
-			return counter.get();
-		}
-		return 0;
+	public int completeCount(Long taskId, String endActId) {
+		return baseMapper.completeCount(taskId, endActId);
 	}
 
 //	@Override
@@ -157,6 +133,12 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			});
 		}
 		return labelTasks;
+	}
+
+	@Override
+	public List<LabelTask> getByTaskId(Long taskId) {
+		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+		return list;
 	}
 
 }

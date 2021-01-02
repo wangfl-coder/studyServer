@@ -47,6 +47,8 @@ public interface IFlowClient {
 	String TASK_VARIABLE = API_PREFIX + "/task-variable";
 	String TASK_VARIABLES = API_PREFIX + "/task-variables";
 	String IS_PROCESS_INSTANCES_FINISHED = API_PREFIX + "/is-process-instances-finished";
+	String SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_ID = API_PREFIX + "/set-task-priority-by-process-instance-id";
+	String SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_IDS = API_PREFIX + "/set-task-priority-by-process-instance-ids";
 
 	/**
 	 * 开启流程
@@ -109,4 +111,24 @@ public interface IFlowClient {
 	 */
 	@PostMapping(IS_PROCESS_INSTANCES_FINISHED)
 	R isProcessInstancesFinished(@RequestBody List<String> ids);
+
+	/**
+	 * 设置流程实例中所有任务的优先级
+	 *
+	 * @param processInstanceId	流程实例id
+	 * @param priority 			优先级
+	 * @return R
+	 */
+	@PostMapping(SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_ID)
+	R<Boolean> setTaskPriorityByProcessInstanceId(@RequestParam("processInstanceId") String processInstanceId, @RequestParam("priority") int priority);
+
+	/**
+	 * 设置流程实例中所有任务的优先级
+	 *
+	 * @param processInstanceIds 流程实例id
+	 * @param priority 			 优先级
+	 * @return R
+	 */
+	@PostMapping(SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_IDS)
+	R<Boolean> setTaskPriorityByProcessInstanceIds(@RequestBody List<String> processInstanceIds, @RequestParam("priority") int priority);
 }

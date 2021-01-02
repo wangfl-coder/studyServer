@@ -12,11 +12,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = LauncherConstant.MKAPP_TASK_NAME)
 public interface ITaskClient {
 	String API_PREFIX = "/client";
+	String GET_TASK_BY_ID = API_PREFIX + "/get-task-by-id";
 	String SAVE_TASK = API_PREFIX + "/save-task";
 	String GET_SUBTASK_COUNT = API_PREFIX + "/get-subtask-count";
 
+
 	@PostMapping(SAVE_TASK)
 	R saveTask(@RequestBody Task task);
+
+	@GetMapping(GET_TASK_BY_ID)
+	R<Task> getById(@RequestParam Long id);
 
 //	@GetMapping(GET_SUBTASK_COUNT)
 //	R<Integer> getSubTaskCount(@RequestParam("id") Long id);

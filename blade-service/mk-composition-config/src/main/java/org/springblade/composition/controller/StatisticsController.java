@@ -79,14 +79,14 @@ public class StatisticsController extends BladeController {
 	public R<TaskProgressVO> statisticsTaskProgress(Long taskId) {
 		TaskProgressVO taskProgressVO = new TaskProgressVO();
 		// 查询一个智库下有多少任务（人）
-		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
+		R<List<LabelTask>> res = labelTaskClient.queryLabelTaskAll(taskId);
 		List<Long> labelTaskIds = new ArrayList<>();
-		if (labelTaskListResult.isSuccess()){
-			List<LabelTask> labelTaskList = labelTaskListResult.getData();
+		if (res.isSuccess()){
+			List<LabelTask> labelTaskList = res.getData();
 			labelTaskList.forEach(labelTask -> labelTaskIds.add(labelTask.getId()));
 			taskProgressVO.setAnnotationTotal(labelTaskList.size());
 			// 查询完成的任务
-			R<Integer> result = labelTaskClient.queryCompleteTaskCount(taskId);
+			R<Integer> result = labelTaskClient.completeCount(taskId);
 			if (result.isSuccess()){
 				taskProgressVO.setFinishCount(result.getData());
 			}
