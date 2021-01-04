@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.task.entity.Task;
 
+import java.util.List;
+
 public interface TaskMapper extends BaseMapper<Task> {
 
 	/**
@@ -25,4 +27,10 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 * @return
 	 */
 	int qualityInspectionTaskCompleteCount(String env, Long taskId, String endActId);
+
+	/**
+	 * 查询完成的各种组合的数量
+	 * @return
+	 */
+	List<Integer> compositionCompleteCount(@Param("taskId") Long taskId);
 }

@@ -84,5 +84,19 @@ g/dtd/mybatis-3-mapper.dtd">
 
     </select>
 
+    <select id="compositionCompleteCount" resultType="int">
+        select count(*) as number from blade_user u
+        left join mk_statistics s on u.id=s.update_user
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+
+        and s.is_deleted=0
+        group by s.update_user,s.composition_id
+    </select>
+
 
 </mapper>
