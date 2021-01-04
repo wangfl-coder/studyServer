@@ -47,6 +47,7 @@ public class CompositionController extends BladeController {
 	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,Query query) {
 		QueryWrapper<Composition> compositionQueryWrapper;
 		compositionQueryWrapper = new QueryWrapper<>();
+		compositionQueryWrapper.ne("annotation_type",3);
 		if(name != null) {
 			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
 		} else{
