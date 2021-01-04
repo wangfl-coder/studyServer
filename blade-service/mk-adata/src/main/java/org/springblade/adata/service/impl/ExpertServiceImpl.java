@@ -433,6 +433,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
 		} else {
 			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, true);
+			
 		}
 		return kv;
 	}
