@@ -9,18 +9,20 @@ public interface TaskMapper extends BaseMapper<Task> {
 	/**
 	 * 已完成子任务数
 	 *
+	 * @param env    	运行环境
 	 * @param taskId    任务Id
 	 * @param endActId  结束流程节点Id
 	 * @return
 	 */
-	int labelTaskCompleteCount(Long taskId, String endActId);
+	int labelTaskCompleteCount(String env, Long taskId, String endActId);
 
 	/**
 	 * 已完成子任务数
 	 *
+	 * @param env    	运行环境
 	 * @param taskId    任务Id
 	 * @param endActId  结束流程节点Id
 	 * @return
 	 */
-	int qualityInspectionTaskCompleteCount(Long taskId, String endActId);
+	int qualityInspectionTaskCompleteCount(String env, Long taskId, String endActId);
 }

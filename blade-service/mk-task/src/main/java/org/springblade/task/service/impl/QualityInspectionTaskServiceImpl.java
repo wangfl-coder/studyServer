@@ -3,6 +3,7 @@ package org.springblade.task.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
 import org.springblade.core.log.exception.ServiceException;
@@ -22,6 +23,7 @@ import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.QualityInspectionTaskMapper;
 import org.springblade.task.service.QualityInspectionTaskService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +31,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-@AllArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityInspectionTaskMapper, QualityInspectionTask> implements QualityInspectionTaskService {
 
 	private final IFlowClient flowClient;
+
+	@Value("${spring.profiles.active}")
+	public String env;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -87,7 +92,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 
 	@Override
 	public int completeCount(Long taskId, String endActId) {
-		return baseMapper.completeCount(taskId, endActId);
+		return baseMapper.completeCount(env, taskId, endActId);
 	}
 
 }
