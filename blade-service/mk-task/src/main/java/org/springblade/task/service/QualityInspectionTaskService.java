@@ -13,4 +13,6 @@ public interface QualityInspectionTaskService extends BaseService<QualityInspect
 	boolean startProcess(String processDefinitionId, Integer count, Integer inspectionType,Task task, List<LabelTask> labelTasks);
 
 	int completeCount(Long taskId, String endActId);
+
+	int correctCount(Long taskId);
 }

@@ -19,4 +19,12 @@ public interface TaskService extends BaseService<Task> {
 	 */
 	 List<TaskVO> batchSetCompletedCount(List<Task> tasks);
 
+	/**
+	 * 批量设置质检正确的子任务数
+	 *
+	 * @param tasks
+	 * @return
+	 */
+	List<TaskVO> batchSetCorrectCount(List<TaskVO> tasks);
+
 }
