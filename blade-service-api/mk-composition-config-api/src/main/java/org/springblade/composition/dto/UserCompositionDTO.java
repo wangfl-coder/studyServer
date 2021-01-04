@@ -14,26 +14,29 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.mapper;
+package org.springblade.composition.dto;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.springblade.composition.dto.UserCompositionDTO;
-import org.springblade.composition.entity.Statistics;
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springblade.composition.entity.Template;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * Mapper 接口
+ * 数据传输对象实体类
  *
- * @author KaiLun
+ * @author Chill
  */
-public interface StatisticsMapper extends BaseMapper<Statistics> {
-	/**
-	 * 查询用户在起止时间内完成的各种组合的数量
-	 * @param startTime
-	 * @param endTime
-	 * @return
-	 */
-	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")Long userId, @Param("taskId")Long taskId);
+@Data
+@ApiModel(value = "UserCompositionDTO对象", description = "UserCompositionDTO对象")
+public class UserCompositionDTO implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	private Long userId;
+	private String userName;
+	private Long compositionId;
+	private String compositionName;
+	private Long number;
 }
