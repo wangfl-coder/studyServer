@@ -22,4 +22,7 @@ public class TaskVO extends Task {
 
 	@ApiModelProperty(value = "总数")
 	private Integer total;
+
+	@ApiModelProperty(value = "完成组合数量")
+	private Integer compositionCompleteCount;
 }
