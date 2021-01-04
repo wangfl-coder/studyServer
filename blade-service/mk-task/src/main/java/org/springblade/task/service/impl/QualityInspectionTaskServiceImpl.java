@@ -95,4 +95,8 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 		return baseMapper.completeCount(env, taskId, endActId);
 	}
 
+	@Override
+	public int correctCount(Long taskId) {
+		return baseMapper.selectCount(Wrappers.<QualityInspectionTask>query().lambda().eq(QualityInspectionTask::getInspectionTaskId, taskId).eq(QualityInspectionTask::getStatus, 2));
+	}
 }

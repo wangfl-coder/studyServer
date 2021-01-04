@@ -151,8 +151,9 @@ public class TaskController extends BladeController {
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
 		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
 		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
+		List<TaskVO> recordList = taskService.batchSetCorrectCount(records);
 		IPage<TaskVO> pageVo = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
-		pageVo.setRecords(records);
+		pageVo.setRecords(recordList);
 		return R.data(pageVo);
 	}
 

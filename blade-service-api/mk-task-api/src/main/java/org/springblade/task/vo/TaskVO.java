@@ -14,8 +14,11 @@ import org.springblade.task.entity.Task;
 @EqualsAndHashCode(callSuper = true)
 public class TaskVO extends Task {
 
-	@ApiModelProperty(value = "通知类型名")
+	@ApiModelProperty(value = "已完成数")
 	private Integer completed;
+
+	@ApiModelProperty(value = "正确数")
+	private Integer correct;
 
 	@ApiModelProperty(value = "总数")
 	private Integer total;
