@@ -126,7 +126,7 @@ public class StatisticsController extends BladeController {
 	@GetMapping("/user_composition")
 	@ApiOperationSupport(order = 1)
 	@ApiOperation(value = "查询用户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
-	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, Long userId, Long taskId) {
+	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId) {
 		return R.data(statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId));
 	}
 
