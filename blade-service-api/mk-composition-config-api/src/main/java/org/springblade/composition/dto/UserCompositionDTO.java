@@ -16,6 +16,8 @@
  */
 package org.springblade.composition.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,9 +36,16 @@ import java.util.List;
 public class UserCompositionDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long userId;
+
 	private String userName;
+
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long compositionId;
+
 	private String compositionName;
+
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long number;
 }

@@ -35,5 +35,5 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param endTime
 	 * @return
 	 */
-	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")Long userId, @Param("taskId")Long taskId);
+	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId);
 }
