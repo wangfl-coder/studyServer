@@ -36,6 +36,19 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	public String env;
 
 	@Override
+	public TaskVO setCompletedCount(Task task) {
+		TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
+		if (1 == task.getTaskType()) {
+			int count = baseMapper.labelTaskCompleteCount(env, task.getId(), "end");
+			taskVO.setCompleted(count);
+		}else if (2 == task.getTaskType()){
+			int count = baseMapper.qualityInspectionTaskCompleteCount(env, task.getId(), "end");
+			taskVO.setCompleted(count);
+		}
+		return taskVO;
+	}
+
+	@Override
 	public List<TaskVO> batchSetCompletedCount(List<Task> tasks) {
 		List<TaskVO> records = tasks.stream().map(task -> {
 			TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
@@ -49,6 +62,16 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 			return taskVO;
 		}).collect(Collectors.toList());
 		return records;
+	}
+
+	@Override
+	public TaskVO setCorrectCount(TaskVO task) {
+		TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
+		if (2 == task.getTaskType()){
+			Integer count = qualityInspectionTaskService.correctCount(task.getId());
+			taskVO.setCorrect(count);
+		}
+		return taskVO;
 	}
 
 	@Override

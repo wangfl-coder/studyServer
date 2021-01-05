@@ -125,8 +125,11 @@ public class TaskController extends BladeController {
 
 	@RequestMapping(value = "/detail/{id}" , method = RequestMethod.GET)
 	@ApiOperation(value = "根据id查询任务")
-	public R<Task> detail(@PathVariable Long id){
-		return R.data(taskService.getById(id));
+	public R<TaskVO> detail(@PathVariable Long id){
+		Task task = taskService.getById(id);
+		TaskVO taskVO = taskService.setCompletedCount(task);
+		TaskVO res = taskService.setCorrectCount(taskVO);
+		return R.data(res);
 	}
 
 	@GetMapping("/compositions")
