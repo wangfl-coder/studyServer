@@ -1,7 +1,9 @@
 package org.springblade.task.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 
 import java.util.List;
@@ -44,9 +46,18 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 */
 	List<String> allLabelTaskWrongFields(Long id);
 
-	/*
+	/**
 	 * 查询完成的各种组合的数量
+	 * @Param taskId 任务id
 	 * @return
 	 */
 	List<Integer> compositionCompleteCount(@Param("taskId") Long taskId);
+
+	/**
+	 * 查询当前时刻组合的数量
+	 * @Param taskId 任务id
+	 * @return
+	 */
+	Integer compositionCount(@Param("env")String env,@Param("taskId") Long taskId);
+
 }
