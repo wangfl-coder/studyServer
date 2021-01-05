@@ -187,11 +187,11 @@ public class TaskController extends BladeController {
 				sum += num;
 			}
 			compositionList.add(sum);
-			QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
-			labelTaskQueryWrapper.eq("task_id",task1.getId());
-			Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
-			task1.setCount(count);
-			taskService.updateById(task1);
+//			QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+//			labelTaskQueryWrapper.eq("task_id",task1.getId());
+//			Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+//			task1.setCount(count);
+//			taskService.updateById(task1);
 		}
 
 		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
