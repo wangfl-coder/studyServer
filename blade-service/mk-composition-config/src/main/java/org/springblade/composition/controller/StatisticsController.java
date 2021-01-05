@@ -21,13 +21,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
+import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.dto.UserCompositionDTO;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
@@ -124,10 +123,20 @@ public class StatisticsController extends BladeController {
 	 * 查询用户在一段时间内标注的各种组合的数量
 	 */
 	@GetMapping("/user_composition")
-	@ApiOperationSupport(order = 1)
+	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "查询用户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
 	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId) {
 		return R.data(statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId));
+	}
+
+	/**
+	 * 查询大任务在一段时间内标注的各种组合的数量，或者还可以领取的组合数量
+	 */
+	@GetMapping("/task_composition")
+	@ApiOperationSupport(order = 3)
+	@ApiOperation(value = "查询大任务在一段时间内标注的各种组合的数量，或者还可以领取的组合数量", notes = "传入起止时间,大任务id,查询已完成还是待领取")
+	public R<List<TaskCompositionDTO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer type ) {
+		return R.data(statisticsService.taskCompositionCount(startTime,endTime,taskId,type));
 	}
 
 }
