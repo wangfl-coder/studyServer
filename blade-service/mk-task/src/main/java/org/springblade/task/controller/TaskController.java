@@ -133,8 +133,12 @@ public class TaskController extends BladeController {
 		TaskVO res = taskService.setCorrectCount(taskVO);
 		Integer compositionCount = taskService.compositionCount(id);
 		res.setCompositionTotal(compositionCount);
-		List<Integer> integers = taskMapper.compositionCompleteCount(id);
-		res.setCompositionCompleteCount(integers.get(0));
+		List<Integer> nums = taskMapper.compositionCompleteCount(id);
+		int sum=0;
+		for (Integer num : nums) {
+			sum += num;
+		}
+		res.setCompositionCompleteCount(sum);
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
 		labelTaskQueryWrapper.eq("task_id",id);
 		Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
@@ -176,18 +180,18 @@ public class TaskController extends BladeController {
 		ArrayList<Integer> compositionCountList = new ArrayList<>();
 		for(Task task1:pages.getRecords()){
 			int sum=0;
-			List<Integer> nums = taskMapper.compositionCompleteCount(task1.getId());
 			Integer compositionCount = taskMapper.compositionCount("dev",task1.getId());
 			compositionCountList.add(compositionCount);
+			List<Integer> nums = taskMapper.compositionCompleteCount(task1.getId());
 			for (Integer num : nums) {
 				sum += num;
 			}
 			compositionList.add(sum);
-			QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
-			labelTaskQueryWrapper.eq("task_id",task1.getId());
-			Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
-			task1.setCount(count);
-			taskService.updateById(task1);
+//			QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+//			labelTaskQueryWrapper.eq("task_id",task1.getId());
+//			Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+//			task1.setCount(count);
+//			taskService.updateById(task1);
 		}
 
 		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
