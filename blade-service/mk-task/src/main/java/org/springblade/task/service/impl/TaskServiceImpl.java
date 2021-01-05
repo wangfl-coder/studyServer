@@ -5,7 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.core.mp.base.BaseServiceImpl;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.CharPool;
+import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.TaskMapper;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -57,5 +62,40 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 			return taskVO;
 		}).collect(Collectors.toList());
 		return records;
+	}
+
+	@Override
+	public Kv compositions(Long id) {
+		List<String> fields = baseMapper.allLabelTaskFields(id);
+		Kv total = Kv.create();
+		for (String field : fields) {
+			if (total.containsKey(field)) {
+				int count = total.getInt(field);
+				count++;
+				total.put(field, count);
+			} else {
+				total.put(field, 1);
+			}
+		}
+
+		List<String> wrongFields = baseMapper.allLabelTaskWrongFields(id);
+		Kv wrong = Kv.create();
+		for (String field : wrongFields) {
+			for (String key : total.keySet()) {
+				if (key.indexOf(field) >= 0) {
+					if (wrong.containsKey(key)) {
+						int count = wrong.getInt(key);
+						count++;
+						wrong.put(key, count);
+					} else {
+						wrong.put(key, 1);
+					}
+				}
+			}
+		}
+		Kv res = Kv.create();
+		res.put("total", total);
+		res.put("wrong", wrong);
+		return res;
 	}
 }

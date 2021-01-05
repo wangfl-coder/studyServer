@@ -16,6 +16,7 @@ import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
@@ -125,6 +126,13 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "根据id查询任务")
 	public R<Task> detail(@PathVariable Long id){
 		return R.data(taskService.getById(id));
+	}
+
+	@GetMapping("/compositions")
+	@ApiOperation(value = "根据id查询任务中所有组合正确率")
+	public R<Kv> compositions(Long id){
+		Kv kv = taskService.compositions(id);
+		return R.data(kv);
 	}
 
 //	@GetMapping("/list")

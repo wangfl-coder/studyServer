@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.task.entity.Task;
 
+import java.util.List;
+
 public interface TaskMapper extends BaseMapper<Task> {
 
 	/**
@@ -25,4 +27,20 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 * @return
 	 */
 	int qualityInspectionTaskCompleteCount(String env, Long taskId, String endActId);
+
+	/**
+	 * 所有子任务的字段列表
+	 *
+	 * @param id    	质检任务id
+	 * @return
+	 */
+	List<String> allLabelTaskFields(Long id);
+
+	/**
+	 * 所有子任务的错误字段列表
+	 *
+	 * @param id    	质检任务id
+	 * @return
+	 */
+	List<String> allLabelTaskWrongFields(Long id);
 }
