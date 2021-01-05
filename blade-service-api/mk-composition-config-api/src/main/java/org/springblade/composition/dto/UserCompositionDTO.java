@@ -48,4 +48,6 @@ public class UserCompositionDTO implements Serializable {
 
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long number;
+
+	private Integer averageSpeed;
 }

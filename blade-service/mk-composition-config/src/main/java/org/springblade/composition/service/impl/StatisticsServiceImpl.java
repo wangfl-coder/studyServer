@@ -16,17 +16,18 @@
  */
 package org.springblade.composition.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.ParamMark;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
+import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.entity.Statistics;
-import org.springblade.composition.mapper.AnnotationDataMapper;
 import org.springblade.composition.mapper.StatisticsMapper;
-import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.core.mp.base.BaseServiceImpl;
-import org.springblade.task.feign.ILabelTaskClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 服务实现类
@@ -34,7 +35,15 @@ import org.springframework.stereotype.Service;
  * @author KaiLun
  */
 @Service
+@RequiredArgsConstructor
 public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Statistics> implements IStatisticsService {
+	private final StatisticsMapper statisticsMapper;
+	@Value("${spring.profiles.active}")
+	public String env;
+	@Override
+	public List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer type){
 
+		return statisticsMapper.taskCompositionCount(env,startTime, endTime,taskId,type);
+	}
 
 }

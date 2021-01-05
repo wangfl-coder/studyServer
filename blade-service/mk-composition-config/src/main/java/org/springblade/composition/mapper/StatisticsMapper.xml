@@ -3,7 +3,8 @@
 <mapper namespace="org.springblade.composition.mapper.StatisticsMapper">
 
     <select id="userCompositionCount" resultType="org.springblade.composition.dto.UserCompositionDTO">
-        select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number from blade_user u
+        select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_user u
         left join mk_statistics s on u.id=s.update_user
         left join mk_composition c on s.composition_id=c.id
         left join mk_task_label l on l.id=s.sub_task_id
@@ -23,6 +24,42 @@
 
         and s.is_deleted=0
         group by s.update_user,s.composition_id
+    </select>
+
+    <select id="taskCompositionCount" resultType="org.springblade.composition.dto.TaskCompositionDTO">
+        select t.NAME_ as compositionName,count(*) as number
+        from
+        <if test="env == 'dev'">
+            bladex_flow_dev.ACT_HI_TASKINST t
+        </if>
+        left join
+        <if test="env == 'prod'">
+            bladex_flow.ACT_HI_TASKINST t
+        </if>
+        <if test="env == 'dev'">
+            bladex_dev.mk_task_label l
+        </if>
+        <if test="env == 'prod'">
+            bladex.mk_task_label l
+        </if>
+        on l.process_instance_id=t.PROC_INST_ID_
+        where
+        <if test="type==1">
+            !ISNULL(END_TIME_)
+        </if>
+        <if test="type==2">
+            ISNULL(END_TIME_)
+        </if>
+        <if test="startTime!=null">
+            and t.LAST_UPDATED_TIME_ &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and t.LAST_UPDATED_TIME_ &lt; #{endTime}
+        </if>
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+        group by NAME_;
     </select>
 
 </mapper>

@@ -14,30 +14,27 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service;
+package org.springblade.composition.dto;
 
-import org.apache.ibatis.annotations.Param;
-import org.springblade.composition.dto.TaskCompositionDTO;
-import org.springblade.composition.entity.Statistics;
-import org.springblade.core.mp.base.BaseService;
-import org.springblade.task.feign.ILabelTaskClient;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
- * 服务类
+ * 数据传输对象实体类
  *
- * @author KaiLun
+ * @author Chill
  */
-public interface IStatisticsService extends BaseService<Statistics> {
+@Data
+@ApiModel(value = "TaskCompositionDTO对象", description = "TaskCompositionDTO对象")
+public class TaskCompositionDTO implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 任务组合完成和待领取数量
-	 * @param startTime
-	 * @param endTime
-	 * @param taskId
-	 * @param type
-	 * @return
-	 */
-	List<TaskCompositionDTO> taskCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+	private String compositionName;
+
+	@JsonSerialize(using = ToStringSerializer.class)
+	private Long number;
 }
