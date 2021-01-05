@@ -17,7 +17,11 @@
 package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+import org.springblade.composition.dto.UserCompositionDTO;
 import org.springblade.composition.entity.Statistics;
+
+import java.util.List;
 
 /**
  * Mapper 接口
@@ -25,5 +29,11 @@ import org.springblade.composition.entity.Statistics;
  * @author KaiLun
  */
 public interface StatisticsMapper extends BaseMapper<Statistics> {
-
+	/**
+	 * 查询用户在起止时间内完成的各种组合的数量
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId);
 }

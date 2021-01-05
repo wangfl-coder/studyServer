@@ -84,6 +84,7 @@ g/dtd/mybatis-3-mapper.dtd">
 
     </select>
 
+
     <select id="allLabelTaskFields" resultType="java.lang.String">
         SELECT field FROM
         (SELECT tq.id AS tq_id,
@@ -97,7 +98,6 @@ g/dtd/mybatis-3-mapper.dtd">
         WHERE tq.inspection_task_id = #{param1} AND tc.is_deleted = 0 AND tq.is_deleted = 0) tqc
         INNER JOIN `mk_composition` c
         ON tqc.tc_composition_id = c.id
-
     </select>
 
     <select id="allLabelTaskWrongFields" resultType="java.lang.String">
@@ -106,4 +106,21 @@ g/dtd/mybatis-3-mapper.dtd">
         on idata.sub_task_id = tqi.id
         where tqi.inspection_task_id = #{param1}
     </select>
+
+
+    <select id="compositionCompleteCount" resultType="int">
+        select count(*) as number from blade_user u
+        left join mk_statistics s on u.id=s.update_user
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+
+        and s.is_deleted=0
+        group by s.update_user,s.composition_id
+    </select>
+    
+
 </mapper>

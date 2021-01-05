@@ -17,6 +17,7 @@
 package org.springblade.composition.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
@@ -27,9 +28,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.composition.dto.UserCompositionDTO;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.mapper.StatisticsMapper;
 import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
@@ -69,6 +72,7 @@ public class StatisticsController extends BladeController {
 	private final IStatisticsService statisticsService;
 	private final ICompositionService compositionService;
 	private final ITemplateService templateService;
+	private final StatisticsMapper statisticsMapper;
 
 	/**
 	 * 查询标注数据
@@ -116,39 +120,14 @@ public class StatisticsController extends BladeController {
 		taskProgressVO.setCompositionList(compositionList);
 		return R.data(taskProgressVO);
 	}
-
 	/**
-	 * 初始化mk_statistics表
+	 * 查询用户在一段时间内标注的各种组合的数量
 	 */
-	@PostMapping("/submit")
-	@ApiOperationSupport(order = 3)
-	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "批量新增或修改", notes = "传入大任务id")
-	public R submit(@RequestParam Long taskId) {
-		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
-		if (labelTaskListResult.isSuccess()){
-			List<LabelTask> labelTaskList = labelTaskListResult.getData();
-			// 默认至少有一个要标注的人
-			Long templateId = labelTaskList.get(0).getTemplateId();
-			List<Composition> compositionList = templateService.allCompositions(templateId);
-			labelTaskList.forEach(labelTask -> {
-				compositionList.forEach(composition ->{
-					Statistics statistics = new Statistics();
-					statistics.setSubTaskId(labelTask.getId());
-					statistics.setCompositionId(composition.getId());
-					statistics.setTemplateId(templateId);
-					statisticsService.save(statistics);
-				});
-				// 初始化补充信息
-				Statistics statistics = new Statistics();
-				statistics.setSubTaskId(labelTask.getId());
-				statistics.setCompositionId(-1L);
-				statistics.setTemplateId(templateId);
-				statisticsService.save(statistics);
-			});
-		}
-		return R.success("初始化Statistics表成功");
+	@GetMapping("/user_composition")
+	@ApiOperationSupport(order = 1)
+	@ApiOperation(value = "查询用户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
+	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId) {
+		return R.data(statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId));
 	}
-
 
 }

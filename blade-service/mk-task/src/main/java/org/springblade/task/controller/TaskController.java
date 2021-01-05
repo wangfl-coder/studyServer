@@ -27,6 +27,7 @@ import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
@@ -55,6 +56,7 @@ public class TaskController extends BladeController {
 	private QualityInspectionTaskService qualityInspectionTaskService;
 	private IStatisticsClient statisticsClient;
 	private IFlowClient flowClient;
+	private TaskMapper taskMapper;
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
@@ -75,7 +77,6 @@ public class TaskController extends BladeController {
 		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
 		return R.data(labelTasks);
 	}
-
 
 	@PostMapping(value = "/inspection/save")
 	@ApiOperation(value = "添加质检任务")
@@ -158,8 +159,20 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
 		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
+		ArrayList<Integer> compositionList = new ArrayList<>();
+		for(Task task1:pages.getRecords()){
+			int sum=0;
+			List<Integer> nums = taskMapper.compositionCompleteCount(task1.getId());
+			for(int i=0;i<nums.size();i++){
+				sum=sum+nums.get(i);
+			}
+			compositionList.add(sum);
+		}
 		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
 		List<TaskVO> recordList = taskService.batchSetCorrectCount(records);
+		for(int j=0;j<recordList.size();j++){
+			recordList.get(j).setCompositionCompleteCount(compositionList.get(j));
+		}
 		IPage<TaskVO> pageVo = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
 		pageVo.setRecords(recordList);
 		return R.data(pageVo);

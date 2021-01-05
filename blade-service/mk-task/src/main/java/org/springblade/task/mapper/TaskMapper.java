@@ -43,4 +43,10 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 * @return
 	 */
 	List<String> allLabelTaskWrongFields(Long id);
+
+	/*
+	 * 查询完成的各种组合的数量
+	 * @return
+	 */
+	List<Integer> compositionCompleteCount(@Param("taskId") Long taskId);
 }
