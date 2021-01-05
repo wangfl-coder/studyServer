@@ -3,7 +3,8 @@
 <mapper namespace="org.springblade.composition.mapper.StatisticsMapper">
 
     <select id="userCompositionCount" resultType="org.springblade.composition.dto.UserCompositionDTO">
-        select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number from blade_user u
+        select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_user u
         left join mk_statistics s on u.id=s.update_user
         left join mk_composition c on s.composition_id=c.id
         left join mk_task_label l on l.id=s.sub_task_id
