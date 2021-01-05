@@ -122,5 +122,27 @@ g/dtd/mybatis-3-mapper.dtd">
         group by s.update_user,s.composition_id
     </select>
 
+    <select id="compositionCount" resultType="int">
+        select count(*) from
+        <if test="env == 'dev'">
+            bladex_flow_dev.ACT_HI_TASKINST t
+        </if>
+        left join
+        <if test="env == 'prod'">
+            bladex_flow.ACT_HI_TASKINST t
+        </if>
+        <if test="env == 'dev'">
+            bladex_dev.mk_task_label l
+        </if>
+        <if test="env == 'prod'">
+            bladex.mk_task_label l
+        </if>
+        on t.PROC_INST_ID_=l.process_instance_id
+        <if test="taskId!=null">
+            where l.task_id=#{taskId}
+        </if>
+
+    </select>
+
 
 </mapper>
