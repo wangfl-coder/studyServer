@@ -139,10 +139,10 @@ public class TaskController extends BladeController {
 			sum += num;
 		}
 		res.setCompositionCompleteCount(sum);
-		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
-		labelTaskQueryWrapper.eq("task_id",id);
-		Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
-		res.setCount(count);
+//		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+//		labelTaskQueryWrapper.eq("task_id",id);
+//		Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+//		res.setCount(count);
 		return R.data(res);
 	}
 

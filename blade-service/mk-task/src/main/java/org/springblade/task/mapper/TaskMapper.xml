@@ -127,10 +127,10 @@ g/dtd/mybatis-3-mapper.dtd">
         <if test="env == 'dev'">
             bladex_flow_dev.ACT_HI_TASKINST t
         </if>
-        left join
         <if test="env == 'prod'">
             bladex_flow.ACT_HI_TASKINST t
         </if>
+        left join
         <if test="env == 'dev'">
             bladex_dev.mk_task_label l
         </if>
