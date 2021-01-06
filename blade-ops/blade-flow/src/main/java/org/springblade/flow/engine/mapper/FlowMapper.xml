@@ -19,6 +19,20 @@
         <result column="model_type" property="modelType"/>
         <result column="tenant_id" property="tenantId"/>
     </resultMap>
+    <update id="updateStatistic">
+        <if test="env == 'dev'">
+            update bladex_dev.mk_statistics s
+            left join bladex_dev.mk_composition c on s.composition_id=c.id
+        </if>
+        <if test="env == 'prod'">
+            update bladex.mk_statistics s
+            left join bladex.mk_composition c on s.composition_id=c.id
+        </if>
+        set s.status=3
+        where c.annotation_type=#{type}
+        and s.sub_task_id=#{labelTaskId}
+        and s.status=1;
+    </update>
 
     <select id="selectFlowPage" resultMap="flowModelResultMap">
         SELECT
