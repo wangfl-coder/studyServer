@@ -178,6 +178,7 @@ public class TemplateController extends BladeController {
 			Composition composition = compositionService.getById(templateCompositionDTO.getCompositionId());
 			templateCompositionDTO.setCompositionName(composition.getName());
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
+			templateCompositionDTO.setCompositionField(composition.getField());
 		});
 		R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
 		if (!result.isSuccess()) {

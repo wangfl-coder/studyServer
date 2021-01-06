@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
 
 
 @Data
@@ -32,5 +33,9 @@ public class SingleFlow extends BladeFlow{
 	private Long labelTaskId;
 	@ApiModelProperty(value = "标注流程实例id")
 	private String labelProcessInstanceId;
+	@ApiModelProperty(value = "组合id")
+	private String compositionId;
+	@ApiModelProperty(value = "组合字段")
+	private String compositionField;
 
 }
