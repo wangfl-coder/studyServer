@@ -20,8 +20,8 @@ public class TaskVO extends Task {
 	@ApiModelProperty(value = "正确数")
 	private Integer correct;
 
-	@ApiModelProperty(value = "总数")
-	private Integer total;
+	@ApiModelProperty(value = "当前时刻组合总数")
+	private Integer compositionTotal;
 
 	@ApiModelProperty(value = "完成组合数量")
 	private Integer compositionCompleteCount;

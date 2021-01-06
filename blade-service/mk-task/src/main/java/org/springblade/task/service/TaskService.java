@@ -1,5 +1,6 @@
 package org.springblade.task.service;
 
+import org.apache.ibatis.annotations.Param;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -50,4 +51,11 @@ public interface TaskService extends BaseService<Task> {
 	 * @return
 	 */
 	Kv compositions(Long id);
+
+	/**
+	 * 查询当前时刻组合的数量
+	 * @Param taskId 任务id
+	 * @return
+	 */
+	Integer compositionCount(@Param("taskId") Long taskId);
 }

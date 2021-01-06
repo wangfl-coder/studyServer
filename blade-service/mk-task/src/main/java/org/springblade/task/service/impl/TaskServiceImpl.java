@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implements TaskService {
 
 	private final QualityInspectionTaskService qualityInspectionTaskService;
+	private final TaskMapper taskMapper;
 
 	@Value("${spring.profiles.active}")
 	public String env;
@@ -127,5 +128,10 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 		res.put("total", total);
 		res.put("wrong", wrong);
 		return res;
+	}
+
+	@Override
+	public Integer compositionCount(Long taskId) {
+		return taskMapper.compositionCount(env,taskId);
 	}
 }

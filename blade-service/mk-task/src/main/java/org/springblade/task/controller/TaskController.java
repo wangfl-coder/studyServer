@@ -27,6 +27,7 @@ import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
@@ -57,6 +58,7 @@ public class TaskController extends BladeController {
 	private IStatisticsClient statisticsClient;
 	private IFlowClient flowClient;
 	private TaskMapper taskMapper;
+	private LabelTaskMapper labelTaskMapper;
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
@@ -129,6 +131,18 @@ public class TaskController extends BladeController {
 		Task task = taskService.getById(id);
 		TaskVO taskVO = taskService.setCompletedCount(task);
 		TaskVO res = taskService.setCorrectCount(taskVO);
+		Integer compositionCount = taskService.compositionCount(id);
+		res.setCompositionTotal(compositionCount);
+		List<Integer> nums = taskMapper.compositionCompleteCount(id);
+		int sum=0;
+		for (Integer num : nums) {
+			sum += num;
+		}
+		res.setCompositionCompleteCount(sum);
+//		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+//		labelTaskQueryWrapper.eq("task_id",id);
+//		Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+//		res.setCount(count);
 		return R.data(res);
 	}
 
@@ -163,18 +177,28 @@ public class TaskController extends BladeController {
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
 		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
 		ArrayList<Integer> compositionList = new ArrayList<>();
+		ArrayList<Integer> compositionCountList = new ArrayList<>();
 		for(Task task1:pages.getRecords()){
 			int sum=0;
+			Integer compositionCount = taskMapper.compositionCount("dev",task1.getId());
+			compositionCountList.add(compositionCount);
 			List<Integer> nums = taskMapper.compositionCompleteCount(task1.getId());
-			for(int i=0;i<nums.size();i++){
-				sum=sum+nums.get(i);
+			for (Integer num : nums) {
+				sum += num;
 			}
 			compositionList.add(sum);
+//			QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+//			labelTaskQueryWrapper.eq("task_id",task1.getId());
+//			Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+//			task1.setCount(count);
+//			taskService.updateById(task1);
 		}
+
 		List<TaskVO> records = taskService.batchSetCompletedCount(pages.getRecords());
 		List<TaskVO> recordList = taskService.batchSetCorrectCount(records);
 		for(int j=0;j<recordList.size();j++){
 			recordList.get(j).setCompositionCompleteCount(compositionList.get(j));
+			recordList.get(j).setCompositionTotal(compositionCountList.get(j));
 		}
 		IPage<TaskVO> pageVo = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
 		pageVo.setRecords(recordList);
