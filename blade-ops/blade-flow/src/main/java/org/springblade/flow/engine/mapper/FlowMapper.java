@@ -18,6 +18,7 @@ package org.springblade.flow.engine.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.ibatis.annotations.Param;
 import org.springblade.flow.engine.entity.FlowModel;
 
 import java.util.List;
@@ -43,4 +44,11 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @return
 	 */
 	List<FlowModel> findByParentModelId(String parentModelId);
+
+	/**
+	 *
+	 * @param labelTaskId 标注子任务id
+	 * @param type 2是基本信息类组合 3是补充信息组合
+	 */
+	void updateStatistic(@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
 }

@@ -47,6 +47,7 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.constant.FlowEngineConstant;
+import org.springblade.flow.engine.mapper.FlowMapper;
 import org.springblade.flow.engine.utils.FlowCache;
 
 import org.springblade.task.entity.LabelTask;
@@ -75,6 +76,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final ITaskClient iTaskClient;
 	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
 	private final IExpertClient iExpertClient;
+	private final FlowMapper flowMapper;
 
 	@Override
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
@@ -222,7 +224,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				return null;
 			}
 			org.springblade.task.entity.Task task = taskRes.getData();
-			historyQuery.processDefinitionId(task.getProcessDefinitionId());
+//			historyQuery.processDefinitionId(task.getProcessDefinitionId());
 		}
 		String taskName = bladeFlow.getTaskName();
 		if (bladeFlow.getProcessIsFinished() != null) {
@@ -478,7 +480,13 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			log.error(ProcessConstant.HOMEPAGE_COMPLETE_KEY+ kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
 			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
 			variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
-//			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
+			if (!kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY)){
+				flowMapper.updateStatistic(labelTask.getId(),2);
+			}
+			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
+				flowMapper.updateStatistic(labelTask.getId(), 3);
+			}
+			//			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
 		}
 		log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));
 		log.error("ProcessConstant.HOMEPAGE_COMPLETE_KEY:"+variables.get(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
@@ -607,6 +615,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 
+	@Override
 	public boolean setTaskPriorityByProcessInstanceId(String processInstanceId, int priority) {
 		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
 		tasks.forEach(t -> {
@@ -615,6 +624,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		return true;
 	}
 
+	@Override
 	public boolean setTaskPriorityByProcessInstanceIds(List<String> processInstanceIds, int priority) {
 		processInstanceIds.forEach(processInstanceId -> {
 			List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId).list();

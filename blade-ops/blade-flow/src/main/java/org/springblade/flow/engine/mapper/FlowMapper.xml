@@ -19,6 +19,13 @@
         <result column="model_type" property="modelType"/>
         <result column="tenant_id" property="tenantId"/>
     </resultMap>
+    <update id="updateStatistic">
+        update mk_statistics s
+        left join mk_composition c on s.composition_id=c.id
+        set s.status=3
+        where c.annotation_type=#{type}
+        and s.sub_task_id=#{labelTaskId};
+    </update>
 
     <select id="selectFlowPage" resultMap="flowModelResultMap">
         SELECT
