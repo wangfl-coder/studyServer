@@ -52,4 +52,10 @@ public class TemplateCompositionDTO extends TemplateComposition {
 	 */
 	@ApiModelProperty(value = "组合类型")
 	private int compositionType;
+
+	/**
+	 * 组合中的字段
+	 */
+	@ApiModelProperty(value = "组合中的字段")
+	private String compositionField;
 }

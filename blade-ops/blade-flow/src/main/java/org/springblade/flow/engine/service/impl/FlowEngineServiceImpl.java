@@ -52,6 +52,7 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.FileUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.enums.FlowModeEnum;
 import org.springblade.flow.core.utils.TaskUtil;
@@ -354,6 +355,17 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 						List<String> candidateGroups = new ArrayList<>();
 						candidateGroups.add(templateComposition.getRoleName());
 						userTask.setCandidateGroups(candidateGroups);
+
+						List<CustomProperty> customPropertyList = new ArrayList<>();
+						CustomProperty compositionIdProperty = new CustomProperty();
+						compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
+						compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+						CustomProperty compositionFieldProperty = new CustomProperty();
+						compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
+						compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
+						customPropertyList.add(compositionIdProperty);
+						customPropertyList.add(compositionFieldProperty);
+						userTask.setCustomProperties(customPropertyList);
 					}
 				});
 				UserTask userTask =  (UserTask)filteredElementMap.get("homepageTask");
@@ -366,6 +378,18 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				List<String> candidateGroups = new ArrayList<>();
 				candidateGroups.add(templateComposition.getRoleName());
 				userTask.setCandidateGroups(candidateGroups);
+
+				List<CustomProperty> customPropertyList = new ArrayList<>();
+				CustomProperty compositionIdProperty = new CustomProperty();
+				compositionIdProperty.setName("compositionId");
+				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+				CustomProperty compositionFieldProperty = new CustomProperty();
+				compositionFieldProperty.setName("compositionField");
+				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
+				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionFieldProperty);
+				userTask.setCustomProperties(customPropertyList);
+
 				filteredElementMap.remove("homepageTask");
 				filteredElementMap.put(userTask.getId(), userTask);
 			}else {

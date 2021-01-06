@@ -77,4 +77,14 @@ public interface ProcessConstant {
 	 * 基本信息是否完整标识
 	 */
 	String BASICINFO_COMPLETE_KEY = "isBiComplete";
+
+	/**
+	 * 组合ID
+	 */
+	String COMPOSITION_ID = "compositionId";
+
+	/**
+	 * 组合字段
+	 */
+	String COMPOSITION_FIELD = "compositionField";
 }
