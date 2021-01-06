@@ -54,6 +54,16 @@ g/dtd/mybatis-3-mapper.dtd">
         <result column="total" property="total"/>
     </resultMap>
 
+    <resultMap id="fieldResultMap1" type="org.springblade.task.entity.Field">
+        <result column="tq_id" property="id"/>
+        <result column="field" property="field"/>
+    </resultMap>
+
+    <resultMap id="fieldResultMap2" type="org.springblade.task.entity.Field">
+        <result column="sub_task_id" property="id"/>
+        <result column="field" property="field"/>
+    </resultMap>
+
     <select id="labelTaskCompleteCount" resultType="int">
         SELECT COUNT(*) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
@@ -85,8 +95,8 @@ g/dtd/mybatis-3-mapper.dtd">
     </select>
 
 
-    <select id="allLabelTaskFields" resultType="java.lang.String">
-        SELECT field FROM
+    <select id="allLabelTaskFields" resultMap="fieldResultMap1">
+        SELECT tq_id,field FROM
         (SELECT tq.id AS tq_id,
         tq.inspection_task_id AS tq_inspection_task_id,
         tq.person_id AS tq_person_id,
@@ -100,8 +110,8 @@ g/dtd/mybatis-3-mapper.dtd">
         ON tqc.tc_composition_id = c.id
     </select>
 
-    <select id="allLabelTaskWrongFields" resultType="java.lang.String">
-        select field from `mk_inspection_data` idata
+    <select id="allLabelTaskWrongFields" resultMap="fieldResultMap2">
+        select sub_task_id,field from `mk_inspection_data` idata
         inner join `mk_task_quality_inspection` tqi
         on idata.sub_task_id = tqi.id
         where tqi.inspection_task_id = #{param1}

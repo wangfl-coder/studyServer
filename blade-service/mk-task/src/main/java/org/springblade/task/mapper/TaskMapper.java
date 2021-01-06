@@ -2,9 +2,11 @@ package org.springblade.task.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springblade.task.entity.Field;
 import org.springblade.task.entity.Task;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TaskMapper extends BaseMapper<Task> {
 
@@ -34,7 +36,7 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 * @param id    	质检任务id
 	 * @return
 	 */
-	List<String> allLabelTaskFields(Long id);
+	List<Field> allLabelTaskFields(Long id);
 
 	/**
 	 * 所有子任务的错误字段列表
@@ -42,7 +44,7 @@ public interface TaskMapper extends BaseMapper<Task> {
 	 * @param id    	质检任务id
 	 * @return
 	 */
-	List<String> allLabelTaskWrongFields(Long id);
+	List<Field> allLabelTaskWrongFields(Long id);
 
 	/*
 	 * 查询完成的各种组合的数量

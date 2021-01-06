@@ -10,6 +10,7 @@ import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.CharPool;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.task.entity.Field;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.TaskMapper;
@@ -20,6 +21,7 @@ import org.springblade.task.vo.TaskVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,23 +91,27 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 
 	@Override
 	public Kv compositions(Long id) {
-		List<String> fields = baseMapper.allLabelTaskFields(id);
+		List<Field> fields = baseMapper.allLabelTaskFields(id);
 		Kv total = Kv.create();
-		for (String field : fields) {
-			if (total.containsKey(field)) {
-				int count = total.getInt(field);
+		for (Field field : fields) {
+			String value = field.getField();
+			if (total.containsKey(value)) {
+				int count = total.getInt(value);
 				count++;
-				total.put(field, count);
+				total.put(value, count);
 			} else {
-				total.put(field, 1);
+				total.put(value, 1);
 			}
 		}
 
-		List<String> wrongFields = baseMapper.allLabelTaskWrongFields(id);
+		List<Field> wrongFields = baseMapper.allLabelTaskWrongFields(id);
 		Kv wrong = Kv.create();
-		for (String field : wrongFields) {
-			for (String key : total.keySet()) {
-				if (key.indexOf(field) >= 0) {
+		for (String key : total.keySet()) {
+			ArrayList<Long> subTaskIds = new ArrayList<>();
+			for (Field field : wrongFields) {
+				if (key.indexOf(field.getField()) >= 0) {
+					if (subTaskIds.contains(field.getId()))
+						continue;
 					if (wrong.containsKey(key)) {
 						int count = wrong.getInt(key);
 						count++;
@@ -113,6 +119,7 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 					} else {
 						wrong.put(key, 1);
 					}
+					subTaskIds.add(field.getId());
 				}
 			}
 		}
