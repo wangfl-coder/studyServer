@@ -50,5 +50,5 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @param labelTaskId 标注子任务id
 	 * @param type 2是基本信息类组合 3是补充信息组合
 	 */
-	void updateStatistic(@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
+	void updateStatistic(@Param("env")String env,@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
 }

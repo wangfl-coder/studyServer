@@ -18,6 +18,7 @@ package org.springblade.flow.business.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.TaskService;
@@ -55,6 +56,7 @@ import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springblade.task.feign.ITaskClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -67,7 +69,7 @@ import java.util.*;
  */
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 	private final TaskService taskService;
@@ -77,6 +79,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
 	private final IExpertClient iExpertClient;
 	private final FlowMapper flowMapper;
+
+	@Value("${spring.profiles.active}")
+	public String env;
 
 	@Override
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
@@ -481,10 +486,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
 			variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
 			if (!kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY)){
-				flowMapper.updateStatistic(labelTask.getId(),2);
+				flowMapper.updateStatistic(env,labelTask.getId(),2);
 			}
 			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
-				flowMapper.updateStatistic(labelTask.getId(), 3);
+				flowMapper.updateStatistic(env,labelTask.getId(), 3);
 			}
 			//			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
 		}
