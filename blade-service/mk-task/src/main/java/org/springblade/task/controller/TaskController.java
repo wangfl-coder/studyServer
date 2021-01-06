@@ -180,7 +180,7 @@ public class TaskController extends BladeController {
 		ArrayList<Integer> compositionCountList = new ArrayList<>();
 		for(Task task1:pages.getRecords()){
 			int sum=0;
-			Integer compositionCount = taskMapper.compositionCount("dev",task1.getId());
+			Integer compositionCount = taskService.compositionCount(task1.getId());
 			compositionCountList.add(compositionCount);
 			List<Integer> nums = taskMapper.compositionCompleteCount(task1.getId());
 			for (Integer num : nums) {
