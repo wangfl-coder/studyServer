@@ -44,4 +44,12 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 		return R.status(update);
 	}
 
+	@Override
+	public R<QualityInspectionTask> queryQualityInspectionTaskByPersonId(Long personId) {
+		QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
+		qualityInspectionTaskQueryWrapper.eq("person_id",personId);
+		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskService.getOne(qualityInspectionTaskQueryWrapper);
+		return R.data(qualityInspectionTask);
+	}
+
 }

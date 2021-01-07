@@ -140,6 +140,28 @@ public class WorkController {
 	}
 
 	/**
+	 * 根据专家id查询办结事务
+	 */
+	@GetMapping("done-by-personId")
+	@ApiOperationSupport(order = 11)
+	@ApiOperation(value = "根据专家id查询办结事务", notes = "传入流程信息")
+	public R<SingleFlow> queryDoneByPersonId(@ApiParam("流程信息") BladeFlow bladeFlow) {
+		SingleFlow singleFlow = flowBusinessService.selectDonePageByPersonId(bladeFlow);
+		return R.data(singleFlow);
+	}
+
+	/**
+	 * 根据任务id查询办结事务
+	 */
+	@GetMapping("done-by-taskId")
+	@ApiOperationSupport(order = 11)
+	@ApiOperation(value = "根据任务id查询办结事务", notes = "传入流程信息")
+	public R<SingleFlow> queryDoneByTaskId(@ApiParam("流程信息") BladeFlow bladeFlow) {
+		SingleFlow singleFlow = flowBusinessService.selectDonePageByTaskId(bladeFlow);
+		return R.data(singleFlow);
+	}
+
+	/**
 	 * 签收事务
 	 *
 	 * @param taskId 任务id

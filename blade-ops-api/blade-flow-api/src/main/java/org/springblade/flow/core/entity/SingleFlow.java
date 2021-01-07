@@ -11,9 +11,9 @@ import java.util.List;
 @Data
 public class SingleFlow extends BladeFlow{
 
-	@ApiModelProperty(value = "专家id")
-	@JsonSerialize(using = ToStringSerializer.class)
-	private Long personId;
+//	@ApiModelProperty(value = "专家id")
+//	@JsonSerialize(using = ToStringSerializer.class)
+//	private Long personId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
 	@ApiModelProperty(value = "模版id")
