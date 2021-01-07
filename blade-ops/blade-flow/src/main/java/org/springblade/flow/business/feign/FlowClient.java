@@ -152,4 +152,11 @@ public class FlowClient implements IFlowClient {
 		Boolean res = flowBusinessService.setTaskPriorityByProcessInstanceIds(processInstanceIds, priority);
 		return R.status(res);
 	}
+
+	@Override
+	@PostMapping(TODO_TIMEOUT_HANDLER)
+	public R<Boolean> todoTimeoutHandler() {
+		Boolean res = flowBusinessService.todoTimeoutHandler();
+		return R.status(res);
+	}
 }

@@ -5,8 +5,11 @@ import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import com.xxl.job.core.log.XxlJobLogger;
 import com.xxl.job.core.util.ShardingUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springblade.core.tool.api.R;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
@@ -27,9 +30,22 @@ import java.util.concurrent.TimeUnit;
  * @author xuxueli
  */
 @Component
+@RequiredArgsConstructor
 public class SampleXxlJob {
 	private static final Logger logger = LoggerFactory.getLogger(SampleXxlJob.class);
 
+	private final IFlowClient flowClient;
+
+	/**
+	 * 1、简单任务示例（Bean模式）
+	 */
+	@XxlJob("todoTimeoutHandler")
+	public ReturnT<String> todoTimeoutHandler(String param) throws Exception {
+		XxlJobLogger.log("XXL-JOB, Hello World.");
+
+		R<Boolean> res = flowClient.todoTimeoutHandler();
+		return ReturnT.SUCCESS;
+	}
 
 	/**
 	 * 1、简单任务示例（Bean模式）
