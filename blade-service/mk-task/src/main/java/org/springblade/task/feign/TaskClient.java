@@ -1,6 +1,7 @@
 package org.springblade.task.feign;
 
 import lombok.AllArgsConstructor;
+import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.task.entity.Task;
@@ -28,6 +29,15 @@ public class TaskClient implements ITaskClient{
 	@GetMapping(GET_TASK_BY_ID)
 	public R<Task> getById(@RequestParam("id") Long id) {
 		Task task = taskService.getById(id);
+		return R.data(task);
+	}
+
+	@Override
+	@GetMapping(GET_TASK_BY_TEMPLATE)
+	public R<Task> getByTemplate(@RequestParam("templateId") Long templateId) {
+		Task taskQuery = new Task();
+		taskQuery.setTemplateId(templateId);
+		Task task = taskService.getOne(Condition.getQueryWrapper(taskQuery));
 		return R.data(task);
 	}
 
