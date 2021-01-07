@@ -66,9 +66,9 @@ public class TaskController extends BladeController {
 		Task task = taskService.getById(taskId);
 		int count = 0;
 		if (1 == task.getTaskType()) {
-			count = labelTaskService.completeCount(task.getId(), "end");
+			count = labelTaskService.completeCount(task.getId());
 		}else if (2 == task.getTaskType()){
-			count = qualityInspectionTaskService.completeCount(task.getId(), "end");
+			count = qualityInspectionTaskService.completeCount(task.getId());
 		}
 		return R.data(count);
 	}

@@ -68,7 +68,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@Override
 	@GetMapping(QUERY_COMPLETE_LABEL_TASK_COUNT)
 	public R<Integer> completeCount(Long taskId) {
-		Integer res = labelTaskService.completeCount(taskId, "end");
+		Integer res = labelTaskService.completeCount(taskId);
 		return R.data(res);
 	}
 

@@ -83,8 +83,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	}
 
 	@Override
-	public int completeCount(Long taskId, String endActId) {
-		return baseMapper.completeCount(env, taskId, endActId);
+	public int completeCount(Long taskId) {
+		return baseMapper.completeCount(env, taskId);
 	}
 
 //	@Override
