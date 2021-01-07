@@ -49,6 +49,7 @@ public interface IFlowClient {
 	String IS_PROCESS_INSTANCES_FINISHED = API_PREFIX + "/is-process-instances-finished";
 	String SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_ID = API_PREFIX + "/set-task-priority-by-process-instance-id";
 	String SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_IDS = API_PREFIX + "/set-task-priority-by-process-instance-ids";
+	String TODO_TIMEOUT_HANDLER = API_PREFIX + "/todo-timeout-handler";
 
 	/**
 	 * 开启流程
@@ -131,4 +132,12 @@ public interface IFlowClient {
 	 */
 	@PostMapping(SET_TASK_PRIORITY_BY_PROCESS_INSTANCE_IDS)
 	R<Boolean> setTaskPriorityByProcessInstanceIds(@RequestBody List<String> processInstanceIds, @RequestParam("priority") int priority);
+
+	/**
+	 * 定时将超时待办返回待签
+	 *
+	 * @return R
+	 */
+	@PostMapping(TODO_TIMEOUT_HANDLER)
+	R<Boolean> todoTimeoutHandler();
 }

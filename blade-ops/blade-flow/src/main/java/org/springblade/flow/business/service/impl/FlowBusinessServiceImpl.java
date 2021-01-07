@@ -44,6 +44,7 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
+import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringPool;
 import org.springblade.core.tool.utils.StringUtil;
@@ -66,6 +67,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.cert.Extension;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -635,6 +638,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			tasks.forEach(t -> {
 				taskService.setPriority(t.getId(), priority);
 			});
+		});
+		return true;
+	}
+
+	public boolean todoTimeoutHandler() {
+		TaskQuery todoQuery = taskService.createTaskQuery().taskAssigneeLike("taskUser_%").active()
+			.includeProcessVariables().orderByTaskCreateTime().desc();
+		List<Task> taskList = todoQuery.list();
+		taskList.forEach(task -> {
+			Date now = new Date();
+			Duration d = DateUtil.between(task.getClaimTime(), now);
+			if (d.getSeconds() > 60) {
+				taskService.unclaim(task.getId());
+			}
 		});
 		return true;
 	}
