@@ -21,6 +21,7 @@ import org.springblade.core.tool.api.R;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.task.entity.Task;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -124,4 +125,11 @@ public interface FlowBusinessService {
 	 * @return boolean
 	 */
 	boolean setTaskPriorityByProcessInstanceIds(List<String> processInstanceIds, int priority);
+
+	/**
+	 * 定时将超时待办返回待签
+	 *
+	 * @return R
+	 */
+	boolean todoTimeoutHandler();
 }

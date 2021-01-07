@@ -74,4 +74,9 @@ public class IFlowClientFallback implements IFlowClient {
 	public R<Boolean> setTaskPriorityByProcessInstanceIds(@RequestBody List<String> processInstanceIds, @RequestParam("priority") int priority) {
 		return R.fail("远程调用失败");
 	}
+
+	@Override
+	public R<Boolean> todoTimeoutHandler() {
+		return R.fail("远程调用失败");
+	}
 }
