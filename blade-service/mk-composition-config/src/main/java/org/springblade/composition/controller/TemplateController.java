@@ -137,11 +137,11 @@ public class TemplateController extends BladeController {
 
 	/**
 	 * 分页
-	 *
+	 * 条件：启用状态，还是停用状态
 	 */
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "templateName", value = "模板名", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "status", value = "状态(1:启用,2:停用)", paramType = "query", dataType = "int")
 	})
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入template")
@@ -220,5 +220,36 @@ public class TemplateController extends BladeController {
 		boolean temp = templateService.compose(templateCompositions);
 		return R.status(temp);
 	}
+
+	/**
+	 * 停用模板
+	 */
+	@PostMapping("/disable")
+	@ApiOperationSupport(order = 6)
+	@ApiOperation(value = "停用模板", notes = "传入模板的id")
+	public R disable(Long templateId) {
+		Template template = new Template();
+		template.setId(templateId);
+		// 2 停用状态
+		template.setStatus(2);
+		boolean temp = templateService.updateById(template);
+		return R.status(temp);
+	}
+
+	/**
+	 * 启用模板
+	 */
+	@PostMapping("/enable")
+	@ApiOperationSupport(order = 7)
+	@ApiOperation(value = "启用模板", notes = "传入模板的id")
+	public R enable(Long templateId) {
+		Template template = new Template();
+		template.setId(templateId);
+		// 1 启用状态
+		template.setStatus(1);
+		boolean temp = templateService.updateById(template);
+		return R.status(temp);
+	}
+
 
 }
