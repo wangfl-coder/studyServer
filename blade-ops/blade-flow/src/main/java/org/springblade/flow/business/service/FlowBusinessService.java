@@ -77,6 +77,22 @@ public interface FlowBusinessService {
 	IPage<SingleFlow> selectDonePage(IPage<SingleFlow> page, BladeFlow bladeFlow);
 
 	/**
+	 * 根据专家id查询办结事务
+	 *
+	 * @param bladeFlow 流程类
+	 * @return
+	 */
+	List<SingleFlow> selectDonePageByPersonId(BladeFlow bladeFlow);
+
+	/**
+	 * 根据任务id查询办结事务
+	 *
+	 * @param bladeFlow 流程类
+	 * @return
+	 */
+	SingleFlow selectDonePageByTaskId(BladeFlow bladeFlow);
+
+	/**
 	 * 完成任务
 	 *
 	 * @param leave 请假信息

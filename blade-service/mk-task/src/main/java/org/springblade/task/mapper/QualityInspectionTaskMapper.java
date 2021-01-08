@@ -10,9 +10,8 @@ public interface QualityInspectionTaskMapper extends BaseMapper<QualityInspectio
 	 *
 	 * @param env    	运行环境
 	 * @param taskId    任务Id
-	 * @param endActId  结束流程节点Id
 	 * @return
 	 */
-	int completeCount(String env, Long taskId, String endActId);
+	int completeCount(String env, Long taskId);
 
 }
