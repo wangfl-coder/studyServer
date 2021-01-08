@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.dto.UserCompositionDTO;
+import org.springblade.composition.dto.UserInspectionDTO;
 import org.springblade.composition.entity.Statistics;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -41,6 +42,24 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 */
 	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId);
 
+	/**
+	 * 查询一个标注大任务在起止时间完成各种组合的数量或者还可以做的数量
+	 * @param env
+	 * @param startTime
+	 * @param endTime
+	 * @param taskId
+	 * @param type
+	 * @return
+	 */
 	List<TaskCompositionDTO> taskCompositionCount(@Param("env")String env,@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+
+	/**
+	 * 查询用户在一段时间内质检的数量和速度
+	 * @param startTime
+	 * @param endTime
+	 * @param userId
+	 * @return
+	 */
+	List<UserInspectionDTO> userInspectionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId);
 
 }
