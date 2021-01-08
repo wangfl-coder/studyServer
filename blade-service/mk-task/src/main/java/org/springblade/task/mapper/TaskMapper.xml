@@ -56,6 +56,7 @@ g/dtd/mybatis-3-mapper.dtd">
 
     <resultMap id="fieldResultMap1" type="org.springblade.task.entity.Field">
         <result column="tq_id" property="id"/>
+        <result column="name" property="name"/>
         <result column="field" property="field"/>
     </resultMap>
 
@@ -96,7 +97,7 @@ g/dtd/mybatis-3-mapper.dtd">
 
 
     <select id="allLabelTaskFields" resultMap="fieldResultMap1">
-        SELECT tq_id,field FROM
+        SELECT tq_id,name,field FROM
         (SELECT tq.id AS tq_id,
         tq.inspection_task_id AS tq_inspection_task_id,
         tq.person_id AS tq_person_id,
