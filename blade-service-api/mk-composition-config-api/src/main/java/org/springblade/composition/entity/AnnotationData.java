@@ -90,4 +90,11 @@ public class AnnotationData extends BaseEntity {
 	@ApiModelProperty(value = "标注类型")
 	private Integer type ;
 
+	/**
+	 * 组合id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "子任务id")
+	private Long compositionId;
+
 }
