@@ -28,6 +28,7 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.dto.UserCompositionDTO;
+import org.springblade.composition.dto.UserInspectionDTO;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
@@ -137,6 +138,16 @@ public class StatisticsController extends BladeController {
 	@ApiOperation(value = "查询大任务在一段时间内标注的各种组合的数量，或者还可以领取的组合数量", notes = "传入起止时间,大任务id,查询已完成还是待领取")
 	public R<List<TaskCompositionDTO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer type ) {
 		return R.data(statisticsService.taskCompositionCount(startTime,endTime,taskId,type));
+	}
+
+	/**
+	 * 查询用户在一段时间内质检的数量和速度
+	 */
+	@GetMapping("/user_inspection")
+	@ApiOperationSupport(order = 4)
+	@ApiOperation(value = "查询用户在一段时间内质检的数量和速度", notes = "传入起止时间,用户id")
+	public R<List<UserInspectionDTO>> statisticsUserInspection(String startTime, String endTime, String userId) {
+		return R.data(statisticsMapper.userInspectionCount(startTime,endTime,userId));
 	}
 
 }
