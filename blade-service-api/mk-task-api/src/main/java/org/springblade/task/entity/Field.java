@@ -23,10 +23,10 @@ public class Field implements Serializable {
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "子任务id")
 	private Long id;
+	@ApiModelProperty(value = "组合名")
+	private String name;
 	@ApiModelProperty(value = "字段名")
 	private String field;
-
-
 
 
 
