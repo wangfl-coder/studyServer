@@ -403,7 +403,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		Expert expert = getById(expertId);
 		Kv kv = Kv.create();
 		if (expert == null) {
-			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, false)
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false)
 				.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
 			return kv;
 		}
@@ -413,9 +413,9 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			expert.getGs(),
 			expert.getDblp()
 		)) {
-			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, false);
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
 		} else {
-			kv.set(ProcessConstant.HOMEPAGE_COMPLETE_KEY, true);
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
 		}
 		List<Composition> compositions = (List<Composition>)iTemplateClient.allCompositions(templateId).getData();
 		List<String> allFields = new ArrayList<>();
@@ -433,7 +433,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
 		} else {
 			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, true);
-			
+
 		}
 		return kv;
 	}
