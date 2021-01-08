@@ -106,7 +106,7 @@ public class AnnotationDataController extends BladeController {
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
-		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())));
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())));
 
 
 		// 删除原来的标注数据,同时更新修改时间
