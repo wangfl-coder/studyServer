@@ -52,7 +52,9 @@ public class CompositionController extends BladeController {
 		QueryWrapper<Composition> compositionQueryWrapper;
 		compositionQueryWrapper = new QueryWrapper<>();
 		compositionQueryWrapper.ne("annotation_type",3);
-		compositionQueryWrapper.eq("status", status);
+		if(status != null) {
+			compositionQueryWrapper.eq("status", status);
+		}
 		if(name != null) {
 			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
 		} else{
