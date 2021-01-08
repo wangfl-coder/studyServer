@@ -68,7 +68,7 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@Override
 	@GetMapping(QUERY_COMPLETE_LABEL_TASK_COUNT)
 	public R<Integer> completeCount(Long taskId) {
-		Integer res = labelTaskService.completeCount(taskId, "end");
+		Integer res = labelTaskService.completeCount(taskId);
 		return R.data(res);
 	}
 
@@ -79,5 +79,13 @@ public class LabelTaskClient implements ILabelTaskClient {
 		labelTaskQueryWrapper.eq("task_id",taskId);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
 		return R.data(list);
+	}
+
+	@Override
+	public R<LabelTask> queryLabelTaskByPersonId(Long personId) {
+		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+		labelTaskQueryWrapper.eq("person_id",personId);
+		LabelTask labelTask = labelTaskService.getOne(labelTaskQueryWrapper);
+		return R.data(labelTask);
 	}
 }

@@ -12,6 +12,8 @@ import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 @NonDS
 @ApiIgnore()
 @RestController
@@ -42,6 +44,14 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 		qualityInspectionTaskUpdateWrapper.eq("id",qualityInspectionTask.getId()).set("time",qualityInspectionTask.getTime()).set("picture",qualityInspectionTask.getPicture()).set("status",qualityInspectionTask.getStatus()).set("remark",qualityInspectionTask.getRemark()).set("update_time", DateUtil.now());
 		boolean update = qualityInspectionTaskService.update(qualityInspectionTaskUpdateWrapper);
 		return R.status(update);
+	}
+
+	@Override
+	public R<List<QualityInspectionTask>> queryQualityInspectionTaskByPersonId(Long personId) {
+		QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
+		qualityInspectionTaskQueryWrapper.eq("person_id",personId);
+		List<QualityInspectionTask> qualityInspectionTasks = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
+		return R.data(qualityInspectionTasks);
 	}
 
 }
