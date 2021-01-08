@@ -394,6 +394,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
 				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
 				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionTypeProperty);
 				customPropertyList.add(compositionFieldProperty);
 				userTask.setCustomProperties(customPropertyList);
 
@@ -438,6 +439,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
 				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
 				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionTypeProperty);
 				customPropertyList.add(compositionFieldProperty);
 				basicInfoTask.setCustomProperties(customPropertyList);
 
