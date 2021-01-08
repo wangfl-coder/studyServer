@@ -13,7 +13,7 @@
             left join bladex_flow.ACT_HI_PROCINST flow
         </if>
         ON t.process_instance_id = flow.PROC_INST_ID_
-        WHERE t.task_id = #{param2} AND flow.END_ACT_ID_ = #{param3}
+        WHERE t.task_id = #{param2} AND !isnull(flow.END_TIME_)
 
     </select>
 

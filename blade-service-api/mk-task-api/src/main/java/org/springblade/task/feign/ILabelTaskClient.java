@@ -24,6 +24,7 @@ public interface ILabelTaskClient {
 	String QUERY_COMPLETE_LABEL_TASK_COUNT = API_PREFIX + "/complete-label-task-count";
 	String QUERY_COMPLETE_LABEL_TASK_COUNT_LIST = API_PREFIX + "/complete-label-task-count-list";
 	String QUERY_LABEL_TASK_ALL = API_PREFIX + "/query-label-task-all";
+	String QUERY_LABEL_TASK_BY_PERSON_ID = API_PREFIX + "/query-label-task-by-person-id";
 
 	@PostMapping(START_LABEL_PROCESS)
 	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
@@ -42,4 +43,7 @@ public interface ILabelTaskClient {
 
 	@GetMapping(QUERY_LABEL_TASK_ALL)
 	R<List<LabelTask>> queryLabelTaskAll(@RequestParam(value = "taskId") Long taskId);
+
+	@GetMapping(QUERY_LABEL_TASK_BY_PERSON_ID)
+	R<LabelTask> queryLabelTaskByPersonId(@RequestParam(value = "personId") Long personId);
 }

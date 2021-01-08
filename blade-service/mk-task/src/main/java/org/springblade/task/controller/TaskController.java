@@ -66,11 +66,18 @@ public class TaskController extends BladeController {
 		Task task = taskService.getById(taskId);
 		int count = 0;
 		if (1 == task.getTaskType()) {
-			count = labelTaskService.completeCount(task.getId(), "end");
+			count = labelTaskService.completeCount(task.getId());
 		}else if (2 == task.getTaskType()){
-			count = qualityInspectionTaskService.completeCount(task.getId(), "end");
+			count = qualityInspectionTaskService.completeCount(task.getId());
 		}
 		return R.data(count);
+	}
+
+	@GetMapping(value = "/inspection/count")
+	@ApiOperation(value = "查询可以质检的标注子任务数量")
+	public R queryIsInspectionTaskCount(@RequestParam("taskId") Long taskId) {
+		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
+		return R.data(labelTasks.size());
 	}
 
 	@GetMapping(value = "/complete/list")
