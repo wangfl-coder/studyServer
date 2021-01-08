@@ -115,11 +115,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
 
 		// 计算总数
-		long count = claimUserQuery.count() + claimRoleWithTenantIdQuery.count() + claimRoleWithoutTenantIdQuery.count();
+		long count = claimRoleWithoutTenantIdQuery.count();
 		// 设置页数
 		//page.setSize(page.getSize());
 		// 设置总数u
-		page.setTotal(count);
+		page.setTotal(flowList.size());
 		// 设置数据
 		page.setRecords(flowList);
 		return page;
@@ -207,7 +207,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 设置页数
 		page.setSize(count);
 		// 设置总数
-		page.setTotal(count);
+		page.setTotal(flowList.size());
 		// 设置数据
 		page.setRecords(flowList);
 		return page;
@@ -443,7 +443,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 计算总数
 		long count = doneQuery.count();
 		// 设置总数
-		page.setTotal(count);
+		page.setTotal(flowList.size());
 		page.setRecords(flowList);
 		return page;
 	}
