@@ -61,5 +61,20 @@
         </if>
         group by NAME_;
     </select>
+    <select id="userInspectionCount" resultType="org.springblade.composition.dto.UserInspectionDTO">
+        select u.id as userId,u.name as userName,count(*) as number,round(avg(t.time)/1000,0) as averageSpeed from mk_task_quality_inspection t
+        left join blade_user u on t.update_user=u.id
+        where 1=1
+        <if test="userId!=null">
+            and t.update_user=#{userId}
+        </if>
+        <if test="startTime!=null">
+            and t.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and t.update_time &lt; #{endTime}
+        </if>
+        group by t.update_user
+    </select>
 
 </mapper>
