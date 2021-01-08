@@ -388,6 +388,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setHistoryTaskEndTime(historicTaskInstance.getEndTime());
 			flow.setVariables(historicTaskInstance.getProcessVariables());
 			flow.setPriority(historicTaskInstance.getPriority());
+			List<Comment> commentList = taskService.getTaskComments(historicTaskInstance.getId());
+			if (commentList.size() > 0) {
+				Comment comment = commentList.get(0);
+				flow.setComment(comment.getFullMessage());
+			}
 
 			ProcessDefinition processDefinition = FlowCache.getProcessDefinition(historicTaskInstance.getProcessDefinitionId());
 			flow.setProcessDefinitionId(processDefinition.getId());
