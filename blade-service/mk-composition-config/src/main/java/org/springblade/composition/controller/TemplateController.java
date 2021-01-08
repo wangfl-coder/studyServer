@@ -234,35 +234,6 @@ public class TemplateController extends BladeController {
 		return R.status(temp);
 	}
 
-	/**
-	 * 停用模板
-	 */
-	@PostMapping("/disable")
-	@ApiOperationSupport(order = 6)
-	@ApiOperation(value = "停用模板", notes = "传入模板的id")
-	public R disable(Long templateId) {
-		Template template = new Template();
-		template.setId(templateId);
-		// 2 停用状态
-		template.setStatus(2);
-		boolean temp = templateService.updateById(template);
-		return R.status(temp);
-	}
-
-	/**
-	 * 启用模板
-	 */
-	@PostMapping("/enable")
-	@ApiOperationSupport(order = 7)
-	@ApiOperation(value = "启用模板", notes = "传入模板的id")
-	public R enable(Long templateId) {
-		Template template = new Template();
-		template.setId(templateId);
-		// 1 启用状态
-		template.setStatus(1);
-		boolean temp = templateService.updateById(template);
-		return R.status(temp);
-	}
 
 
 }

@@ -9,7 +9,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.composition.service.ICompositionService;
+import org.springblade.composition.service.ITemplateCompositionService;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
@@ -22,10 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "composition")
 @AllArgsConstructor
-@Api(value = "组合接口")
+@Api(value = "组合接口",tags = "组合")
 public class CompositionController extends BladeController {
 
 	private ICompositionService ICompositionService;
+	private final ITemplateCompositionService templateCompositionService;
 
 	@PostMapping("/save")
 	@ApiOperation(value = "添加组合")
@@ -41,13 +44,15 @@ public class CompositionController extends BladeController {
 
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "status(1:启用的组合,2:停用的组合)", value = "查询条件", paramType = "query", dataType = "int")
 	})
 	@ApiOperation(value = "分页查询全部组合")
-	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,Query query) {
+	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,@RequestParam(value = "status",required = false) Integer status,Query query) {
 		QueryWrapper<Composition> compositionQueryWrapper;
 		compositionQueryWrapper = new QueryWrapper<>();
 		compositionQueryWrapper.ne("annotation_type",3);
+		compositionQueryWrapper.eq("status", status);
 		if(name != null) {
 			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
 		} else{
@@ -60,12 +65,28 @@ public class CompositionController extends BladeController {
 	@PostMapping(value = "/update")
 	@ApiOperation(value = "更新组合")
 	public R update(@RequestBody Composition composition){
+		TemplateComposition templateComposition = new TemplateComposition();
+		templateComposition.setCompositionId(composition.getId());
+		if (templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition).last("LIMIT 1")).getId() != null){
+			return R.fail("不能更新组合，已经有模板使用此组合，可以停用");
+		}
+		return R.status(ICompositionService.updateById(composition));
+	}
+
+	@PostMapping(value = "/disable_or_enable")
+	@ApiOperation(value = "停用或启用组合")
+	public R disableOrEnable(@RequestBody Composition composition){
 		return R.status(ICompositionService.updateById(composition));
 	}
 
 	@PostMapping(value = "/remove")
 	@ApiOperation(value = "删除组合")
 	public R delete(@RequestParam String ids){
+		TemplateComposition templateComposition = new TemplateComposition();
+		templateComposition.setCompositionId(Func.toLong(ids));
+		if (templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition).last("LIMIT 1")).getId() != null){
+			return R.fail("不能删除组合，已经有模板使用此组合，可以停用");
+		}
 		return R.status(ICompositionService.deleteLogic(Func.toLongList(ids)));
 	}
 }

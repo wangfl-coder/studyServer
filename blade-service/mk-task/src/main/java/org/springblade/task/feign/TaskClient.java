@@ -37,7 +37,7 @@ public class TaskClient implements ITaskClient{
 	public R<Task> getByTemplate(@RequestParam("templateId") Long templateId) {
 		Task taskQuery = new Task();
 		taskQuery.setTemplateId(templateId);
-		Task task = taskService.getOne(Condition.getQueryWrapper(taskQuery));
+		Task task = taskService.getOne(Condition.getQueryWrapper(taskQuery).last("LIMIT 1"));
 		return R.data(task);
 	}
 
