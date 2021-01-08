@@ -360,10 +360,14 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 						CustomProperty compositionIdProperty = new CustomProperty();
 						compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
 						compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+						CustomProperty compositionTypeProperty = new CustomProperty();
+						compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+						compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
 						CustomProperty compositionFieldProperty = new CustomProperty();
 						compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
 						compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
 						customPropertyList.add(compositionIdProperty);
+						customPropertyList.add(compositionTypeProperty);
 						customPropertyList.add(compositionFieldProperty);
 						userTask.setCustomProperties(customPropertyList);
 					}
@@ -381,12 +385,16 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 
 				List<CustomProperty> customPropertyList = new ArrayList<>();
 				CustomProperty compositionIdProperty = new CustomProperty();
-				compositionIdProperty.setName("compositionId");
+				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
 				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+				CustomProperty compositionTypeProperty = new CustomProperty();
+				compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+				compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
 				CustomProperty compositionFieldProperty = new CustomProperty();
-				compositionFieldProperty.setName("compositionField");
+				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
 				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
 				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionTypeProperty);
 				customPropertyList.add(compositionFieldProperty);
 				userTask.setCustomProperties(customPropertyList);
 
@@ -419,6 +427,21 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				basicInfoTask.setCandidateGroups(candidateGroups);
 				basicInfoTask.setIncomingFlows(incomingFlows);
 				basicInfoTask.setOutgoingFlows(outgoingFlows);
+
+				List<CustomProperty> customPropertyList = new ArrayList<>();
+				CustomProperty compositionIdProperty = new CustomProperty();
+				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
+				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+				CustomProperty compositionTypeProperty = new CustomProperty();
+				compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+				compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
+				CustomProperty compositionFieldProperty = new CustomProperty();
+				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
+				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
+				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionTypeProperty);
+				customPropertyList.add(compositionFieldProperty);
+				basicInfoTask.setCustomProperties(customPropertyList);
 
 				flowElementList.add(incomingFlow);
 				flowElementList.add(outgoingFlow);

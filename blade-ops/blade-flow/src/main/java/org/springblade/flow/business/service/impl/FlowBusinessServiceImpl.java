@@ -160,6 +160,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (Func.isNotEmpty(extCompId))
 				flow.setCompositionId(extCompId.get(0).getElementText());
+			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+			if (Func.isNotEmpty(extCompType))
+				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());
@@ -295,6 +298,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 				if (Func.isNotEmpty(extCompId))
 					flow.setCompositionId(extCompId.get(0).getElementText());
+				List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+				if (Func.isNotEmpty(extCompType))
+					flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 				List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 				if (Func.isNotEmpty(extField))
 					flow.setCompositionField(extField.get(0).getElementText());
@@ -412,6 +418,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (Func.isNotEmpty(extCompId))
 				flow.setCompositionId(extCompId.get(0).getElementText());
+			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+			if (Func.isNotEmpty(extCompType))
+				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());
@@ -483,10 +492,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			Kv kv = res.getData();
 			variables.put("priority", task.getPriority());
 			log.error(ProcessConstant.BASICINFO_COMPLETE_KEY+ kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
-			log.error(ProcessConstant.HOMEPAGE_COMPLETE_KEY+ kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
+			log.error(ProcessConstant.HOMEPAGE_FOUND_KEY+ kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY));
 			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
-			variables.put(ProcessConstant.HOMEPAGE_COMPLETE_KEY, kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
-			if (!kv.getBool(ProcessConstant.HOMEPAGE_COMPLETE_KEY)){
+			variables.put(ProcessConstant.HOMEPAGE_FOUND_KEY, kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY));
+			if (!kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY)){
 				flowMapper.updateStatistic(env,labelTask.getId(),2);
 			}
 			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
@@ -495,7 +504,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			//			boolean isBiComplete = iLabelTaskClient.isBiComplete(taskId);
 		}
 		log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));
-		log.error("ProcessConstant.HOMEPAGE_COMPLETE_KEY:"+variables.get(ProcessConstant.HOMEPAGE_COMPLETE_KEY));
+		log.error("ProcessConstant.HOMEPAGE_FOUND_KEY:"+variables.get(ProcessConstant.HOMEPAGE_FOUND_KEY));
 		// 完成任务
 		taskService.complete(taskId, variables);
 		if(variables.get("priority")!=null){
@@ -582,6 +591,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (Func.isNotEmpty(extCompId))
 				flow.setCompositionId(extCompId.get(0).getElementText());
+			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+			if (Func.isNotEmpty(extCompType))
+				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());

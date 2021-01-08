@@ -71,7 +71,7 @@ public interface ProcessConstant {
 	/**
 	 * 主页是否完整标识
 	 */
-	String HOMEPAGE_COMPLETE_KEY = "isHpComplete";
+	String HOMEPAGE_FOUND_KEY = "isHomepageFound";
 
 	/**
 	 * 基本信息是否完整标识
@@ -82,6 +82,11 @@ public interface ProcessConstant {
 	 * 组合ID
 	 */
 	String COMPOSITION_ID = "compositionId";
+
+	/**
+	 * 组合类型
+	 */
+	String COMPOSITION_TYPE = "compositionType";
 
 	/**
 	 * 组合字段
