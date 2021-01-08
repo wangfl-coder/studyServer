@@ -44,8 +44,8 @@ public class CompositionController extends BladeController {
 
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "name", value = "查询条件", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "status(1:启用的组合,2:停用的组合)", value = "查询条件", paramType = "query", dataType = "int")
+		@ApiImplicitParam(name = "name", value = "组合名", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "status", value = "组合状态(1:启用的组合,2:停用的组合)", paramType = "query", dataType = "int")
 	})
 	@ApiOperation(value = "分页查询全部组合")
 	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,@RequestParam(value = "status",required = false) Integer status,Query query) {
