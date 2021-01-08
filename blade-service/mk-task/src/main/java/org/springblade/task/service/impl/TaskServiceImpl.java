@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.tool.support.Kv;
-import org.springblade.core.tool.utils.BeanUtil;
-import org.springblade.core.tool.utils.CharPool;
-import org.springblade.core.tool.utils.Func;
-import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.core.tool.utils.*;
 import org.springblade.task.entity.Field;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
@@ -94,19 +91,23 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	public Kv compositions(Long id) {
 		List<Field> fields = baseMapper.allLabelTaskFields(id);
 		Kv total = Kv.create();
+		Kv totalRes = Kv.create();
 		for (Field field : fields) {
 			String value = field.getField();
 			if (total.containsKey(value)) {
 				int count = total.getInt(value);
 				count++;
 				total.put(value, count);
+				totalRes.put(field.getName(), count);
 			} else {
 				total.put(value, 1);
+				totalRes.put(field.getName(), 1);
 			}
 		}
 
 		List<Field> wrongFields = baseMapper.allLabelTaskWrongFields(id);
 		Kv wrong = Kv.create();
+		Kv wrongRes = Kv.create();
 		for (String key : total.keySet()) {
 			ArrayList<Long> subTaskIds = new ArrayList<>();
 			for (Field field : wrongFields) {
@@ -117,16 +118,24 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 						int count = wrong.getInt(key);
 						count++;
 						wrong.put(key, count);
+						for (Field f: fields) {
+							if(f.getField().equals(key))
+								wrongRes.put(f.getName(), count);
+						}
 					} else {
 						wrong.put(key, 1);
+						for (Field f: fields) {
+							if(f.getField().equals(key))
+								wrongRes.put(f.getName(), 1);
+						}
 					}
 					subTaskIds.add(field.getId());
 				}
 			}
 		}
 		Kv res = Kv.create();
-		res.put("total", total);
-		res.put("wrong", wrong);
+		res.put("total", totalRes);
+		res.put("wrong", wrongRes);
 		return res;
 	}
 
