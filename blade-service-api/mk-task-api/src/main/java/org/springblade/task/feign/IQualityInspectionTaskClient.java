@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @FeignClient(value = LauncherConstant.MKAPP_TASK_NAME)
 public interface IQualityInspectionTaskClient {
 
@@ -29,7 +31,7 @@ public interface IQualityInspectionTaskClient {
 	R updateQualityInspectionTaskById(@RequestBody QualityInspectionTask qualityInspectionTask);
 
 	@GetMapping(QUERY_QUALITY_INSPECTION_TASK_BY_PERSON_ID)
-	R<QualityInspectionTask> queryQualityInspectionTaskByPersonId(@RequestParam(value = "personId") Long personId);
+	R<List<QualityInspectionTask>> queryQualityInspectionTaskByPersonId(@RequestParam(value = "personId") Long personId);
 
 
 }

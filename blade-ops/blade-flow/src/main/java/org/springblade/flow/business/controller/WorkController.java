@@ -39,6 +39,8 @@ import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 流程事务通用接口
  *
@@ -145,9 +147,9 @@ public class WorkController {
 	@GetMapping("done-by-personId")
 	@ApiOperationSupport(order = 11)
 	@ApiOperation(value = "根据专家id查询办结事务", notes = "传入流程信息")
-	public R<SingleFlow> queryDoneByPersonId(@ApiParam("流程信息") BladeFlow bladeFlow) {
-		SingleFlow singleFlow = flowBusinessService.selectDonePageByPersonId(bladeFlow);
-		return R.data(singleFlow);
+	public R<List<SingleFlow>> queryDoneByPersonId(@ApiParam("流程信息") BladeFlow bladeFlow) {
+		List<SingleFlow> singleFlows = flowBusinessService.selectDonePageByPersonId(bladeFlow);
+		return R.data(singleFlows);
 	}
 
 	/**

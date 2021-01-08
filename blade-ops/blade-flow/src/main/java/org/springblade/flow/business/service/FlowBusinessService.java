@@ -82,7 +82,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	SingleFlow selectDonePageByPersonId(BladeFlow bladeFlow);
+	List<SingleFlow> selectDonePageByPersonId(BladeFlow bladeFlow);
 
 	/**
 	 * 根据任务id查询办结事务

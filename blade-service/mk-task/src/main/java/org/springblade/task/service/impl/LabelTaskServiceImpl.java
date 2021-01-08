@@ -1,5 +1,6 @@
 package org.springblade.task.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
@@ -19,9 +20,11 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.FlowUtil;
 import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, LabelTask> implements LabelTaskService {
 
 	private final IFlowClient flowClient;
+	private final QualityInspectionTaskService qualityInspectionTaskService;
 
 	@Value("${spring.profiles.active}")
 	public String env;
@@ -128,7 +132,10 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
 			list.forEach(labelTask -> {
 				String processInstanceId = labelTask.getProcessInstanceId();
-				if ((boolean)kv.get(processInstanceId)) {
+				QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
+				qualityInspectionTaskQueryWrapper.eq("label_task_id",labelTask.getId());
+				List<QualityInspectionTask> list1 = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
+				if ((boolean)kv.get(processInstanceId) && list1.size() == 0) {
 //					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
 //					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
 //					labelTaskService.update(labelTaskUpdateWrapper);

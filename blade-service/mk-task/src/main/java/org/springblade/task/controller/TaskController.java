@@ -73,6 +73,13 @@ public class TaskController extends BladeController {
 		return R.data(count);
 	}
 
+	@GetMapping(value = "/inspection/count")
+	@ApiOperation(value = "查询可以质检的标注子任务数量")
+	public R queryIsInspectionTaskCount(@RequestParam("taskId") Long taskId) {
+		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
+		return R.data(labelTasks.size());
+	}
+
 	@GetMapping(value = "/complete/list")
 	@ApiOperation(value = "查询已经完成的任务列表")
 	public R queryCompleteTask(@RequestParam("taskId") Long taskId) {

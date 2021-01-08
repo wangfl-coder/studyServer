@@ -12,6 +12,8 @@ import org.springblade.task.service.QualityInspectionTaskService;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 @NonDS
 @ApiIgnore()
 @RestController
@@ -45,11 +47,11 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 	}
 
 	@Override
-	public R<QualityInspectionTask> queryQualityInspectionTaskByPersonId(Long personId) {
+	public R<List<QualityInspectionTask>> queryQualityInspectionTaskByPersonId(Long personId) {
 		QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
 		qualityInspectionTaskQueryWrapper.eq("person_id",personId);
-		QualityInspectionTask qualityInspectionTask = qualityInspectionTaskService.getOne(qualityInspectionTaskQueryWrapper);
-		return R.data(qualityInspectionTask);
+		List<QualityInspectionTask> qualityInspectionTasks = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
+		return R.data(qualityInspectionTasks);
 	}
 
 }
