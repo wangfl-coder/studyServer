@@ -88,7 +88,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public int completeCount(Long taskId) {
-		return baseMapper.completeCount(env, taskId);
+		return baseMapper.completeCount("dev", taskId);
 	}
 
 //	@Override
@@ -150,6 +150,21 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	public List<LabelTask> getByTaskId(Long taskId) {
 		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
 		return list;
+	}
+
+	@Override
+	public long annotationDoneCount(String param2) {
+		return baseMapper.annotationDoneCount(env,param2);
+	}
+
+	@Override
+	public long annotationTodoCount(String param2) {
+		return baseMapper.annotationTodoCount(env,param2);
+	}
+
+	@Override
+	public int annotationClaimCount(List<String> param2) {
+		return baseMapper.annotationClaimCount(env,param2);
 	}
 
 }

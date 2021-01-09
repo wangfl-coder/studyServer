@@ -15,4 +15,5 @@ public interface QualityInspectionTaskService extends BaseService<QualityInspect
 	int completeCount(Long taskId);
 
 	int correctCount(Long taskId);
+
 }

@@ -17,7 +17,6 @@
 package org.springblade.flow.business.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -26,20 +25,14 @@ import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.TaskService;
-import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
-import org.flowable.engine.impl.bpmn.parser.BpmnParse;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
-import org.flowable.variable.api.history.HistoricVariableInstance;
-import org.flowable.variable.service.impl.persistence.entity.HistoricVariableInstanceEntity;
-import org.flowable.variable.service.impl.util.CommandContextUtil;
-import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
@@ -64,11 +57,8 @@ import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springblade.task.feign.ITaskClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 
-import java.security.cert.Extension;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -88,6 +78,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
 	private final IExpertClient iExpertClient;
 	private final FlowMapper flowMapper;
+
 
 	@Value("${spring.profiles.active}")
 	public String env;
@@ -116,10 +107,14 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 		// 计算总数
 		long count = claimRoleWithoutTenantIdQuery.count();
-		// 设置页数
-		//page.setSize(page.getSize());
 		// 设置总数u
-		page.setTotal(flowList.size());
+		List<String> taskGroupList = Func.toStrList(taskGroup);
+		Integer total = (Integer)iLabelTaskClient.queryLabelTaskClaimCount(taskGroupList).getData();
+		if(bladeFlow.getCategoryName().equals("标注流程")){
+			page.setTotal(total);
+		} else if(bladeFlow.getCategoryName().equals("质检流程")){
+			page.setTotal(count-total);
+		}
 		// 设置数据
 		page.setRecords(flowList);
 		return page;
@@ -207,10 +202,15 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 		// 计算总数
 		long count = todoQuery.count();
-		// 设置页数
-		page.setSize(count);
+//		// 设置页数
+//		page.setSize(count);
 		// 设置总数
-		page.setTotal(flowList.size());
+		Integer total = (Integer)iLabelTaskClient.queryLabelTaskTodoCount(taskUser).getData();
+		if(bladeFlow.getCategoryName().equals("标注流程")){
+			page.setTotal(total);
+		} else if(bladeFlow.getCategoryName().equals("质检流程")){
+			page.setTotal(count-total);
+		}
 		// 设置数据
 		page.setRecords(flowList);
 		return page;
@@ -452,7 +452,12 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 计算总数
 		long count = doneQuery.count();
 		// 设置总数
-		page.setTotal(flowList.size());
+		Integer total = (Integer)iLabelTaskClient.queryLabelTaskDoneCount(taskUser).getData();
+		if(bladeFlow.getCategoryName().equals("标注流程")){
+			page.setTotal(total);
+		} else if(bladeFlow.getCategoryName().equals("质检流程")){
+			page.setTotal(count-total);
+		}
 		page.setRecords(flowList);
 		return page;
 	}

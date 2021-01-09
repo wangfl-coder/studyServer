@@ -88,4 +88,19 @@ public class LabelTaskClient implements ILabelTaskClient {
 		LabelTask labelTask = labelTaskService.getOne(labelTaskQueryWrapper);
 		return R.data(labelTask);
 	}
+
+	@Override
+	public R queryLabelTaskDoneCount(String param2) {
+		return R.data(labelTaskService.annotationDoneCount(param2));
+	}
+
+	@Override
+	public R queryLabelTaskTodoCount(String param2) {
+		return R.data(labelTaskService.annotationTodoCount(param2));
+	}
+
+	@Override
+	public R queryLabelTaskClaimCount(List<String> param2) {
+		return R.data(labelTaskService.annotationClaimCount(param2));
+	}
 }

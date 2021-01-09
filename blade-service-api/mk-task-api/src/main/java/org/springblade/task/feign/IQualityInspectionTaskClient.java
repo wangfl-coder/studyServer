@@ -33,5 +33,4 @@ public interface IQualityInspectionTaskClient {
 	@GetMapping(QUERY_QUALITY_INSPECTION_TASK_BY_PERSON_ID)
 	R<List<QualityInspectionTask>> queryQualityInspectionTaskByPersonId(@RequestParam(value = "personId") Long personId);
 
-
 }

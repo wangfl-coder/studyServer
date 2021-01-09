@@ -99,4 +99,5 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	public int correctCount(Long taskId) {
 		return baseMapper.selectCount(Wrappers.<QualityInspectionTask>query().lambda().eq(QualityInspectionTask::getInspectionTaskId, taskId).eq(QualityInspectionTask::getStatus, 2));
 	}
+
 }

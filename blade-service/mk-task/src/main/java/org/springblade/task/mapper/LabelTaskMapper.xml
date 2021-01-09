@@ -17,4 +17,59 @@
 
     </select>
 
+    <select id="annotationDoneCount" resultType="long">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE flow.ASSIGNEE_=#{param2} AND !isnull(flow.END_TIME_)
+
+    </select>
+
+    <select id="annotationTodoCount" resultType="long">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE flow.ASSIGNEE_=#{param2} AND isnull(flow.END_TIME_)
+
+    </select>
+
+    <select id="annotationClaimCount" resultType="int">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            inner join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_flow_dev.ACT_HI_IDENTITYLINK id
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        </if>
+        ON id.TASK_ID_=flow.ID_
+        WHERE ISNULL(flow.ASSIGNEE_) AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </select>
+
 </mapper>

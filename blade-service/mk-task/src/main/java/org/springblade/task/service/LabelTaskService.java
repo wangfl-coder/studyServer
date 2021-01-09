@@ -23,4 +23,10 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 	List<LabelTask> queryCompleteTask(Long taskId);
 
 	List<LabelTask> getByTaskId(Long taskId);
+
+	long annotationDoneCount(String param2);
+
+	long annotationTodoCount(String param2);
+
+	int annotationClaimCount(List<String> param2);
 }
