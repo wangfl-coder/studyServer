@@ -2,23 +2,20 @@ package org.springblade.task.feign;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.LabelTaskService;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+//import sun.security.krb5.internal.LastReq;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -82,11 +79,15 @@ public class LabelTaskClient implements ILabelTaskClient {
 	}
 
 	@Override
-	public R<LabelTask> queryLabelTaskByPersonId(Long personId) {
+	public R<List<LabelTask>> queryLabelTaskByPersonId(Long personId) {
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
 		labelTaskQueryWrapper.eq("person_id",personId);
-		LabelTask labelTask = labelTaskService.getOne(labelTaskQueryWrapper);
-		return R.data(labelTask);
+		return R.data(labelTaskService.list(labelTaskQueryWrapper));
+	}
+
+	@Override
+	public R<List<ExpertLabelTaskVO>> queryLabelTaskByExpertId(String expertId) {
+		return R.data(labelTaskService.personIdToProcessInstance(expertId));
 	}
 
 	@Override

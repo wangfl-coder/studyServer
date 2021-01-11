@@ -17,6 +17,7 @@
 package org.springblade.flow.business.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -37,10 +38,7 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
-import org.springblade.core.tool.utils.DateUtil;
-import org.springblade.core.tool.utils.Func;
-import org.springblade.core.tool.utils.StringPool;
-import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.core.tool.utils.*;
 import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
@@ -50,11 +48,14 @@ import org.springblade.flow.engine.constant.FlowEngineConstant;
 import org.springblade.flow.engine.mapper.FlowMapper;
 import org.springblade.flow.engine.utils.FlowCache;
 
+import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springblade.task.feign.ITaskClient;
+import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
+import org.springblade.task.vo.TaskVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -468,90 +469,109 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public List<SingleFlow> selectDonePageByPersonId(BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectDonePageByPersonId(BladeFlow bladeFlow,IPage<SingleFlow> page) {
 		String taskUser = TaskUtil.getTaskUser();
 		List<SingleFlow> flowList = new LinkedList<>();
+		List<ExpertLabelTaskVO> expertLabelTaskVOS = new ArrayList<>();
+		List<ExpertQualityInspectionTaskVO> expertQualityInspectionTaskVOS = new ArrayList<>();
 
 		if (bladeFlow.getCategoryName().equals("标注流程")){
-			LabelTask labelTask = iLabelTaskClient.queryLabelTaskByPersonId(bladeFlow.getPersonId()).getData();
-			if (labelTask.getId() != null) {
-				SingleFlow flow = new SingleFlow();
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
-				flow.setProcessInstanceId(labelTask.getProcessInstanceId());
-				HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
-					.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
-				if (bladeFlow.getCategory() != null) {
-					doneQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
+			if(bladeFlow.getPersonId()!=null) {
+				List<LabelTask> labelTasks = iLabelTaskClient.queryLabelTaskByPersonId(bladeFlow.getPersonId()).getData();
+				for(LabelTask labelTask:labelTasks){
+					ExpertLabelTaskVO expertLabelTaskVO = Objects.requireNonNull(BeanUtil.copy(labelTask, ExpertLabelTaskVO.class));
+					expertLabelTaskVOS.add(expertLabelTaskVO);
 				}
-				if (bladeFlow.getBeginDate() != null) {
-					doneQuery.taskCompletedAfter(bladeFlow.getBeginDate());
-				}
-				if (bladeFlow.getEndDate() != null) {
-					doneQuery.taskCompletedBefore(bladeFlow.getEndDate());
-				}
-				if (doneQuery.listPage(0, 1).size() != 0) {
-					HistoricTaskInstance historicTaskInstance = doneQuery.listPage(0, 1).get(0);
-					flow.setTaskId(historicTaskInstance.getId());
-					flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
-					flow.setTaskName(historicTaskInstance.getName());
-					flow.setAssignee(historicTaskInstance.getAssignee());
-					flow.setCreateTime(historicTaskInstance.getCreateTime());
-					flow.setExecutionId(historicTaskInstance.getExecutionId());
-					flow.setHistoryTaskEndTime(historicTaskInstance.getEndTime());
-					flow.setVariables(historicTaskInstance.getProcessVariables());
-					flow.setPriority(historicTaskInstance.getPriority());
-
-					ProcessDefinition processDefinition = FlowCache.getProcessDefinition(historicTaskInstance.getProcessDefinitionId());
-					flow.setProcessDefinitionId(processDefinition.getId());
-					flow.setProcessDefinitionName(processDefinition.getName());
-					flow.setProcessDefinitionKey(processDefinition.getKey());
-					flow.setProcessDefinitionVersion(processDefinition.getVersion());
-					flow.setCategory(processDefinition.getCategory());
-					flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
-
-					//flow.setProcessInstanceId(historicTaskInstance.getProcessInstanceId());
-					flow.setHistoryProcessInstanceId(historicTaskInstance.getProcessInstanceId());
-					HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance((historicTaskInstance.getProcessInstanceId()));
-					if (Func.isNotEmpty(historicProcessInstance)) {
-						String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
-						flow.setBusinessTable(businessKey[0]);
-						flow.setBusinessId(businessKey[1]);
-						if (historicProcessInstance.getEndActivityId() != null) {
-							flow.setProcessIsFinished(FlowEngineConstant.STATUS_FINISHED);
-						} else {
-							flow.setProcessIsFinished(FlowEngineConstant.STATUS_UNFINISHED);
-						}
-					}
-					flow.setStatus(FlowEngineConstant.STATUS_FINISH);
-					BpmnModel bpmnModel = repositoryService.getBpmnModel(historicTaskInstance.getProcessDefinitionId());
-					UserTask userTask = (UserTask) bpmnModel.getFlowElement(historicTaskInstance.getTaskDefinitionKey());
-					Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
-					List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
-					if (Func.isNotEmpty(extCompId))
-						flow.setCompositionId(extCompId.get(0).getElementText());
-					List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
-					if (Func.isNotEmpty(extField))
-						flow.setCompositionField(extField.get(0).getElementText());
-					flowList.add(flow);
-				}
-//				return flowList;
+			}else if(bladeFlow.getExpertId()!=null){
+				expertLabelTaskVOS = iLabelTaskClient.queryLabelTaskByExpertId(bladeFlow.getExpertId()).getData();
 			}
-		} else if (bladeFlow.getCategoryName().equals("质检流程")){
-			List<QualityInspectionTask> qualityInspectionTasks = iQualityInspectionTaskClient.queryQualityInspectionTaskByPersonId(bladeFlow.getPersonId()).getData();
-			qualityInspectionTasks.forEach(qualityInspectionTask -> {
-				if (qualityInspectionTask.getId() != null) {
+			expertLabelTaskVOS.forEach(expertProcessInstanceVO -> {
+				if (expertProcessInstanceVO.getId() != null) {
 					SingleFlow flow = new SingleFlow();
-					flow.setTemplateId(qualityInspectionTask.getTemplateId());
-					flow.setPersonId(qualityInspectionTask.getPersonId());
-					flow.setPersonName(qualityInspectionTask.getPersonName());
-					flow.setSubTaskId(qualityInspectionTask.getId());
-					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
-					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
-					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
-					flow.setProcessInstanceId(qualityInspectionTask.getProcessInstanceId());
+					flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
+					flow.setPersonId(expertProcessInstanceVO.getPersonId());
+					flow.setPersonName(expertProcessInstanceVO.getPersonName());
+					flow.setSubTaskId(expertProcessInstanceVO.getId());
+					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
+						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
+					if (bladeFlow.getCategory() != null) {
+						doneQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
+					}
+					if (bladeFlow.getBeginDate() != null) {
+						doneQuery.taskCompletedAfter(bladeFlow.getBeginDate());
+					}
+					if (bladeFlow.getEndDate() != null) {
+						doneQuery.taskCompletedBefore(bladeFlow.getEndDate());
+					}
+					if (doneQuery.listPage(0, 1).size() != 0) {
+						HistoricTaskInstance historicTaskInstance = doneQuery.listPage(0, 1).get(0);
+						flow.setTaskId(historicTaskInstance.getId());
+						flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
+						flow.setTaskName(historicTaskInstance.getName());
+						flow.setAssignee(historicTaskInstance.getAssignee());
+						flow.setCreateTime(historicTaskInstance.getCreateTime());
+						flow.setExecutionId(historicTaskInstance.getExecutionId());
+						flow.setHistoryTaskEndTime(historicTaskInstance.getEndTime());
+						flow.setVariables(historicTaskInstance.getProcessVariables());
+						flow.setPriority(historicTaskInstance.getPriority());
+
+						ProcessDefinition processDefinition = FlowCache.getProcessDefinition(historicTaskInstance.getProcessDefinitionId());
+						flow.setProcessDefinitionId(processDefinition.getId());
+						flow.setProcessDefinitionName(processDefinition.getName());
+						flow.setProcessDefinitionKey(processDefinition.getKey());
+						flow.setProcessDefinitionVersion(processDefinition.getVersion());
+						flow.setCategory(processDefinition.getCategory());
+						flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
+
+						//flow.setProcessInstanceId(historicTaskInstance.getProcessInstanceId());
+						flow.setHistoryProcessInstanceId(historicTaskInstance.getProcessInstanceId());
+						HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance((historicTaskInstance.getProcessInstanceId()));
+						if (Func.isNotEmpty(historicProcessInstance)) {
+							String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
+							flow.setBusinessTable(businessKey[0]);
+							flow.setBusinessId(businessKey[1]);
+							if (historicProcessInstance.getEndActivityId() != null) {
+								flow.setProcessIsFinished(FlowEngineConstant.STATUS_FINISHED);
+							} else {
+								flow.setProcessIsFinished(FlowEngineConstant.STATUS_UNFINISHED);
+							}
+						}
+						flow.setStatus(FlowEngineConstant.STATUS_FINISH);
+						BpmnModel bpmnModel = repositoryService.getBpmnModel(historicTaskInstance.getProcessDefinitionId());
+						UserTask userTask = (UserTask) bpmnModel.getFlowElement(historicTaskInstance.getTaskDefinitionKey());
+						Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
+						List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
+						if (Func.isNotEmpty(extCompId))
+							flow.setCompositionId(extCompId.get(0).getElementText());
+						List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
+						if (Func.isNotEmpty(extField))
+							flow.setCompositionField(extField.get(0).getElementText());
+						flowList.add(flow);
+					}
+				}
+			});
+		} else if (bladeFlow.getCategoryName().equals("质检流程")){
+			if(bladeFlow.getPersonId()!=null) {
+				List<QualityInspectionTask> qualityInspectionTasks = iQualityInspectionTaskClient.queryQualityInspectionTaskByPersonId(bladeFlow.getPersonId()).getData();
+				for(QualityInspectionTask qualityInspectionTask:qualityInspectionTasks){
+					ExpertQualityInspectionTaskVO expertQualityInspectionTaskVO = Objects.requireNonNull(BeanUtil.copy(qualityInspectionTask, ExpertQualityInspectionTaskVO.class));
+					expertQualityInspectionTaskVOS.add(expertQualityInspectionTaskVO);
+				}
+			}else if(bladeFlow.getExpertId()!=null){
+				expertQualityInspectionTaskVOS = iQualityInspectionTaskClient.queryQualityInspectionTaskByExpertId(bladeFlow.getExpertId()).getData();
+			}
+			expertQualityInspectionTaskVOS.forEach(expertProcessInstanceVO -> {
+				if (expertProcessInstanceVO.getId() != null) {
+					SingleFlow flow = new SingleFlow();
+					flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
+					flow.setPersonId(expertProcessInstanceVO.getPersonId());
+					flow.setPersonName(expertProcessInstanceVO.getPersonName());
+					flow.setSubTaskId(expertProcessInstanceVO.getId());
+					flow.setInspectionTaskId(expertProcessInstanceVO.getInspectionTaskId());
+					flow.setLabelTaskId(expertProcessInstanceVO.getLabelTaskId());
+					flow.setAnnotationTaskId(expertProcessInstanceVO.getTaskId());
+					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {
@@ -607,100 +627,14 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
 						flowList.add(flow);
+					}
 				}
-			}
 			});
 		}
-		return flowList;
-	}
-
-	@Override
-	public SingleFlow selectDonePageByTaskId(BladeFlow bladeFlow) {
-		String taskUser = TaskUtil.getTaskUser();
-
-		HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
-			.includeProcessVariables().taskId(bladeFlow.getTaskId()).taskDeleteReason(null);
-
-		if (bladeFlow.getCategory() != null) {
-			doneQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
-		}
-		if (bladeFlow.getBeginDate() != null) {
-			doneQuery.taskCompletedAfter(bladeFlow.getBeginDate());
-		}
-		if (bladeFlow.getEndDate() != null) {
-			doneQuery.taskCompletedBefore(bladeFlow.getEndDate());
-		}
-
-		if (doneQuery.listPage(0, 1).size() != 0) {
-			HistoricTaskInstance historicTaskInstance = doneQuery.listPage(0, 1).get(0);
-			SingleFlow flow = new SingleFlow();
-			flow.setTaskId(historicTaskInstance.getId());
-			flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
-			flow.setTaskName(historicTaskInstance.getName());
-			flow.setAssignee(historicTaskInstance.getAssignee());
-			flow.setCreateTime(historicTaskInstance.getCreateTime());
-			flow.setExecutionId(historicTaskInstance.getExecutionId());
-			flow.setHistoryTaskEndTime(historicTaskInstance.getEndTime());
-			flow.setVariables(historicTaskInstance.getProcessVariables());
-			flow.setPriority(historicTaskInstance.getPriority());
-
-			ProcessDefinition processDefinition = FlowCache.getProcessDefinition(historicTaskInstance.getProcessDefinitionId());
-			flow.setProcessDefinitionId(processDefinition.getId());
-			flow.setProcessDefinitionName(processDefinition.getName());
-			flow.setProcessDefinitionKey(processDefinition.getKey());
-			flow.setProcessDefinitionVersion(processDefinition.getVersion());
-			flow.setCategory(processDefinition.getCategory());
-			flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
-
-			flow.setProcessInstanceId(historicTaskInstance.getProcessInstanceId());
-			flow.setHistoryProcessInstanceId(historicTaskInstance.getProcessInstanceId());
-			HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance((historicTaskInstance.getProcessInstanceId()));
-			if (Func.isNotEmpty(historicProcessInstance)) {
-				String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
-				flow.setBusinessTable(businessKey[0]);
-				flow.setBusinessId(businessKey[1]);
-				if (historicProcessInstance.getEndActivityId() != null) {
-					flow.setProcessIsFinished(FlowEngineConstant.STATUS_FINISHED);
-				} else {
-					flow.setProcessIsFinished(FlowEngineConstant.STATUS_UNFINISHED);
-				}
-			}
-			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
-
-			BpmnModel bpmnModel = repositoryService.getBpmnModel(historicTaskInstance.getProcessDefinitionId());
-			UserTask userTask = (UserTask)bpmnModel.getFlowElement(historicTaskInstance.getTaskDefinitionKey());
-			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
-			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
-			if (Func.isNotEmpty(extCompId))
-				flow.setCompositionId(extCompId.get(0).getElementText());
-			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
-			if (Func.isNotEmpty(extField))
-				flow.setCompositionField(extField.get(0).getElementText());
-
-			if (bladeFlow.getCategoryName().equals("标注流程")){
-				LabelTask labelTask = iLabelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
-				if (labelTask.getId() != null) {
-					flow.setTemplateId(labelTask.getTemplateId());
-					flow.setPersonId(labelTask.getPersonId());
-					flow.setPersonName(labelTask.getPersonName());
-					flow.setSubTaskId(labelTask.getId());
-				}
-			} else if (bladeFlow.getCategoryName().equals("质检流程")){
-				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
-				if (qualityInspectionTask.getId() != null) {
-					flow.setTemplateId(qualityInspectionTask.getTemplateId());
-					flow.setPersonId(qualityInspectionTask.getPersonId());
-					flow.setPersonName(qualityInspectionTask.getPersonName());
-					flow.setSubTaskId(qualityInspectionTask.getId());
-					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
-					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
-					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
-				}
-			}
-			return flow;
-		}else{
-			return new SingleFlow();
-		}
+		page.setTotal(flowList.size());
+		page.setRecords(flowList);
+		return page;
+		//return flowList;
 	}
 
 	@Override
