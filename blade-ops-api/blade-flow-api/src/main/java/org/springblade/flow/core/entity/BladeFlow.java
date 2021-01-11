@@ -188,10 +188,15 @@ public class BladeFlow implements Serializable {
 	}
 
 	/**
-	 * 专家id
+	 * 自动生成的专家id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long personId;
+
+	/**
+	 * 真正的专家id
+	 */
+	private String expertId;
 
 
 }

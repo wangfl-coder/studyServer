@@ -30,22 +30,6 @@ public interface TaskMapper extends BaseMapper<Task> {
 	int qualityInspectionTaskCompleteCount(String env, Long taskId);
 
 	/**
-	 * 所有子任务的字段列表
-	 *
-	 * @param id    	质检任务id
-	 * @return
-	 */
-	List<Field> allLabelTaskFields(Long id);
-
-	/**
-	 * 所有子任务的错误字段列表
-	 *
-	 * @param id    	质检任务id
-	 * @return
-	 */
-	List<Field> allLabelTaskWrongFields(Long id);
-
-	/**
 	 * 查询完成的各种组合的数量
 	 * @Param taskId 任务id
 	 * @return

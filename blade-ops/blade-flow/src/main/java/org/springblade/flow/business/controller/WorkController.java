@@ -146,20 +146,9 @@ public class WorkController {
 	@GetMapping("done-by-personId")
 	@ApiOperationSupport(order = 11)
 	@ApiOperation(value = "根据专家id查询办结事务", notes = "传入流程信息")
-	public R<List<SingleFlow>> queryDoneByPersonId(@ApiParam("流程信息") BladeFlow bladeFlow) {
-		List<SingleFlow> singleFlows = flowBusinessService.selectDonePageByPersonId(bladeFlow);
-		return R.data(singleFlows);
-	}
-
-	/**
-	 * 根据任务id查询办结事务
-	 */
-	@GetMapping("done-by-taskId")
-	@ApiOperationSupport(order = 11)
-	@ApiOperation(value = "根据任务id查询办结事务", notes = "传入流程信息")
-	public R<SingleFlow> queryDoneByTaskId(@ApiParam("流程信息") BladeFlow bladeFlow) {
-		SingleFlow singleFlow = flowBusinessService.selectDonePageByTaskId(bladeFlow);
-		return R.data(singleFlow);
+	public R<IPage<SingleFlow>> queryDoneByPersonId(@ApiParam("流程信息") BladeFlow bladeFlow,Query query) {
+		IPage<SingleFlow> pages = flowBusinessService.selectDonePageByPersonId(bladeFlow, Condition.getPage(query));
+		return R.data(pages);
 	}
 
 	/**

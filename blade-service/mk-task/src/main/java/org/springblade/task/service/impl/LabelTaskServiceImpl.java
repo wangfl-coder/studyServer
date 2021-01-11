@@ -1,9 +1,7 @@
 package org.springblade.task.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
@@ -14,6 +12,8 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
@@ -25,17 +25,14 @@ import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
+import org.springblade.task.vo.RoleClaimCountVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -89,6 +86,11 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	public int completeCount(Long taskId) {
 		return baseMapper.completeCount(env, taskId);
+	}
+
+	@Override
+	public List<ExpertLabelTaskVO> personIdToProcessInstance(String expertId) {
+		return baseMapper.personIdToProcessInstance(expertId);
 	}
 
 //	@Override
@@ -152,4 +154,23 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		return list;
 	}
 
+	@Override
+	public long annotationDoneCount(String param2) {
+		return baseMapper.annotationDoneCount(env,param2);
+	}
+
+	@Override
+	public long annotationTodoCount(String param2) {
+		return baseMapper.annotationTodoCount(env,param2);
+	}
+
+	@Override
+	public int annotationClaimCount(List<String> roleAlias) {
+		return baseMapper.annotationClaimCount(env, roleAlias);
+	}
+
+	@Override
+	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
+		return baseMapper.roleClaimCount(env, roleAlias);
+	}
 }

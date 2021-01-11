@@ -54,17 +54,6 @@ g/dtd/mybatis-3-mapper.dtd">
         <result column="total" property="total"/>
     </resultMap>
 
-    <resultMap id="fieldResultMap1" type="org.springblade.task.entity.Field">
-        <result column="tq_id" property="id"/>
-        <result column="name" property="name"/>
-        <result column="field" property="field"/>
-    </resultMap>
-
-    <resultMap id="fieldResultMap2" type="org.springblade.task.entity.Field">
-        <result column="sub_task_id" property="id"/>
-        <result column="field" property="field"/>
-    </resultMap>
-
     <select id="labelTaskCompleteCount" resultType="int">
         SELECT COUNT(*) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
@@ -94,30 +83,6 @@ g/dtd/mybatis-3-mapper.dtd">
             WHERE t.inspection_task_id = #{param2} AND !isnull(flow.END_TIME_)
 
     </select>
-
-
-    <select id="allLabelTaskFields" resultMap="fieldResultMap1">
-        SELECT tq_id,name,field FROM
-        (SELECT tq.id AS tq_id,
-        tq.inspection_task_id AS tq_inspection_task_id,
-        tq.person_id AS tq_person_id,
-        tq.status AS tq_status,
-        tc.composition_id AS tc_composition_id
-        FROM `mk_task_quality_inspection` tq
-        INNER JOIN `mk_template_composition` tc
-        ON tq.template_id = tc.template_id
-        WHERE tq.inspection_task_id = #{param1} AND tc.is_deleted = 0 AND tq.is_deleted = 0) tqc
-        INNER JOIN `mk_composition` c
-        ON tqc.tc_composition_id = c.id
-    </select>
-
-    <select id="allLabelTaskWrongFields" resultMap="fieldResultMap2">
-        select sub_task_id,field from `mk_inspection_data` idata
-        inner join `mk_task_quality_inspection` tqi
-        on idata.sub_task_id = tqi.id
-        where tqi.inspection_task_id = #{param1}
-    </select>
-
 
     <select id="compositionCompleteCount" resultType="int">
         select count(*) as number from blade_user u

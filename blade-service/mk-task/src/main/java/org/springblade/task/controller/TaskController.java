@@ -156,21 +156,6 @@ public class TaskController extends BladeController {
 		return R.data(res);
 	}
 
-	@GetMapping("/compositions")
-	@ApiOperation(value = "根据id查询任务中所有组合正确率")
-	public R<Kv> compositions(Long id) {
-		Kv kv = taskService.compositions(id);
-		return R.data(kv);
-	}
-
-	@GetMapping("/role-claim-count")
-	@ApiOperation(value = "返回当前用户所有角色及分别可接的任务数")
-	public R<Kv> roleClaimCount(BladeUser user) {
-		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
-		Kv kv = taskService.roleClaimCount(roleAlias);
-		return R.data(kv);
-	}
-
 //	@GetMapping("/list")
 //	@ApiImplicitParams({
 //		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string")

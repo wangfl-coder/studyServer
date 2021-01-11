@@ -7,6 +7,7 @@ import org.springblade.common.cache.CacheNames;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
@@ -46,6 +47,13 @@ public class QualityInspectionTaskController extends BladeController implements 
 //		 List<Person> persons = getPersons().getData();
 		//Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
 		return R.status(service.startProcess(processDefinitionId,count,inspectionType,task,labelTasks));
+	}
+
+	@GetMapping("/compositions")
+	@ApiOperation(value = "根据id查询任务中所有组合正确率")
+	public R<Kv> compositions(Long id) {
+		Kv kv = service.compositions(id);
+		return R.data(kv);
 	}
 
 }

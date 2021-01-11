@@ -10,10 +10,13 @@ import org.springblade.common.cache.CacheNames;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.system.cache.SysCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
@@ -21,9 +24,11 @@ import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.vo.RoleClaimCountVO;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -66,4 +71,11 @@ public class LabelTaskController extends BladeController implements CacheNames {
 		return R.data(pages);
 	}
 
+	@GetMapping("/role-claim-count")
+	@ApiOperation(value = "返回当前用户所有角色及分别可接的任务数")
+	public R<List<RoleClaimCountVO>> roleClaimCount(BladeUser user) {
+		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
+		List<RoleClaimCountVO> res = labelTaskService.roleClaimCount(roleAlias);
+		return R.data(res);
+	}
 }

@@ -2,6 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.task.mapper.LabelTaskMapper">
 
+    <resultMap id="personProcessInstance" type="org.springblade.task.vo.ExpertLabelTaskVO">
+        <result column="id" property="id"/>
+        <result column="person_id" property="personId"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+        <result column="person_name" property="personName"/>
+        <result column="template_id" property="templateId"/>
+    </resultMap>
+
+    <resultMap id="roleClaimCountResultMap" type="org.springblade.task.vo.RoleClaimCountVO">
+        <result column="GROUP_ID_" property="roleAlias"/>
+        <result column="COUNT(GROUP_ID_)" property="count"/>
+    </resultMap>
+
     <select id="completeCount" resultType="int">
         SELECT COUNT(*) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
@@ -15,6 +29,93 @@
         ON t.process_instance_id = flow.PROC_INST_ID_
         WHERE t.task_id = #{param2} AND !isnull(flow.END_TIME_)
 
+    </select>
+
+    <select id="personIdToProcessInstance" resultMap="personProcessInstance">
+        select l.id,l.person_id,l.person_name,l.template_id,e.expert_id,l.process_instance_id from mk_adata_expert e
+        INNER JOIN mk_task_label l
+        on e.id=l.person_id
+        WHERE e.expert_id = #{expertId}
+    </select>
+
+    <select id="annotationDoneCount" resultType="long">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE flow.ASSIGNEE_=#{param2} AND !isnull(flow.END_TIME_)
+
+    </select>
+
+    <select id="annotationTodoCount" resultType="long">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE flow.ASSIGNEE_=#{param2} AND isnull(flow.END_TIME_)
+
+    </select>
+
+    <select id="annotationClaimCount" resultType="int">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            inner join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_flow_dev.ACT_HI_IDENTITYLINK id
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        </if>
+        ON id.TASK_ID_=flow.ID_
+        WHERE ISNULL(flow.ASSIGNEE_) AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </select>
+
+    <select id="roleClaimCount" resultMap="roleClaimCountResultMap">
+        SELECT GROUP_ID_,COUNT(GROUP_ID_) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            inner join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_flow_dev.ACT_HI_IDENTITYLINK id
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        </if>
+        ON id.TASK_ID_=flow.ID_
+        WHERE ISNULL(flow.ASSIGNEE_) AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY id.GROUP_ID_
     </select>
 
 </mapper>

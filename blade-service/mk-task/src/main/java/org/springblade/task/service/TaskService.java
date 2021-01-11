@@ -45,22 +45,6 @@ public interface TaskService extends BaseService<Task> {
 	List<TaskVO> batchSetCorrectCount(List<TaskVO> tasks);
 
 	/**
-	 * 批量设置质检正确的子任务数
-	 *
-	 * @param id
-	 * @return
-	 */
-	Kv compositions(Long id);
-
-	/**
-	 * 返回当前用户所有角色及分别可接的任务数
-	 *
-	 * @param roleAlias
-	 * @return
-	 */
-	Kv roleClaimCount(List<String> roleAlias);
-
-	/**
 	 * 查询当前时刻组合的数量
 	 * @Param taskId 任务id
 	 * @return
