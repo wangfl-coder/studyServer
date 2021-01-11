@@ -9,6 +9,7 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.service.QualityInspectionTaskService;
+import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -52,6 +53,11 @@ public class QualityInspectionTaskClient implements IQualityInspectionTaskClient
 		qualityInspectionTaskQueryWrapper.eq("person_id",personId);
 		List<QualityInspectionTask> qualityInspectionTasks = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
 		return R.data(qualityInspectionTasks);
+	}
+
+	@Override
+	public R<List<ExpertQualityInspectionTaskVO>> queryQualityInspectionTaskByExpertId(String expertId) {
+		return R.data(qualityInspectionTaskService.personIdToProcessInstance(expertId));
 	}
 
 }

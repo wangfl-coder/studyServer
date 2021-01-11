@@ -2,15 +2,11 @@ package org.springblade.task.service;
 
 import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.base.BaseService;
-import org.springblade.core.tool.api.R;
-import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
-import org.springblade.task.vo.TaskVO;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 public interface LabelTaskService extends BaseService<LabelTask> {
 
@@ -19,8 +15,15 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 	int completeCount(Long taskId);
 //
 //	List<TaskVO> getCompleteTaskCount(List<Task> tasks);
+    List<ExpertLabelTaskVO> personIdToProcessInstance(String expertId);
 
 	List<LabelTask> queryCompleteTask(Long taskId);
 
 	List<LabelTask> getByTaskId(Long taskId);
+
+	long annotationDoneCount(String param2);
+
+	long annotationTodoCount(String param2);
+
+	int annotationClaimCount(List<String> param2);
 }

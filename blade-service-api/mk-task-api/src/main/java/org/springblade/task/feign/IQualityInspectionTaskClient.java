@@ -4,6 +4,7 @@ import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
+import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ public interface IQualityInspectionTaskClient {
 	String QUERY_QUALITY_INSPECTION_TASK_BY_ID = API_PREFIX + "/query-quality-inspection-task-by-id";
 	String UPDATE_QUALITY_INSPECTION_TASK_BY_ID = API_PREFIX + "/update-quality-inspection-task-by-id";
 	String QUERY_QUALITY_INSPECTION_TASK_BY_PERSON_ID = API_PREFIX + "/query-quality-inspection-task-by-person-id";
+	String QUERY_QUALITY_INSPECTION_TASK_BY_EXPERT_ID = API_PREFIX + "/query-quality-inspection-task-by-expert-id";
 
 	@GetMapping(QUERY_QUALITY_INSPECTION_TASK_BY_INSTANCEID)
 	R<QualityInspectionTask> queryQualityInspectionTask(@RequestParam(value = "processInstanceId") String processInstanceId);
@@ -33,5 +35,7 @@ public interface IQualityInspectionTaskClient {
 	@GetMapping(QUERY_QUALITY_INSPECTION_TASK_BY_PERSON_ID)
 	R<List<QualityInspectionTask>> queryQualityInspectionTaskByPersonId(@RequestParam(value = "personId") Long personId);
 
+	@GetMapping(QUERY_QUALITY_INSPECTION_TASK_BY_EXPERT_ID)
+	R<List<ExpertQualityInspectionTaskVO>> queryQualityInspectionTaskByExpertId(@RequestParam(value = "expertId") String expertId);
 
 }

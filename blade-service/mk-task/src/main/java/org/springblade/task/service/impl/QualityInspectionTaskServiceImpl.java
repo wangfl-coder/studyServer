@@ -23,6 +23,7 @@ import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.QualityInspectionTaskMapper;
 import org.springblade.task.service.QualityInspectionTaskService;
+import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,4 +100,10 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 	public int correctCount(Long taskId) {
 		return baseMapper.selectCount(Wrappers.<QualityInspectionTask>query().lambda().eq(QualityInspectionTask::getInspectionTaskId, taskId).eq(QualityInspectionTask::getStatus, 2));
 	}
+
+	@Override
+	public List<ExpertQualityInspectionTaskVO> personIdToProcessInstance(String expertId) {
+		return baseMapper.personIdToProcessInstance(expertId);
+	}
+
 }

@@ -6,6 +6,7 @@ import org.springblade.core.mp.base.BaseService;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
+import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface QualityInspectionTaskService extends BaseService<QualityInspect
 	int completeCount(Long taskId);
 
 	int correctCount(Long taskId);
+
+	List<ExpertQualityInspectionTaskVO> personIdToProcessInstance(String expertId);
 }

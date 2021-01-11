@@ -2,6 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.task.mapper.QualityInspectionTaskMapper">
 
+    <resultMap id="personProcessInstance" type="org.springblade.task.vo.ExpertQualityInspectionTaskVO">
+        <result column="id" property="id"/>
+        <result column="person_id" property="personId"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+        <result column="person_name" property="personName"/>
+        <result column="template_id" property="templateId"/>
+        <result column="task_id" property="taskId"/>
+        <result column="label_task_id" property="labelTaskId"/>
+        <result column="inspection_task_id" property="inspectionTaskId"/>
+    </resultMap>
+
     <select id="completeCount" resultType="int">
         SELECT COUNT(*) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
@@ -14,6 +26,28 @@
         </if>
         ON t.process_instance_id = flow.PROC_INST_ID_
         WHERE t.inspection_task_id = #{param2} AND !isnull(flow.END_TIME_)
+    </select>
+
+<!--    <select id="inspectionDoneCount" resultType="long">-->
+<!--        SELECT COUNT(*) FROM-->
+<!--        <if test="param1!= null and param1!= '' and param1 == 'dev'">-->
+<!--            bladex_dev.mk_task_quality_inspection t-->
+<!--            left join bladex_flow_dev.ACT_HI_TASKINST flow-->
+<!--        </if>-->
+<!--        <if test="param1!= null and param1!= '' and param1 == 'prod'">-->
+<!--            bladex.mk_task_quality_inspection t-->
+<!--            left join bladex_flow.ACT_HI_TASKINST flow-->
+<!--        </if>-->
+<!--        ON t.process_instance_id = flow.PROC_INST_ID_-->
+<!--        WHERE flow.ASSIGNEE_=#{param2} AND !isnull(flow.END_TIME_)-->
+
+<!--    </select>-->
+
+    <select id="personIdToProcessInstance" resultMap="personProcessInstance">
+        select q.id,q.person_id,q.person_name,q.template_id,e.expert_id,q.process_instance_id,q.label_task_id,q.task_id,q.inspection_task_id from mk_adata_expert e
+        INNER JOIN mk_task_quality_inspection q
+        on e.id=q.person_id
+        WHERE e.expert_id = #{expertId}
     </select>
 
 </mapper>
