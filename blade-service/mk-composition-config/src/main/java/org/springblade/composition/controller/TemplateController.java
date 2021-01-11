@@ -189,11 +189,14 @@ public class TemplateController extends BladeController {
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
 			templateCompositionDTO.setCompositionField(composition.getField());
 		});
-		R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
-		if (!result.isSuccess()) {
-			return R.fail("部署模版流程失败");
+		boolean generateProcess = false;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
+		if (generateProcess) {
+			R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
+			if (!result.isSuccess()) {
+				return R.fail("部署模版流程失败");
+			}
+			templateDTO.setProcessDefinitionId((String) result.getData());
 		}
-		templateDTO.setProcessDefinitionId((String)result.getData());
 		boolean tmp = templateService.saveOrUpdate(template);
 		if(!tmp) {
 			return R.fail("新建模板失败");

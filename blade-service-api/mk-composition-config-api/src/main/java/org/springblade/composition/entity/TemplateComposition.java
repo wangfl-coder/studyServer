@@ -78,9 +78,14 @@ public class TemplateComposition extends BaseEntity {
 	/**
 	 * 重复标注次数
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "重复标注次数")
-	private Integer repeatMarkTimes;
+	private Integer labelRepeatTimes;
+
+	/**
+	 * 标注相同通过次数
+	 */
+	@ApiModelProperty(value = "标注相同通过次数")
+	private Integer labelAgreementCount;
 
 	/**
 	 * 备注
