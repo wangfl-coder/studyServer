@@ -57,6 +57,7 @@ import org.springblade.flow.engine.constant.FlowEngineConstant;
 import org.springblade.flow.engine.mapper.FlowMapper;
 import org.springblade.flow.engine.utils.FlowCache;
 
+import org.springblade.system.cache.SysCache;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
@@ -96,7 +97,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	@Override
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
-		String taskGroup = TaskUtil.getCandidateGroup();
+		String taskGroup;
+		if (null != bladeFlow.getRoleId()) {
+			List<String> res = SysCache.getRoleAliases(bladeFlow.getRoleId().toString());
+			if (Func.isNotEmpty(res)) {
+				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
+			}else {
+				return null;
+			}
+		}else {
+			taskGroup = TaskUtil.getCandidateGroup();
+		}
 		List<SingleFlow> flowList = new LinkedList<>();
 
 		// 个人等待签收的任务
@@ -126,9 +137,19 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public SingleFlow selectOneClaimPage(String categoryName) {
+	public SingleFlow selectOneClaimPage(String categoryName, Long roleId) {
 //		String taskUser = TaskUtil.getTaskUser();
-		String taskGroup = TaskUtil.getCandidateGroup();
+		String taskGroup;
+		if (null != roleId) {
+			List<String> res = SysCache.getRoleAliases(roleId.toString());
+			if (Func.isNotEmpty(res)) {
+				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
+			}else {
+				return null;
+			}
+		}else {
+			taskGroup = TaskUtil.getCandidateGroup();
+		}
 
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
@@ -736,6 +757,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			log.error(ProcessConstant.HOMEPAGE_FOUND_KEY+ kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY));
 			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
 			variables.put(ProcessConstant.HOMEPAGE_FOUND_KEY, kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY));
+//			variables.put("isHomepageFound", true);
 			if (!kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY)){
 				flowMapper.updateStatistic(env,labelTask.getId(),2);
 			}

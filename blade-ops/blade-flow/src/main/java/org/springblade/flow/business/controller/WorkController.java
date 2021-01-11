@@ -86,8 +86,7 @@ public class WorkController {
 	@GetMapping("claim-one")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "返回一个待签事务并签收", notes = "传入流程信息")
-
-	public R<SingleFlow> claimOne(@RequestParam(value = "categoryName") String categoryName) {
+	public R<SingleFlow> claimOne(@RequestParam String categoryName, @RequestParam(value="roleId", required=false) Long roleId) {
 //		Query query = new Query();
 //		query.setCurrent(1).setSize(1);
 //		IPage<BladeFlow> bladeFlowIPage = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
@@ -99,7 +98,7 @@ public class WorkController {
 //		}else {
 //			return null;
 //		}
-		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName);
+		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId);
 		if(flow.getTaskId()!=null){
 			taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
 			return R.data(flow);

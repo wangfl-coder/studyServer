@@ -72,6 +72,7 @@ public interface ProcessConstant {
 	 * 主页是否完整标识
 	 */
 	String HOMEPAGE_FOUND_KEY = "isHpComplete";
+//	String HOMEPAGE_FOUND_KEY = "isHomepageFound";
 
 	/**
 	 * 基本信息是否完整标识

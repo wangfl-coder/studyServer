@@ -15,11 +15,13 @@ import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
@@ -59,6 +61,7 @@ public class TaskController extends BladeController {
 	private IFlowClient flowClient;
 	private TaskMapper taskMapper;
 	private LabelTaskMapper labelTaskMapper;
+
 
 	@GetMapping(value = "/complete/count")
 	@ApiOperation(value = "查询已经完成的任务的数量")
@@ -155,8 +158,16 @@ public class TaskController extends BladeController {
 
 	@GetMapping("/compositions")
 	@ApiOperation(value = "根据id查询任务中所有组合正确率")
-	public R<Kv> compositions(Long id){
+	public R<Kv> compositions(Long id) {
 		Kv kv = taskService.compositions(id);
+		return R.data(kv);
+	}
+
+	@GetMapping("/role-claim-count")
+	@ApiOperation(value = "返回当前用户所有角色及分别可接的任务数")
+	public R<Kv> roleClaimCount(BladeUser user) {
+		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
+		Kv kv = taskService.roleClaimCount(roleAlias);
 		return R.data(kv);
 	}
 

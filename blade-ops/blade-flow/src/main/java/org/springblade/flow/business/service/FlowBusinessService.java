@@ -47,7 +47,7 @@ public interface FlowBusinessService {
 	 *
 	 * @return
 	 */
-	SingleFlow selectOneClaimPage(String categoryName);
+	SingleFlow selectOneClaimPage(String categoryName, Long roleId);
 
 	/**
 	 * 流程待办列表

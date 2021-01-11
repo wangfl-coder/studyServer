@@ -48,13 +48,17 @@ public class BladeFlow implements Serializable {
 	 */
 	private String taskDefinitionKey;
 	/**
+	 * 任务执行人名称
+	 */
+	private String assigneeName;
+	/**
 	 * 任务执行人编号
 	 */
 	private String assignee;
 	/**
-	 * 任务执行人名称
+	 * 任务执行人角色Id
 	 */
-	private String assigneeName;
+	private Long roleId;
 	/**
 	 * 任务优先级
 	 */

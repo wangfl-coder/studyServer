@@ -140,6 +140,17 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	}
 
 	@Override
+	public Kv roleClaimCount(List<String> roleAlias) {
+		Kv res = Kv.create();
+		String roleStr = StringUtil.collectionToCommaDelimitedString(roleAlias);
+		roleAlias.forEach(alias -> {
+			int count = taskMapper.roleClaimCount(env, alias);
+			res.put(alias, count);
+		});
+		return res;
+	}
+
+	@Override
 	public Integer compositionCount(Long taskId) {
 		return taskMapper.compositionCount(env,taskId);
 	}

@@ -173,10 +173,9 @@ public class TemplateController extends BladeController {
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "新增或修改模板，同时构建组合", notes = "传入templateDTO")
 	public R submit(@Valid @RequestBody TemplateDTO templateDTO) {
-		Template template = Objects.requireNonNull(BeanUtil.copy(templateDTO, Template.class));
 		// 不等于null，就是更新操作。需要首先判断是否有任务已经使用此模板
-		if (template.getId() != null){
-			Task task = taskClient.getByTemplate(template.getId()).getData();
+		if (templateDTO.getId() != null){
+			Task task = taskClient.getByTemplate(templateDTO.getId()).getData();
 			if (task.getId() != null){
 				return R.fail("有任务已经使用此模板，不能修改，可以停用");
 			}
@@ -197,6 +196,7 @@ public class TemplateController extends BladeController {
 			}
 			templateDTO.setProcessDefinitionId((String) result.getData());
 		}
+		Template template = Objects.requireNonNull(BeanUtil.copy(templateDTO, Template.class));
 		boolean tmp = templateService.saveOrUpdate(template);
 		if(!tmp) {
 			return R.fail("新建模板失败");
