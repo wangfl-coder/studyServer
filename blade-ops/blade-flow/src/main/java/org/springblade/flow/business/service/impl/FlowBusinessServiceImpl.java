@@ -505,6 +505,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				}
 			}else if(bladeFlow.getExpertId()!=null){
 				expertLabelTaskVOS = iLabelTaskClient.queryLabelTaskByExpertId(bladeFlow.getExpertId()).getData();
+			}else {
+				return selectDonePage(page, bladeFlow);
 			}
 			expertLabelTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
@@ -584,6 +586,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				}
 			}else if(bladeFlow.getExpertId()!=null){
 				expertQualityInspectionTaskVOS = iQualityInspectionTaskClient.queryQualityInspectionTaskByExpertId(bladeFlow.getExpertId()).getData();
+			}else{
+				return selectDonePage(page,bladeFlow);
 			}
 			expertQualityInspectionTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
