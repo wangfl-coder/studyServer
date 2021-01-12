@@ -148,7 +148,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		}
 
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().asc();
 
 		if (taskQuery.listPage(0, 1).size() != 0) {
 			Task task = taskQuery.listPage(0, 1).get(0);
