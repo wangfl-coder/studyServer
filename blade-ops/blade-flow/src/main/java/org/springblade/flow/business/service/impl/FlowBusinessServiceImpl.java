@@ -503,8 +503,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					ExpertLabelTaskVO expertLabelTaskVO = Objects.requireNonNull(BeanUtil.copy(labelTask, ExpertLabelTaskVO.class));
 					expertLabelTaskVOS.add(expertLabelTaskVO);
 				}
-			}else if(bladeFlow.getExpertId()!=null){
+			}else if(bladeFlow.getExpertId() != null && !bladeFlow.getExpertId().isEmpty()){
 				expertLabelTaskVOS = iLabelTaskClient.queryLabelTaskByExpertId(bladeFlow.getExpertId()).getData();
+			}else {
+				return selectDonePage(page, bladeFlow);
 			}
 			expertLabelTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
@@ -514,6 +516,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setPersonName(expertProcessInstanceVO.getPersonName());
 					flow.setSubTaskId(expertProcessInstanceVO.getId());
 					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+					if(bladeFlow.getExpertId()!=null){
+						flow.setExpertId(bladeFlow.getExpertId());
+					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {
@@ -579,8 +584,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					ExpertQualityInspectionTaskVO expertQualityInspectionTaskVO = Objects.requireNonNull(BeanUtil.copy(qualityInspectionTask, ExpertQualityInspectionTaskVO.class));
 					expertQualityInspectionTaskVOS.add(expertQualityInspectionTaskVO);
 				}
-			}else if(bladeFlow.getExpertId()!=null){
+			}else if(bladeFlow.getExpertId()!=null && !bladeFlow.getExpertId().isEmpty()){
 				expertQualityInspectionTaskVOS = iQualityInspectionTaskClient.queryQualityInspectionTaskByExpertId(bladeFlow.getExpertId()).getData();
+			}else{
+				return selectDonePage(page,bladeFlow);
 			}
 			expertQualityInspectionTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
@@ -593,6 +600,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setLabelTaskId(expertProcessInstanceVO.getLabelTaskId());
 					flow.setAnnotationTaskId(expertProcessInstanceVO.getTaskId());
 					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+					if(bladeFlow.getExpertId()!=null){
+						flow.setExpertId(bladeFlow.getExpertId());
+					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {

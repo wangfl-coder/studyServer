@@ -19,6 +19,7 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.Func;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
@@ -67,9 +68,14 @@ public class CompositionController extends BladeController {
 	@PostMapping(value = "/update")
 	@ApiOperation(value = "更新组合")
 	public R update(@RequestBody Composition composition){
-		TemplateComposition templateComposition = new TemplateComposition();
-		templateComposition.setCompositionId(composition.getId());
-		if (templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition).last("LIMIT 1")).getId() != null){
+//		TemplateComposition templateComposition = new TemplateComposition();
+//		templateComposition.setCompositionId(composition.getId());
+//		if (templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition).last("LIMIT 1")).getId() != null){
+//			return R.fail("不能更新组合，已经有模板使用此组合，可以停用");
+//		}
+		QueryWrapper<TemplateComposition> templateCompositionQueryWrapper = new QueryWrapper<>();
+		templateCompositionQueryWrapper.eq("composition_id",composition.getId());
+		if (templateCompositionService.list(templateCompositionQueryWrapper).size()!=0){
 			return R.fail("不能更新组合，已经有模板使用此组合，可以停用");
 		}
 		return R.status(ICompositionService.updateById(composition));

@@ -79,12 +79,12 @@ public class TaskController extends BladeController {
 	@GetMapping(value = "/inspection/count")
 	@ApiOperation(value = "查询可以质检的标注子任务数量")
 	public R queryIsInspectionTaskCount(@RequestParam("taskId") Long taskId) {
-		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
+		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask1(taskId);
 		return R.data(labelTasks.size());
 	}
 
 	@GetMapping(value = "/complete/list")
-	@ApiOperation(value = "查询已经完成的任务列表")
+	@ApiOperation(value = "查询已经完成的标注任务列表")
 	public R queryCompleteTask(@RequestParam("taskId") Long taskId) {
 		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(taskId);
 		return R.data(labelTasks);
@@ -94,8 +94,14 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加质检任务")
 	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
+		List<LabelTask> labelTasks=new ArrayList<>();
 		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
-		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
+		//1不去重,2去重
+		if(qualityInspectionDTO.getInspectionType()==1){
+			labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
+		}else if(qualityInspectionDTO.getInspectionType()==2){
+			labelTasks = labelTaskService.queryCompleteTask1(task.getAnnotationTaskId());
+		}
 		if (labelTasks.size() > 0){
 			boolean save = taskService.save(task);
 			try {
