@@ -503,7 +503,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					ExpertLabelTaskVO expertLabelTaskVO = Objects.requireNonNull(BeanUtil.copy(labelTask, ExpertLabelTaskVO.class));
 					expertLabelTaskVOS.add(expertLabelTaskVO);
 				}
-			}else if(bladeFlow.getExpertId()!=null){
+			}else if(bladeFlow.getExpertId() != null && !bladeFlow.getExpertId().isEmpty()){
 				expertLabelTaskVOS = iLabelTaskClient.queryLabelTaskByExpertId(bladeFlow.getExpertId()).getData();
 			}else {
 				return selectDonePage(page, bladeFlow);
@@ -584,7 +584,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					ExpertQualityInspectionTaskVO expertQualityInspectionTaskVO = Objects.requireNonNull(BeanUtil.copy(qualityInspectionTask, ExpertQualityInspectionTaskVO.class));
 					expertQualityInspectionTaskVOS.add(expertQualityInspectionTaskVO);
 				}
-			}else if(bladeFlow.getExpertId()!=null){
+			}else if(bladeFlow.getExpertId()!=null && !bladeFlow.getExpertId().isEmpty()){
 				expertQualityInspectionTaskVOS = iQualityInspectionTaskClient.queryQualityInspectionTaskByExpertId(bladeFlow.getExpertId()).getData();
 			}else{
 				return selectDonePage(page,bladeFlow);
