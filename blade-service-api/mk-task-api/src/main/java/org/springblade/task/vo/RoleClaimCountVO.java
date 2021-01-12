@@ -18,6 +18,9 @@ public class RoleClaimCountVO {
 	@ApiModelProperty(value = "角色别名")
 	private String roleAlias;
 
+	@ApiModelProperty(value = "角色名")
+	private String roleName;
+
 	@ApiModelProperty(value = "可接任务数")
 	private Integer count;
 
