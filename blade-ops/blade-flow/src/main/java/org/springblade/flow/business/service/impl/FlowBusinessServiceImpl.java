@@ -186,26 +186,29 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 			if (categoryName.equals("标注流程")) {
 				LabelTask labelTask = iLabelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-
 //					log.error("processInstanceId:"+task.getProcessInstanceId());
 //					log.error("taskId:"+task.getId());
-
-				flow.setTemplateId(labelTask.getTemplateId());
-				flow.setPersonId(labelTask.getPersonId());
-				flow.setPersonName(labelTask.getPersonName());
-				flow.setSubTaskId(labelTask.getId());
+				if(labelTask.getId()!=null){
+					flow.setTemplateId(labelTask.getTemplateId());
+					flow.setPersonId(labelTask.getPersonId());
+					flow.setPersonName(labelTask.getPersonName());
+					flow.setSubTaskId(labelTask.getId());
+					return flow;
+				}
 			} else if (categoryName.equals("质检流程")) {
 				QualityInspectionTask qualityInspectionTask = iQualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
-				flow.setTemplateId(qualityInspectionTask.getTemplateId());
-				flow.setPersonId(qualityInspectionTask.getPersonId());
-				flow.setPersonName(qualityInspectionTask.getPersonName());
-				flow.setSubTaskId(qualityInspectionTask.getId());
-				flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
-				flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
-				flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+				if(qualityInspectionTask.getId()!=null){
+					flow.setTemplateId(qualityInspectionTask.getTemplateId());
+					flow.setPersonId(qualityInspectionTask.getPersonId());
+					flow.setPersonName(qualityInspectionTask.getPersonName());
+					flow.setSubTaskId(qualityInspectionTask.getId());
+					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					return flow;
+				}
 			}
-			return flow;
-
+			return new SingleFlow();
 		} else {
 			return new SingleFlow();
 		}
