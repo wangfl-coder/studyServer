@@ -514,6 +514,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setPersonName(expertProcessInstanceVO.getPersonName());
 					flow.setSubTaskId(expertProcessInstanceVO.getId());
 					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+					if(bladeFlow.getExpertId()!=null){
+						flow.setExpertId(bladeFlow.getExpertId());
+					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {
@@ -593,6 +596,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setLabelTaskId(expertProcessInstanceVO.getLabelTaskId());
 					flow.setAnnotationTaskId(expertProcessInstanceVO.getTaskId());
 					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+					if(bladeFlow.getExpertId()!=null){
+						flow.setExpertId(bladeFlow.getExpertId());
+					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
 						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {

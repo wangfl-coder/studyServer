@@ -79,7 +79,7 @@ public class TemplateComposition extends BaseEntity {
 	 * 重复标注次数
 	 */
 	@ApiModelProperty(value = "重复标注次数")
-	private Integer labelRepeatTimes;
+	private Integer label_repeat_times;
 
 	/**
 	 * 标注相同通过次数
