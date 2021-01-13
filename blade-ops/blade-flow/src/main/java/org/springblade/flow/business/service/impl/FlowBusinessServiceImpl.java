@@ -572,6 +572,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 						if (Func.isNotEmpty(extCompId))
 							flow.setCompositionId(extCompId.get(0).getElementText());
+						List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+						if (Func.isNotEmpty(extCompType))
+							flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 						List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
@@ -656,6 +659,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 						if (Func.isNotEmpty(extCompId))
 							flow.setCompositionId(extCompId.get(0).getElementText());
+						List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+						if (Func.isNotEmpty(extCompType))
+							flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
 						List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
