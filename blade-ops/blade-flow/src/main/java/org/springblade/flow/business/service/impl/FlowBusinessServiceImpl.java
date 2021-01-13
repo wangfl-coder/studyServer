@@ -513,17 +513,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			}
 			expertLabelTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
-					SingleFlow flow = new SingleFlow();
-					flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
-					flow.setPersonId(expertProcessInstanceVO.getPersonId());
-					flow.setPersonName(expertProcessInstanceVO.getPersonName());
-					flow.setSubTaskId(expertProcessInstanceVO.getId());
-					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
-					if(bladeFlow.getExpertId()!=null){
-						flow.setExpertId(bladeFlow.getExpertId());
-					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
-						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
+						.includeProcessVariables().taskDeleteReason(null).processInstanceId(expertProcessInstanceVO.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {
 						doneQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
 					}
@@ -533,8 +524,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					if (bladeFlow.getEndDate() != null) {
 						doneQuery.taskCompletedBefore(bladeFlow.getEndDate());
 					}
-					if (doneQuery.listPage(0, 1).size() != 0) {
-						HistoricTaskInstance historicTaskInstance = doneQuery.listPage(0, 1).get(0);
+					List<HistoricTaskInstance> doneList = doneQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
+					doneList.forEach(historicTaskInstance -> {
+						SingleFlow flow = new SingleFlow();
+						flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
+						flow.setPersonId(expertProcessInstanceVO.getPersonId());
+						flow.setPersonName(expertProcessInstanceVO.getPersonName());
+						flow.setSubTaskId(expertProcessInstanceVO.getId());
+						flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+						if(bladeFlow.getExpertId()!=null){
+							flow.setExpertId(bladeFlow.getExpertId());
+						}
 						flow.setTaskId(historicTaskInstance.getId());
 						flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
 						flow.setTaskName(historicTaskInstance.getName());
@@ -553,7 +553,6 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						flow.setCategory(processDefinition.getCategory());
 						flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
 
-						//flow.setProcessInstanceId(historicTaskInstance.getProcessInstanceId());
 						flow.setHistoryProcessInstanceId(historicTaskInstance.getProcessInstanceId());
 						HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance((historicTaskInstance.getProcessInstanceId()));
 						if (Func.isNotEmpty(historicProcessInstance)) {
@@ -577,7 +576,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
 						flowList.add(flow);
-					}
+					});
 				}
 			});
 		} else if (bladeFlow.getCategoryName().equals("质检流程")){
@@ -594,20 +593,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			}
 			expertQualityInspectionTaskVOS.forEach(expertProcessInstanceVO -> {
 				if (expertProcessInstanceVO.getId() != null) {
-					SingleFlow flow = new SingleFlow();
-					flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
-					flow.setPersonId(expertProcessInstanceVO.getPersonId());
-					flow.setPersonName(expertProcessInstanceVO.getPersonName());
-					flow.setSubTaskId(expertProcessInstanceVO.getId());
-					flow.setInspectionTaskId(expertProcessInstanceVO.getInspectionTaskId());
-					flow.setLabelTaskId(expertProcessInstanceVO.getLabelTaskId());
-					flow.setAnnotationTaskId(expertProcessInstanceVO.getTaskId());
-					flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
-					if(bladeFlow.getExpertId()!=null){
-						flow.setExpertId(bladeFlow.getExpertId());
-					}
 					HistoricTaskInstanceQuery doneQuery = historyService.createHistoricTaskInstanceQuery().taskAssignee(taskUser).finished()
-						.includeProcessVariables().taskDeleteReason(null).processInstanceId(flow.getProcessInstanceId());
+						.includeProcessVariables().taskDeleteReason(null).processInstanceId(expertProcessInstanceVO.getProcessInstanceId());
 					if (bladeFlow.getCategory() != null) {
 						doneQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
 					}
@@ -617,8 +604,20 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					if (bladeFlow.getEndDate() != null) {
 						doneQuery.taskCompletedBefore(bladeFlow.getEndDate());
 					}
-					if (doneQuery.listPage(0, 1).size() != 0) {
-						HistoricTaskInstance historicTaskInstance = doneQuery.listPage(0, 1).get(0);
+					List<HistoricTaskInstance> doneList = doneQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
+					doneList.forEach(historicTaskInstance -> {
+						SingleFlow flow = new SingleFlow();
+						flow.setTemplateId(expertProcessInstanceVO.getTemplateId());
+						flow.setPersonId(expertProcessInstanceVO.getPersonId());
+						flow.setPersonName(expertProcessInstanceVO.getPersonName());
+						flow.setSubTaskId(expertProcessInstanceVO.getId());
+						flow.setInspectionTaskId(expertProcessInstanceVO.getInspectionTaskId());
+						flow.setLabelTaskId(expertProcessInstanceVO.getLabelTaskId());
+						flow.setAnnotationTaskId(expertProcessInstanceVO.getTaskId());
+						flow.setProcessInstanceId(expertProcessInstanceVO.getProcessInstanceId());
+						if(bladeFlow.getExpertId()!=null){
+							flow.setExpertId(bladeFlow.getExpertId());
+						}
 						flow.setTaskId(historicTaskInstance.getId());
 						flow.setTaskDefinitionKey(historicTaskInstance.getTaskDefinitionKey());
 						flow.setTaskName(historicTaskInstance.getName());
@@ -661,7 +660,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
 						flowList.add(flow);
-					}
+					});
 				}
 			});
 		}
