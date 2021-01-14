@@ -122,6 +122,12 @@ public class Expert extends BaseEntity {
 	private String homepage;
 
 	/**
+	 * 第三方个人主页
+	 */
+	@ApiModelProperty(value = "第三方个人主页")
+	private String otherHomepage;
+	
+	/**
 	 * 官方主页
 	 */
 	@ApiModelProperty(value = "官方主页")

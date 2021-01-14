@@ -43,6 +43,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
@@ -112,7 +113,12 @@ public class InspectionDataController extends BladeController {
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入InspectionDataVO对象")
 	public R submit(@Valid @RequestBody InspectionDataVO inspectionDataVO) {
-
+		// 清理质检数据前后的多余空白字符
+		if (inspectionDataVO.getInspectionDataList() != null) {
+			inspectionDataVO.getInspectionDataList().forEach(inspectionData -> {
+				inspectionData.setValue(StringUtil.trimWhitespace(inspectionData.getValue()));
+			});
+		}
 		Long subTaskId  = inspectionDataVO.getSubTaskId();
 		List<InspectionData> inspectionDataList = inspectionDataVO.getInspectionDataList();
 
