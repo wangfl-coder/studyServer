@@ -17,6 +17,7 @@
 package org.springblade.composition.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
@@ -103,6 +104,10 @@ public class AnnotationDataController extends BladeController {
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
 	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+		// 清理标注数据前后的多余空白字符
+		if (annotationDataVO.getAnnotationDataList() != null) {
+			annotationDataVO.getAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
+		}
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
