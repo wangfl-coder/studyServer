@@ -25,16 +25,19 @@ import org.flowable.bpmn.model.ExtensionElement;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -80,6 +83,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final IQualityInspectionTaskClient iQualityInspectionTaskClient;
 	private final IExpertClient iExpertClient;
 	private final FlowMapper flowMapper;
+	private final IStatisticsClient iStatisticsClient;
+	private final RuntimeService runtimeService;
 
 
 	@Value("${spring.profiles.active}")
@@ -659,7 +664,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public boolean completeTask(BladeFlow flow) {
+	public boolean completeTask(SingleFlow flow) {
 		String taskId = flow.getTaskId();
 		String processInstanceId = flow.getProcessInstanceId();
 		String taskGroup = TaskUtil.getCandidateGroup();
@@ -671,6 +676,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (StringUtil.isNoneBlank(processInstanceId, comment)) {
 			taskService.addComment(taskId, processInstanceId, comment);
 		}
+		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+		Map<String, Object> processVariables = processInstance.getProcessVariables();
 		// 创建变量
 		Map<String, Object> variables = flow.getVariables();
 		if (variables == null) {
@@ -689,6 +696,49 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			if (!res.isSuccess()) {
 				log.error("获取专家信息是否完成失败！");
 				return false;
+			}
+//			if (null != flow.getCompositionType() && 2 == flow.getCompositionType()) {
+			if (taskGroup.equals("homepage_labeler")) {
+				variables.put("biCount1", 0);
+				variables.put("biSame1", 0);
+				variables.put("biNotfound1", 0);
+				variables.put("biCount2", 0);
+				variables.put("biSame2", 0);
+				variables.put("biNotfound2", 0);
+			}
+			if (taskGroup.equals("bi1")){
+				if (null == processVariables.get("biCount1")) {
+					variables.put("biCount1", 0);
+					variables.put("biSame1", 0);
+					variables.put("biNotfound1", 0);
+				} else {
+					R<Kv> res2 = iStatisticsClient.queryBasicInfoStatus(labelTask.getId(), labelTask.getTemplateId(), 1348915419956248578L);
+					if (!res2.isSuccess()) {
+						log.error("查询基本信息状态失败！");
+						return false;
+					}
+					Kv kv = res2.getData();
+					variables.put("biCount1", kv.get("biCount"));
+					variables.put("biSame1", kv.get("biSame"));
+					variables.put("biNotfound1", kv.get("biNotfound"));
+				}
+			}
+			if (taskGroup.equals("bi2")){
+				if (null == processVariables.get("biCount2")) {
+					variables.put("biCount2", 0);
+					variables.put("biSame2", 0);
+					variables.put("biNotfound2", 0);
+				} else {
+					R<Kv> res2 = iStatisticsClient.queryBasicInfoStatus(labelTask.getId(), labelTask.getTemplateId(), 1348915419956248578L);
+					if (!res2.isSuccess()) {
+						log.error("查询基本信息状态失败！");
+						return false;
+					}
+					Kv kv = res2.getData();
+					variables.put("biCount2", kv.get("biCount"));
+					variables.put("biSame2", kv.get("biSame"));
+					variables.put("biNotfound2", kv.get("biNotfound"));
+				}
 			}
 			Kv kv = res.getData();
 			variables.put("priority", task.getPriority());

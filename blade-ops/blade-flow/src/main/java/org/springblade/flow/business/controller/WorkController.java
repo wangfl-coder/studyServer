@@ -184,7 +184,7 @@ public class WorkController {
 	@PostMapping("complete-task")
 	@ApiOperationSupport(order = 9)
 	@ApiOperation(value = "完成任务", notes = "传入流程信息")
-	public R completeTask(@ApiParam("任务信息") @RequestBody BladeFlow flow) {
+	public R completeTask(@ApiParam("任务信息") @RequestBody SingleFlow flow) {
 		if (!flow.getStatus().equals("finish")) {
 			return R.status(flowBusinessService.completeTask(flow));
 		}else {

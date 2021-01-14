@@ -188,7 +188,7 @@ public class TemplateController extends BladeController {
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
 			templateCompositionDTO.setCompositionField(composition.getField());
 		});
-		boolean generateProcess = true;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
+		boolean generateProcess = false;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
 		if (generateProcess) {
 			R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
 			if (!result.isSuccess()) {

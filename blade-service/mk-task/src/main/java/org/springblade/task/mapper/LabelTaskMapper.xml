@@ -12,6 +12,7 @@
     </resultMap>
 
     <resultMap id="roleClaimCountResultMap" type="org.springblade.task.vo.RoleClaimCountVO">
+        <result column="id" property="roleId"/>
         <result column="GROUP_ID_" property="roleAlias"/>
         <result column="role_name" property="roleName"/>
         <result column="COUNT(GROUP_ID_)" property="count"/>
@@ -95,7 +96,7 @@
     </select>
 
     <select id="roleClaimCount" resultMap="roleClaimCountResultMap">
-        SELECT t.*,role.role_name FROM (
+        SELECT role.id,t.*,role.role_name FROM (
         SELECT GROUP_ID_,COUNT(GROUP_ID_) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
             bladex_dev.mk_task_label t
