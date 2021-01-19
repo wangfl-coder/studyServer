@@ -89,7 +89,7 @@ public class TemplateController extends BladeController {
 			composition.setAnnotationType(3);
 			return R.data(composition);
 		}
-		templateComposition.setRoleName(userRoleName);
+		templateComposition.setLabelRoleName(userRoleName);
 		TemplateComposition detail = templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition));
 		if (detail == null){
 			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
@@ -188,7 +188,7 @@ public class TemplateController extends BladeController {
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
 			templateCompositionDTO.setCompositionField(composition.getField());
 		});
-		boolean generateProcess = false;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
+		boolean generateProcess = true;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
 		if (generateProcess) {
 			R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
 			if (!result.isSuccess()) {

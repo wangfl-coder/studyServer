@@ -1,6 +1,7 @@
 package org.springblade.task.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springblade.composition.entity.Composition;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.vo.RoleClaimCountVO;
@@ -56,4 +57,11 @@ public interface LabelTaskMapper extends BaseMapper<LabelTask> {
 	 * @return
 	 */
 	List<RoleClaimCountVO> roleClaimCount(String env, List<String> param2);
+
+	/**
+	 * 返回模版中所有的组合
+	 * @param templateId 模版Id
+	 * @return
+	 */
+	List<Composition> allCompositions(Long templateId);
 }

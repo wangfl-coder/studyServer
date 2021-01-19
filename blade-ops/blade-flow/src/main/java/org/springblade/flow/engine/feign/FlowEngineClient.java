@@ -60,19 +60,42 @@ public class FlowEngineClient implements IFlowEngineClient {
 	/**
 	 * 从模版部署流程的参考模型Id
 	 */
-	@Value("${blade.template-process.model-id}")
+	@Value("${blade.template-process.v1.model-id}")
 	private String modelId;
 
 	/**
 	 * 从模版部署流程的流程类型
 	 */
-	@Value("${blade.template-process.category}")
+	@Value("${blade.template-process.v1.category}")
 	private String category;
+
+	/**
+	 * 从模版部署流程V2的参考模型Id
+	 */
+	@Value("${blade.template-process.v2.model-id}")
+	private String modelIdV2;
+
+	/**
+	 * 从模版部署流程V2的流程类型
+	 */
+	@Value("${blade.template-process.v2.category}")
+	private String categoryV2;
+
+	/**
+	 * 用哪个版本的模型
+	 */
+	@Value("${blade.template-process.using}")
+	private String using;
 
 	@Override
 	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
 	public R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO) {
-		String processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, null, templateDTO);
+		String processDefinitionId;
+		if (using.equals("v2")) {
+			processDefinitionId = flowEngineService.deployModelByTemplateV2(modelIdV2, categoryV2, null, templateDTO);
+		} else {
+			processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, null, templateDTO);
+		}
 		return R.data(processDefinitionId);
 	}
 }

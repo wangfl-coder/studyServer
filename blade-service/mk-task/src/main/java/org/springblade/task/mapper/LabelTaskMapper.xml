@@ -18,6 +18,22 @@
         <result column="COUNT(GROUP_ID_)" property="count"/>
     </resultMap>
 
+    <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
+        <result column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="create_user" property="createUser"/>
+        <result column="create_dept" property="createDept"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="name" property="name"/>
+        <result column="field" property="field"/>
+        <result column="annotation_type" property="annotationType"/>
+    </resultMap>
+
     <select id="completeCount" resultType="int">
         SELECT COUNT(*) FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
@@ -129,4 +145,9 @@
 
     </select>
 
+    <select id="allCompositions" resultMap="compositionResultMap">
+        select c.* from `mk_composition` c
+        inner join `mk_template_composition` tc
+        on c.id=tc.composition_id where tc.template_id=#{param1} and tc.is_deleted=0
+    </select>
 </mapper>

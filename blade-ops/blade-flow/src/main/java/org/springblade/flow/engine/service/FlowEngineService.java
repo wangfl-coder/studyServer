@@ -121,6 +121,16 @@ public interface FlowEngineService extends IService<FlowModel> {
 	String deployModelByTemplate(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO);
 
 	/**
+	 * 通过模版部署流程V2
+	 *
+	 * @param modelId      模型id
+	 * @param category     分类
+	 * @param tenantIdList 租户id集合
+	 * @return
+	 */
+	String deployModelByTemplateV2(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO);
+
+	/**
 	 * 删除流程实例
 	 *
 	 * @param processInstanceId 流程实例id

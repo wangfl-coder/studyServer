@@ -42,6 +42,9 @@ public class ExpertBaseTaskDTO extends BaseEntity {
 	private Integer priority;
 	@ApiModelProperty(value = "抽查数量")
 	private Integer count;
-
+	@ApiModelProperty(value = "教育、工作经历质检百分比(0-100)")
+	private Integer eduWorkInspectPercent;
+	@ApiModelProperty(value = "中英文简介质检百分比(0-100)")
+	private Integer bioInspectPercent;
 
 }

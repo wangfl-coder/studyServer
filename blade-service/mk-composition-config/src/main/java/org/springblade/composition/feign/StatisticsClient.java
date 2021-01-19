@@ -103,7 +103,10 @@ public class StatisticsClient implements IStatisticsClient {
 		}
 		List<Composition> compositionList = templateService.allCompositions(templateId);
 		Composition composition = compositionService.getById(compositionId);
-		List<AnnotationData> annotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda().eq(AnnotationData::getSubTaskId, labelTaskId).eq(AnnotationData::getCompositionId, compositionId));
+		List<AnnotationData> annotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+			.eq(AnnotationData::getSubTaskId, labelTaskId)
+			.eq(AnnotationData::getCompositionId, compositionId)
+		);
 		Map<String, List<AnnotationData>> dataPerField = annotationDataList.stream()
 			.collect(groupingBy(AnnotationData::getField));
 		HashMap<String, Integer> notFound = new HashMap<>();
@@ -138,11 +141,15 @@ public class StatisticsClient implements IStatisticsClient {
 			}
 			same.put(entry.getKey(), sameNum);
 		}
-		//只看最小的
-		Optional<Map.Entry<String, Integer>> minEntry = same.entrySet()
-			.stream()
-			.min(Comparator.comparing(Map.Entry::getValue));
-		kv.put("biSame", minEntry.get().getValue());
+		if (same.size() > 0) {
+			//只看最小的
+			Optional<Map.Entry<String, Integer>> minEntry = same.entrySet()
+				.stream()
+				.min(Comparator.comparing(Map.Entry::getValue));
+			kv.put("biSame", minEntry.get().getValue());
+		} else {
+			kv.put("biSame", 0);
+		}
 		return R.data(kv);
 	}
 }

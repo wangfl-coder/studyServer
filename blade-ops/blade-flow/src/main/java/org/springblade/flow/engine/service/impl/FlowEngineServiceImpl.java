@@ -45,7 +45,6 @@ import org.flowable.engine.runtime.ProcessInstanceQuery;
 import org.flowable.engine.task.Comment;
 import org.springblade.composition.dto.TemplateCompositionDTO;
 import org.springblade.composition.dto.TemplateDTO;
-import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.utils.DateUtil;
@@ -71,6 +70,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -341,66 +341,9 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		// add
 		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
 		final AtomicInteger counter = new AtomicInteger(1);
+		setTaskRoleNameByComposition(flowElementList, filteredElementMap, "homepageTask", null, 1, templateCompositions);
 		templateCompositions.forEach(templateComposition -> {
-			if (1 == templateComposition.getCompositionType()) {	//主页标注
-				flowElementList.stream().forEach(flowElement -> {
-					if (flowElement.getId().equals("homepageTask")) {
-						UserTask userTask =  (UserTask)flowElement;
-						userTask.setId("comp-"+templateComposition.getCompositionId());
-						SequenceFlow incomingFlow = userTask.getIncomingFlows().get(0);
-						incomingFlow.setTargetRef(userTask.getId());
-						SequenceFlow outgoingFlow = userTask.getOutgoingFlows().get(0);
-						outgoingFlow.setSourceRef(userTask.getId());
-						userTask.setName(templateComposition.getCompositionName());
-						List<String> candidateGroups = new ArrayList<>();
-						candidateGroups.add(templateComposition.getRoleName());
-						userTask.setCandidateGroups(candidateGroups);
-
-						List<CustomProperty> customPropertyList = new ArrayList<>();
-						CustomProperty compositionIdProperty = new CustomProperty();
-						compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
-						compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
-						CustomProperty compositionTypeProperty = new CustomProperty();
-						compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
-						compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
-						CustomProperty compositionFieldProperty = new CustomProperty();
-						compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
-						compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
-						customPropertyList.add(compositionIdProperty);
-						customPropertyList.add(compositionTypeProperty);
-						customPropertyList.add(compositionFieldProperty);
-						userTask.setCustomProperties(customPropertyList);
-					}
-				});
-				UserTask userTask =  (UserTask)filteredElementMap.get("homepageTask");
-				userTask.setId("comp-"+templateComposition.getCompositionId());
-				SequenceFlow incomingFlow = userTask.getIncomingFlows().get(0);
-				incomingFlow.setTargetRef(userTask.getId());
-				SequenceFlow outgoingFlow = userTask.getOutgoingFlows().get(0);
-				outgoingFlow.setSourceRef(userTask.getId());
-				userTask.setName(templateComposition.getCompositionName());
-				List<String> candidateGroups = new ArrayList<>();
-				candidateGroups.add(templateComposition.getRoleName());
-				userTask.setCandidateGroups(candidateGroups);
-
-				List<CustomProperty> customPropertyList = new ArrayList<>();
-				CustomProperty compositionIdProperty = new CustomProperty();
-				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
-				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
-				CustomProperty compositionTypeProperty = new CustomProperty();
-				compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
-				compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
-				CustomProperty compositionFieldProperty = new CustomProperty();
-				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
-				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
-				customPropertyList.add(compositionIdProperty);
-				customPropertyList.add(compositionTypeProperty);
-				customPropertyList.add(compositionFieldProperty);
-				userTask.setCustomProperties(customPropertyList);
-
-				filteredElementMap.remove("homepageTask");
-				filteredElementMap.put(userTask.getId(), userTask);
-			}else {
+		if (2 == templateComposition.getCompositionType()) {	//基本信息标注
 				SequenceFlow incomingFlow = new SequenceFlow();
 				incomingFlow.setSourceRef("distributeTaskGateway");
 				incomingFlow.setTargetRef("comp-"+templateComposition.getCompositionId());
@@ -423,24 +366,12 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				basicInfoTask.setId("comp-"+templateComposition.getCompositionId());
 				basicInfoTask.setName(templateComposition.getCompositionName());
 				List<String> candidateGroups = new ArrayList<>();
-				candidateGroups.add(templateComposition.getRoleName());
+				candidateGroups.add(templateComposition.getLabelRoleName());
 				basicInfoTask.setCandidateGroups(candidateGroups);
 				basicInfoTask.setIncomingFlows(incomingFlows);
 				basicInfoTask.setOutgoingFlows(outgoingFlows);
 
-				List<CustomProperty> customPropertyList = new ArrayList<>();
-				CustomProperty compositionIdProperty = new CustomProperty();
-				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
-				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
-				CustomProperty compositionTypeProperty = new CustomProperty();
-				compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
-				compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
-				CustomProperty compositionFieldProperty = new CustomProperty();
-				compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
-				compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
-				customPropertyList.add(compositionIdProperty);
-				customPropertyList.add(compositionTypeProperty);
-				customPropertyList.add(compositionFieldProperty);
+				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
 				basicInfoTask.setCustomProperties(customPropertyList);
 
 				flowElementList.add(incomingFlow);
@@ -453,6 +384,255 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			}
 		});
 
+		flowElementList.stream().forEach(flowElement -> {
+			if (flowElement.getId().equals("complementInfoTask")) {
+				UserTask userTask =  (UserTask)flowElement;
+				List<String> candidateGroups = new ArrayList<>();
+				candidateGroups.add(templateDTO.getMoreMessageRoleName());
+				userTask.setCandidateGroups(candidateGroups);
+			}
+		});
+		UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
+		List<String> candidateGroups = new ArrayList<>();
+		candidateGroups.add(templateDTO.getMoreMessageRoleName());
+		userTask.setCandidateGroups(candidateGroups);
+		filteredElementMap.put("complementInfoTask", userTask);
+
+		process.setFlowElementMap(filteredElementMap);
+		byte[] bytes = getBpmnXML(bpmnModel);
+		String processName = model.getName();
+		if (!StringUtil.endsWithIgnoreCase(processName, FlowEngineConstant.SUFFIX)) {
+			processName += FlowEngineConstant.SUFFIX;
+		}
+		String finalProcessName = processName;
+		if (Func.isNotEmpty(tenantIdList)) {
+			tenantIdList.forEach(tenantId -> {
+				Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
+				deployTemplate(deployment, category);
+			});
+		} else {
+			Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
+			return deployTemplate(deployment, category);
+		}
+		return null;
+	}
+
+	@Override
+	public String deployModelByTemplateV2(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO) {
+		FlowModel model = this.getById(modelId);
+		if (model == null) {
+			throw new ServiceException("No model found with the given id: " + modelId);
+		}
+		BpmnModel bpmnModel = getBpmnModel(model);
+
+		// filter
+		String[] filterArr = {
+			"biFlow*", "biPassFlow*",
+			"exclusiveGateway*",  "exclusiveCollectGateway*", "biBreakFlow*",
+			"labelBiTask*", "labelBiFlow*", "labelBiPassFlow*",
+			"inspectBiTask*", "inspectBiFlow*", "inspectBiPassFlow*"
+		};
+		Process process = bpmnModel.getProcesses().get(0);
+		List<FlowElement> flowElementList = (List<FlowElement>) process.getFlowElements();
+		flowElementList.removeIf(flowElement -> StringUtil.simpleMatch(filterArr, flowElement.getId()) );
+
+		Map<String,FlowElement> flowElementMap = process.getFlowElementMap();
+		Map<String,FlowElement> filteredElementMap = flowElementMap.entrySet().stream()
+			.filter(flowElement -> !StringUtil.simpleMatch(filterArr, flowElement.getKey()) )
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		// add
+		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
+		final AtomicInteger counter = new AtomicInteger(1);
+		List<ValuedDataObject> dataObjects = process.getDataObjects();
+		ValuedDataObject homepageDataObject = null;
+		for (ValuedDataObject dataObject: dataObjects ) {
+			if (dataObject.getName().equals("hasHomepage"))
+				homepageDataObject = dataObject;
+		}
+		boolean hasHomepage = setTaskRoleNameByComposition(flowElementList, filteredElementMap, "labelerHomepageTask", "inspectorHomepageTask", 1, templateCompositions);
+		if (hasHomepage)
+			homepageDataObject.setValue(true);
+		else
+			homepageDataObject.setValue(false);
+
+		ValuedDataObject eduWorkDataObject = null;
+		for (ValuedDataObject dataObject: dataObjects ) {
+			if (dataObject.getName().equals("hasEduWork"))
+				eduWorkDataObject = dataObject;
+		}
+		setTaskRoleNameByComposition(flowElementList, filteredElementMap, "labelEduWorkTaskJunior", "inspectEduWorkTask", 4, templateCompositions);
+		boolean hasEduWork = setTaskRoleNameByComposition(flowElementList, filteredElementMap, "labelEduWorkTaskSenior", "inspectEduWorkTask", 4, templateCompositions);
+		if (hasEduWork)
+			eduWorkDataObject.setValue(true);
+		else
+			eduWorkDataObject.setValue(false);
+
+		ValuedDataObject bioDataObject = null;
+		for (ValuedDataObject dataObject: dataObjects ) {
+			if (dataObject.getName().equals("hasBio"))
+				bioDataObject = dataObject;
+		}
+		boolean hasBio = setTaskRoleNameByComposition(flowElementList, filteredElementMap, "labelBioTask", "inspectBioTask", 5, templateCompositions);
+		if (hasBio)
+			bioDataObject.setValue(true);
+		else
+			bioDataObject.setValue(false);
+
+
+		templateCompositions.forEach(templateComposition -> {
+			if (2 == templateComposition.getCompositionType()) {	//基本信息标注
+				HashMap<String, String> dict = new HashMap<>();
+				dict.put("id", templateComposition.getCompositionId().toString());
+
+				// biFlow*
+				SequenceFlow biFlow = new SequenceFlow();
+				biFlow.setId("biFlow"+counter.get());
+				biFlow.setSourceRef("distributeTaskGateway");
+				biFlow.setTargetRef("exclusiveGateway"+counter.get());
+				biFlow.setParentContainer(process);
+				List<SequenceFlow> exclusiveGatewayIncomingFlows = new ArrayList<>();
+				exclusiveGatewayIncomingFlows.add(biFlow);
+
+				// labelBiFlow*
+				SequenceFlow labelBiFlow = new SequenceFlow();
+				labelBiFlow.setId("labelBiFlow"+counter.get());
+				labelBiFlow.setSourceRef("exclusiveGateway"+counter.get());
+				labelBiFlow.setTargetRef("labelBiTask"+counter.get());
+				labelBiFlow.setParentContainer(process);
+				labelBiFlow.setName("不到二人;二人不同;二人都没找到");
+				String labelBiFlowConditionStr = StringUtil.format("${biCounter{id} < 2 || (biCounter{id} == 2 && biSame{id} == 0) || (biCounter{id} == 2 && biNotfound{id} == 2)}", dict);
+				labelBiFlow.setConditionExpression(labelBiFlowConditionStr);
+//				labelBiFlow.setConditionExpression("${biCounter1 < 2 || (biCounter1 == 2 && biSame1 == 0) || (biCounter1 == 2 && biNotfound1 == 2)}");
+				List<SequenceFlow> labelBiTaskIncomingFlows = new ArrayList<>();
+				labelBiTaskIncomingFlows.add(labelBiFlow);
+				List<SequenceFlow> exclusiveGatewayOutgoingFlows = new ArrayList<>();
+				exclusiveGatewayOutgoingFlows.add(labelBiFlow);
+
+				// labelBiPassFlow*
+				SequenceFlow labelBiPassFlow = new SequenceFlow();
+				labelBiPassFlow.setId("labelBiPassFlow"+counter.get());
+				labelBiPassFlow.setSourceRef("labelBiTask"+counter.get());
+				labelBiPassFlow.setTargetRef("exclusiveGateway"+counter.get());
+				labelBiPassFlow.setParentContainer(process);
+				labelBiPassFlow.setName("基本信息标注完成1");
+				labelBiPassFlow.setConditionExpression("${pass}");
+//				List<SequenceFlow> exclusiveGatewayIncomingFlows = new ArrayList<>();
+				exclusiveGatewayIncomingFlows.add(labelBiPassFlow);
+				List<SequenceFlow> labelBiTaskOutgoingFlows = new ArrayList<>();
+				labelBiTaskOutgoingFlows.add(labelBiPassFlow);
+
+				// inspectBiFlow*
+				SequenceFlow inspectBiFlow = new SequenceFlow();
+				inspectBiFlow.setId("inspectBiFlow"+counter.get());
+				inspectBiFlow.setSourceRef("exclusiveGateway"+counter.get());
+				inspectBiFlow.setTargetRef("inspectBiTask"+counter.get());
+				inspectBiFlow.setParentContainer(process);
+				inspectBiFlow.setName("三人都不同去质检");
+				String inspectBiFlowConditionStr = StringUtil.format("${biCounter{id} == 3 && biSame{id} == 0}", dict);
+				inspectBiFlow.setConditionExpression(inspectBiFlowConditionStr);
+//				inspectBiFlow.setConditionExpression("${biCounter1 == 3 && biSame1 == 0}");
+				List<SequenceFlow> inspectBiTaskIncomingFlows = new ArrayList<>();
+				inspectBiTaskIncomingFlows.add(inspectBiFlow);
+//				List<SequenceFlow> exclusiveGatewayOutgoingFlows = new ArrayList<>();
+				exclusiveGatewayOutgoingFlows.add(inspectBiFlow);
+
+				// inspectBiPassFlow*
+				SequenceFlow inspectBiPassFlow = new SequenceFlow();
+				inspectBiPassFlow.setId("inspectBiPassFlow"+counter.get());
+				inspectBiPassFlow.setSourceRef("inspectBiTask"+counter.get());
+				inspectBiPassFlow.setTargetRef("exclusiveCollectGateway"+counter.get());
+				inspectBiPassFlow.setParentContainer(process);
+				inspectBiPassFlow.setName("个人信息质检完成1");
+				inspectBiPassFlow.setConditionExpression("${pass}");
+				List<SequenceFlow> exclusiveCollectGatewayIncomingFlows = new ArrayList<>();
+				exclusiveGatewayIncomingFlows.add(inspectBiPassFlow);
+				List<SequenceFlow> inspectBiTaskOutgoingFlows = new ArrayList<>();
+				inspectBiTaskOutgoingFlows.add(inspectBiPassFlow);
+
+				// biBreakFlow*
+				SequenceFlow biBreakFlow = new SequenceFlow();
+				biBreakFlow.setId("biBreakFlow"+counter.get());
+				biBreakFlow.setSourceRef("exclusiveGateway"+counter.get());
+				biBreakFlow.setTargetRef("exclusiveCollectGateway"+counter.get());
+				biBreakFlow.setParentContainer(process);
+				biBreakFlow.setName("二人相同;三人中二人相同;三人都没找到");
+				String biBreakFlowConditionStr = StringUtil.format("${(biCounter{id} == 2 && biSame{id} == 1) || (biCounter{id} == 3 && biSame{id} == 1) || (biCounter{id} == 3 && biNotfound{id} == 3)}", dict);
+				biBreakFlow.setConditionExpression(biBreakFlowConditionStr);
+//				biBreakFlow.setConditionExpression("${(biCounter1 == 2 && biSame1 == 1) || (biCounter1 == 3 && biSame1 == 1) || (biCounter1 == 3 && biNotfound1 == 3)}");
+//				List<SequenceFlow> exclusiveCollectGatewayIncomingFlows = new ArrayList<>();
+				exclusiveCollectGatewayIncomingFlows.add(biBreakFlow);
+//				List<SequenceFlow> exclusiveGatewayOutgoingFlows = new ArrayList<>();
+				exclusiveGatewayOutgoingFlows.add(biBreakFlow);
+
+				// biPassFlow*
+				SequenceFlow biPassFlow = new SequenceFlow();
+				biPassFlow.setId("biPassFlow"+counter.get());
+				biPassFlow.setSourceRef("exclusiveCollectGateway"+counter.get());
+				biPassFlow.setTargetRef("collectTaskGateway");
+				biPassFlow.setParentContainer(process);
+				List<SequenceFlow> exclusiveCollectGatewayOutgoingFlows = new ArrayList<>();
+				exclusiveCollectGatewayOutgoingFlows.add(biPassFlow);
+
+				Gateway exclusiveGateway = new ExclusiveGateway();
+				exclusiveGateway.setId("exclusiveGateway"+counter.get());
+				exclusiveGateway.setIncomingFlows(exclusiveGatewayIncomingFlows);
+				exclusiveGateway.setOutgoingFlows(exclusiveGatewayOutgoingFlows);
+
+				UserTask labelBiTask = new UserTask();
+				labelBiTask.setId("labelBiTask"+counter.get());
+				labelBiTask.setName(templateComposition.getCompositionName());
+				List<String> labelCandidateGroups = new ArrayList<>();
+				labelCandidateGroups.add(templateComposition.getLabelRoleName());
+				labelBiTask.setCandidateGroups(labelCandidateGroups);
+				labelBiTask.setIncomingFlows(labelBiTaskIncomingFlows);
+				labelBiTask.setOutgoingFlows(labelBiTaskOutgoingFlows);
+				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+				labelBiTask.setCustomProperties(customPropertyList);
+
+				UserTask inspectBiTask = new UserTask();
+				inspectBiTask.setId("inspectBiTask"+counter.get());
+				inspectBiTask.setName(templateComposition.getCompositionName());
+				List<String> inspectionCandidateGroups = new ArrayList<>();
+				inspectionCandidateGroups.add(templateComposition.getInspectionRoleName());
+				inspectBiTask.setCandidateGroups(inspectionCandidateGroups);
+				inspectBiTask.setIncomingFlows(inspectBiTaskIncomingFlows);
+				inspectBiTask.setOutgoingFlows(inspectBiTaskOutgoingFlows);
+//				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+				inspectBiTask.setCustomProperties(customPropertyList);
+
+				Gateway exclusiveCollectGateway = new ExclusiveGateway();
+				exclusiveCollectGateway.setId("exclusiveCollectGateway"+counter.get());
+				exclusiveCollectGateway.setIncomingFlows(exclusiveCollectGatewayIncomingFlows);
+				exclusiveCollectGateway.setOutgoingFlows(exclusiveCollectGatewayOutgoingFlows);
+
+				flowElementList.add(biFlow);
+				flowElementList.add(biPassFlow);
+				flowElementList.add(exclusiveGateway);
+				flowElementList.add(exclusiveCollectGateway);
+				flowElementList.add(biBreakFlow);
+				flowElementList.add(labelBiTask);
+				flowElementList.add(labelBiFlow);
+				flowElementList.add(labelBiPassFlow);
+				flowElementList.add(inspectBiTask);
+				flowElementList.add(inspectBiFlow);
+				flowElementList.add(inspectBiPassFlow);
+				filteredElementMap.put(biFlow.getId(), biFlow);
+				filteredElementMap.put(biPassFlow.getId(), biPassFlow);
+				filteredElementMap.put(exclusiveGateway.getId(), exclusiveGateway);
+				filteredElementMap.put(exclusiveCollectGateway.getId(), exclusiveCollectGateway);
+				filteredElementMap.put(biBreakFlow.getId(), biBreakFlow);
+				filteredElementMap.put(labelBiTask.getId(), labelBiTask);
+				filteredElementMap.put(labelBiFlow.getId(), labelBiFlow);
+				filteredElementMap.put(labelBiPassFlow.getId(), labelBiPassFlow);
+				filteredElementMap.put(inspectBiTask.getId(), inspectBiTask);
+				filteredElementMap.put(inspectBiFlow.getId(), inspectBiFlow);
+				filteredElementMap.put(inspectBiPassFlow.getId(), inspectBiPassFlow);
+				counter.getAndIncrement();
+			}
+		});
+
+		// 补充信息任务设置角色
 		flowElementList.stream().forEach(flowElement -> {
 			if (flowElement.getId().equals("complementInfoTask")) {
 				UserTask userTask =  (UserTask)flowElement;
@@ -594,4 +774,79 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		}
 	}
 
+	private List<CustomProperty> buildCustomPropertyListWithComposition(TemplateCompositionDTO templateComposition) {
+		List<CustomProperty> customPropertyList = new ArrayList<>();
+		CustomProperty compositionIdProperty = new CustomProperty();
+		compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
+		compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+		CustomProperty compositionTypeProperty = new CustomProperty();
+		compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+		compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
+		CustomProperty compositionFieldProperty = new CustomProperty();
+		compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
+		compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
+		customPropertyList.add(compositionIdProperty);
+		customPropertyList.add(compositionTypeProperty);
+		customPropertyList.add(compositionFieldProperty);
+		return customPropertyList;
+	}
+
+	private boolean setTaskRoleNameByComposition(List<FlowElement> flowElementList, Map<String,FlowElement> flowElementMap, String labelTaskName, String inspectionTaskName, Integer annotationType, List<TemplateCompositionDTO> templateCompositions) {
+		AtomicBoolean hasComposition = new AtomicBoolean(false);
+		templateCompositions.forEach(templateComposition -> {
+			if (annotationType == templateComposition.getCompositionType()) {    //	主页标注/工作、教育经历标注/中英文简介标注
+				hasComposition.set(true);
+				flowElementList.stream().forEach(flowElement -> {
+					if (flowElement.getId().equals(labelTaskName)) {
+						UserTask userTask = (UserTask) flowElement;
+						userTask.setName(templateComposition.getCompositionName());
+						List<String> candidateGroups = new ArrayList<>();
+						candidateGroups.add(templateComposition.getLabelRoleName());
+						userTask.setCandidateGroups(candidateGroups);
+
+						List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+						userTask.setCustomProperties(customPropertyList);
+					}
+					if (null != templateComposition.getInspectionRoleName() ) {
+						if (flowElement.getId().equals(inspectionTaskName)) {
+							UserTask userTask = (UserTask) flowElement;
+							userTask.setName(templateComposition.getCompositionName());
+							List<String> candidateGroups = new ArrayList<>();
+							candidateGroups.add(templateComposition.getInspectionRoleName());
+							userTask.setCandidateGroups(candidateGroups);
+
+							List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+							userTask.setCustomProperties(customPropertyList);
+						}
+					}
+				});
+				UserTask labelTask = (UserTask) flowElementMap.get(labelTaskName);
+				labelTask.setName(templateComposition.getCompositionName());
+				List<String> labelCandidateGroups = new ArrayList<>();
+				labelCandidateGroups.add(templateComposition.getLabelRoleName());
+				labelTask.setCandidateGroups(labelCandidateGroups);
+
+				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+				labelTask.setCustomProperties(customPropertyList);
+
+				flowElementMap.remove(labelTaskName);
+				flowElementMap.put(labelTask.getId(), labelTask);
+
+				if (null != inspectionTaskName && null != templateComposition.getInspectionRoleName() ) {
+					UserTask inspectionTask = (UserTask) flowElementMap.get(inspectionTaskName);
+					inspectionTask.setName(templateComposition.getCompositionName());
+					List<String> inspectionCandidateGroups = new ArrayList<>();
+					inspectionCandidateGroups.add(templateComposition.getInspectionRoleName());
+					inspectionTask.setCandidateGroups(inspectionCandidateGroups);
+
+					List<CustomProperty> customPropertyList2 = buildCustomPropertyListWithComposition(templateComposition);
+					inspectionTask.setCustomProperties(customPropertyList2);
+
+					flowElementMap.remove(inspectionTaskName);
+					flowElementMap.put(inspectionTask.getId(), inspectionTask);
+				}
+			}
+		});
+		return hasComposition.get();
+	}
 }

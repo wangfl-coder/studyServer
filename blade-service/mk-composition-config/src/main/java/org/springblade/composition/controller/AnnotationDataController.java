@@ -33,6 +33,7 @@ import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
@@ -103,7 +104,7 @@ public class AnnotationDataController extends BladeController {
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
-	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO, BladeUser bladeUser) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getAnnotationDataList() != null) {
 			annotationDataVO.getAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
@@ -111,8 +112,11 @@ public class AnnotationDataController extends BladeController {
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
-		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())));
-
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+			.eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId())
+			.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())
+			.eq(AnnotationData::getCreateUser, bladeUser.getUserId())
+		);
 
 		// 删除原来的标注数据,同时更新修改时间
 		if (oldAnnotationDataList.size() != 0) {
@@ -121,15 +125,15 @@ public class AnnotationDataController extends BladeController {
 			annotationDataService.deleteLogic(oldAnnotationDataIds);
 		}
 		// 注意补充信息角色
-		Expert expert = new Expert();
-		expert.setId(annotationDataVO.getExpertId());
-		if (oldAnnotationDataList.size() != 0) {
-			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
-		}
-		if (annotationDataList != null){
-			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
-		}
-		expertClient.saveExpert(expert);
+//		Expert expert = new Expert();
+//		expert.setId(annotationDataVO.getExpertId());
+//		if (oldAnnotationDataList.size() != 0) {
+//			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
+//		}
+//		if (annotationDataList != null){
+//			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
+//		}
+//		expertClient.saveExpert(expert);
 
 		//更新统计表，记录标注用时
 		Statistics statistics_query = new Statistics();

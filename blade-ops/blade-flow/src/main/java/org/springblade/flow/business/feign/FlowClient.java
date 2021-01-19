@@ -17,6 +17,8 @@
 package org.springblade.flow.business.feign;
 
 import lombok.AllArgsConstructor;
+import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.ValuedDataObject;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ExecutionQuery;
@@ -54,12 +56,21 @@ public class FlowClient implements IFlowClient {
 	private final TaskService taskService;
 	private final HistoryService historyService;
 	private final FlowBusinessService flowBusinessService;
+	private final RepositoryService repositoryService;
 
 	@Override
 	@PostMapping(START_PROCESS_INSTANCE_BY_ID)
 	public R<BladeFlow> startProcessInstanceById(String processDefinitionId, String businessKey, @RequestBody Map<String, Object> variables) {
 		// 设置流程启动用户
 		identityService.setAuthenticatedUserId(TaskUtil.getTaskUser());
+
+		Process process = repositoryService.getBpmnModel(processDefinitionId).getMainProcess();
+		// 获取之前存入dataObjects的变量
+		List<ValuedDataObject> datas = repositoryService.getBpmnModel(processDefinitionId).getMainProcess().getDataObjects();
+		for (ValuedDataObject data : datas) {
+			variables.put(data.getName(), data.getValue());
+		}
+
 		// 开启流程
 		ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
 		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();

@@ -127,7 +127,10 @@ public class TaskController extends BladeController {
 			R<List<Expert>> rexperts = expertClient.getExpertIds(task.getId());
 			if (rexperts.isSuccess()) {
 				List<Expert> experts = rexperts.getData();
-				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, experts);
+				result = labelTaskService.startProcess(
+					expertBaseTaskDTO.getProcessDefinitionId(),
+					task,
+					experts);
 				task.setCount(experts.size());
 				taskService.saveOrUpdate(task);
 			} else {

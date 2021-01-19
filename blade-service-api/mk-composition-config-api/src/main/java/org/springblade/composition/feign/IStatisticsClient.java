@@ -50,5 +50,5 @@ public interface IStatisticsClient {
 	 * 查询基本信息状态
 	 */
 	@GetMapping(QUERY_BASICINFO_STATUS)
-	R<Kv> queryBasicInfoStatus(Long labelTaskId, Long templateId, Long compositionId);
+	R<Kv> queryBasicInfoStatus(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
 }
