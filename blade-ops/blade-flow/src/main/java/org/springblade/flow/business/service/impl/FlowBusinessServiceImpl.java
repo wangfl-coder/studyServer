@@ -54,6 +54,7 @@ import org.springblade.flow.engine.mapper.FlowMapper;
 import org.springblade.flow.engine.utils.FlowCache;
 
 import org.springblade.system.cache.SysCache;
+import org.springblade.system.entity.Role;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
@@ -120,6 +121,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
+		List<String> roleAliases = Func.toStrList(taskGroup);
+		for (String roleAlias : roleAliases) {
+			claimRoleWithoutTenantIdQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
+		}
 		// 构建列表数据
 		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, page, FlowEngineConstant.STATUS_CLAIM);
 		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
@@ -158,6 +163,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().asc();
 
+		List<String> roleAliases = Func.toStrList(taskGroup);
+		for (String roleAlias : roleAliases) {
+			taskQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
+		}
 		if (taskQuery.listPage(0, 1).size() != 0) {
 			Task task = taskQuery.listPage(0, 1).get(0);
 			SingleFlow flow = new SingleFlow();
@@ -233,6 +242,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		// 构建列表数据
 		buildFlowTaskList(bladeFlow, flowList, todoQuery, page, FlowEngineConstant.STATUS_TODO);
 
+		for(SingleFlow flow: flowList) {
+			Role role = flowMapper.getRoleByTemplateComposition(env, flow.getTemplateId(), Long.valueOf(flow.getCompositionId()));
+			flow.setRoleId(role.getId());
+		}
 		// 计算总数
 		long count = todoQuery.count();
 //		// 设置页数
@@ -697,8 +710,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (StringUtil.isNoneBlank(processInstanceId, comment)) {
 			taskService.addComment(taskId, processInstanceId, comment);
 		}
-		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-		Map<String, Object> processVariables = processInstance.getProcessVariables();
+		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
 		// 创建变量
 		Map<String, Object> variables = flow.getVariables();
 		if (variables == null) {
@@ -770,6 +782,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
 				flowMapper.updateStatistic(env,labelTask.getId(), 3);
 			}
+			String roleAlias = SysCache.getRoleAlias(flow.getRoleId());
+			processVariables.put(roleAlias+"-"+AuthUtil.getUserId(), true);
+			runtimeService.setVariables(processInstanceId, processVariables);
 			//			boolean isBiComplete = labelTaskClient.isBiComplete(taskId);
 		}
 		log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));

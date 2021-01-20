@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.flow.engine.entity.FlowModel;
+import org.springblade.system.entity.Role;
 
 import java.util.List;
 
@@ -51,4 +52,11 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @param type 2是基本信息类组合 3是补充信息组合
 	 */
 	void updateStatistic(@Param("env")String env,@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
+
+	/**
+	 * 根据模版Id和组合Id获取角色
+	 * @param templateId 模版Id
+	 * @param compositionId 组合Id
+	 */
+	Role getRoleByTemplateComposition(String env, Long templateId, Long compositionId);
 }

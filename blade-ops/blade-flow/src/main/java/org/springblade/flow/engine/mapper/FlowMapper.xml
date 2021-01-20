@@ -19,6 +19,17 @@
         <result column="model_type" property="modelType"/>
         <result column="tenant_id" property="tenantId"/>
     </resultMap>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="roleResultMap" type="org.springblade.system.entity.Role">
+        <id column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="role_name" property="roleName"/>
+        <result column="sort" property="sort"/>
+        <result column="role_alias" property="roleAlias"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
     <update id="updateStatistic">
         <if test="env == 'dev'">
             update bladex_dev.mk_statistics s
@@ -64,4 +75,16 @@
         where modelrelation.parent_model_id = #{_parameter}
     </select>
 
+    <select id="getRoleByTemplateComposition" resultMap="roleResultMap">
+        <if test="param1 == 'dev'">
+            select r.* from bladex_dev.blade_role r
+            inner join bladex_dev.mk_template_composition tc
+        </if>
+        <if test="param1 == 'prod'">
+            select r.* from bladex.blade_role r
+            inner join bladex.mk_template_composition tc
+        </if>
+        on r.role_alias=tc.label_role_name
+        where tc.template_id=#{param2} and tc.composition_id=#{param3} and tc.is_deleted=0 limit 1
+    </select>
 </mapper>
