@@ -19,6 +19,7 @@ package org.springblade.composition.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Param;
+import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.mapper.StatisticsMapper;
@@ -46,4 +47,8 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 		return statisticsMapper.taskCompositionCount(env,startTime, endTime,taskId,type);
 	}
 
+	@Override
+	public Expert getExpertByLabelTaskId(Long id){
+		return statisticsMapper.getExpertByLabelTaskId(id);
+	}
 }

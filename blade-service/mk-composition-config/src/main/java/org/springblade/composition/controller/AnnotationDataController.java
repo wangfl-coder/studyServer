@@ -125,15 +125,15 @@ public class AnnotationDataController extends BladeController {
 			annotationDataService.deleteLogic(oldAnnotationDataIds);
 		}
 		// 注意补充信息角色
-//		Expert expert = new Expert();
-//		expert.setId(annotationDataVO.getExpertId());
-//		if (oldAnnotationDataList.size() != 0) {
-//			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
-//		}
-//		if (annotationDataList != null){
-//			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
-//		}
-//		expertClient.saveExpert(expert);
+		Expert expert = new Expert();
+		expert.setId(annotationDataVO.getExpertId());
+		if (oldAnnotationDataList.size() != 0) {
+			oldAnnotationDataList.forEach(oldAnnotationData->BeanUtil.setProperty(expert, oldAnnotationData.getField(),""));
+		}
+		if (annotationDataList != null){
+			annotationDataList.forEach(annotationData->BeanUtil.setProperty(expert, annotationData.getField(),annotationData.getValue()));
+		}
+		expertClient.saveExpert(expert);
 
 		//更新统计表，记录标注用时
 		Statistics statistics_query = new Statistics();

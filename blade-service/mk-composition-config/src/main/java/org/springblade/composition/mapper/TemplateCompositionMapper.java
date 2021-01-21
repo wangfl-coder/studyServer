@@ -17,7 +17,10 @@
 package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.TemplateComposition;
+
+import java.util.List;
 
 /**
  * Mapper 接口
@@ -25,5 +28,12 @@ import org.springblade.composition.entity.TemplateComposition;
  * @author KaiLun
  */
 public interface TemplateCompositionMapper extends BaseMapper<TemplateComposition> {
+
+	/**
+	 * 返回模版中所有的组合
+	 * @param templateId 模版Id
+	 * @return
+	 */
+	List<Composition> allCompositions(Long templateId);
 
 }

@@ -18,6 +18,8 @@ package org.springblade.composition.feign;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springblade.adata.entity.Expert;
+import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
@@ -30,6 +32,7 @@ import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.support.Kv;
+import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +61,8 @@ public class StatisticsClient implements IStatisticsClient {
 	private final IStatisticsService statisticsService;
 	private final ICompositionService compositionService;
 	private final IAnnotationDataService annotationDataService;
+	private final IExpertClient expertClient;
+
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -129,18 +134,24 @@ public class StatisticsClient implements IStatisticsClient {
 			kv.put("biNotfound", 0);
 		}
 
+		Expert expert = statisticsService.getExpertByLabelTaskId(labelTaskId);
 		HashMap<String, Integer> same = new HashMap<>();
 		for (Map.Entry<String,List<AnnotationData>> entry : dataPerField.entrySet()) {
 			int sameNum = 0;
 			List<AnnotationData> list = entry.getValue();
 			for (int i = 0; i < list.size(); i++) {
 				for (int j = i+1; j < list.size(); j++) {
-					if(list.get(i).getValue().equals(list.get(j).getValue()))
+					if(list.get(i).getValue().equals(list.get(j).getValue())) {
 						sameNum++;
+						if (sameNum >= 2) {
+							BeanUtil.setProperty(expert, entry.getKey(),list.get(i).getValue());
+						}
+					}
 				}
 			}
 			same.put(entry.getKey(), sameNum);
 		}
+		expertClient.saveExpert(expert);
 		if (same.size() > 0) {
 			//只看最小的
 			Optional<Map.Entry<String, Integer>> minEntry = same.entrySet()

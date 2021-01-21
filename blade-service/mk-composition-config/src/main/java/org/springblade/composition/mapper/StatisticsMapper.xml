@@ -77,4 +77,10 @@
         group by t.update_user
     </select>
 
+    <select id="getExpertByLabelTaskId" resultType="org.springblade.adata.entity.Expert">
+        select e.* from mk_adata_expert e
+        inner join mk_task_label t
+        on e.id=t.person_id
+        where t.id=#{param1}
+    </select>
 </mapper>
