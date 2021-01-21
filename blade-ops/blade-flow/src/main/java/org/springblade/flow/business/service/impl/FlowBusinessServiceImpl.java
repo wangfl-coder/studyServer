@@ -255,7 +255,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		}
 
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().asc();
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
 		List<String> roleAliases = Func.toStrList(taskGroup);
 		for (String roleAlias : roleAliases) {

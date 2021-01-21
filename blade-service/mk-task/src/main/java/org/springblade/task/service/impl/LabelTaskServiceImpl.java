@@ -219,6 +219,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
-		return baseMapper.roleClaimCount(env, roleAlias);
+		return baseMapper.roleClaimCount(env, roleAlias, AuthUtil.getUserId());
 	}
 }

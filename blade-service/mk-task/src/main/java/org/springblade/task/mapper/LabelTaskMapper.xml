@@ -134,6 +134,18 @@
         <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
             #{item}
         </foreach>
+        AND flow.PROC_INST_ID_ NOT IN (
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            SELECT PROC_INST_ID_ FROM bladex_flow_dev.ACT_RU_VARIABLE
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            SELECT PROC_INST_ID_ FROM bladex_flow.ACT_RU_VARIABLE
+        </if>
+        WHERE NAME_ IN
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            concat(#{item},'-',#{param3})
+        </foreach>
+        )
         GROUP BY GROUP_ID_ ) t
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
             inner join bladex_dev.blade_role role
