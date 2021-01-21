@@ -21,11 +21,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
 import org.springblade.adata.service.IExpertService;
+import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.mp.base.BaseServiceImpl;
@@ -38,6 +41,9 @@ import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.constant.ProcessConstant;
+import org.springblade.system.user.entity.User;
+import org.springblade.system.user.feign.IUserClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> implements IExpertService {
 
 	private final ITemplateClient iTemplateClient;
+	private final IUserClient iUserClient;
 
 	@Override
 	public String fetchDetail(String id) {
@@ -437,4 +444,21 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		}
 		return kv;
 	}
+
+	@Override
+	public User queryNameById(Long userId) {
+		return iUserClient.userInfoById(userId).getData();
+	}
+
+	@Override
+	public List<UserRemarkVO> userRemark(Long personId) {
+		return baseMapper.userRemark(personId);
+	}
+
+	@Override
+	public List<UserRemarkVO> userInspectionRemark(Long personId) {
+		return baseMapper.userInspectionRemark(personId);
+	}
+
+
 }

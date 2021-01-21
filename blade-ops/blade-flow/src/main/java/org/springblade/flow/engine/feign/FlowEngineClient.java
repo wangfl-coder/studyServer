@@ -37,10 +37,7 @@ import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.service.FlowEngineService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -74,5 +71,11 @@ public class FlowEngineClient implements IFlowEngineClient {
 	public R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO) {
 		String processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, null, templateDTO);
 		return R.data(processDefinitionId);
+	}
+
+	@Override
+	@GetMapping(FLOW_HISTORY)
+	public R<List<BladeFlow>> historyFlow(@RequestParam String processInstanceId, String startActivityId, String endActivityId) {
+		return R.data(flowEngineService.historyFlowList(processInstanceId, startActivityId, endActivityId));
 	}
 }

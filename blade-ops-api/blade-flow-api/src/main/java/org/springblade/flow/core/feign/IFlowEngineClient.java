@@ -41,6 +41,7 @@ public interface IFlowEngineClient {
 
 	String API_PREFIX = "/client";
 	String DEPLOY_MODEL_BY_TEMPLATE = API_PREFIX + "/deploy-model-by-template";
+	String FLOW_HISTORY = API_PREFIX + "/flow-history";
 
 
 	/**
@@ -51,4 +52,15 @@ public interface IFlowEngineClient {
 	 */
 	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
 	R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO);
+
+	/**
+	 * 获取流转历史列表
+	 *
+	 * @param processInstanceId 流程实例id
+	 * @param startActivityId   开始节点id
+	 * @param endActivityId     结束节点id
+	 * @return
+	 */
+	@GetMapping(FLOW_HISTORY)
+	 R<List<BladeFlow>> historyFlow(@RequestParam String processInstanceId, String startActivityId, String endActivityId);
 }

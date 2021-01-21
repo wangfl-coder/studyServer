@@ -39,4 +39,28 @@
         <result column="deliver_inspection_time" property="deliverInspectionTime"/>
     </resultMap>
 
+    <resultMap id="userRemarkResultMap" type="org.springblade.adata.vo.UserRemarkVO">
+        <result column="id" property="personId"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+    </resultMap>
+
+    <select id="queryExportExperts" resultMap="paramResultMap">
+        select * from mk_adata_expert
+        where task_id=#{taskId}
+    </select>
+
+    <select id="userRemark" resultMap="userRemarkResultMap">
+        select e.id,l.process_instance_id from mk_adata_expert e
+        inner join mk_task_label l
+        on l.person_id=e.id
+        where e.id=#{personId}
+    </select>
+
+    <select id="userInspectionRemark" resultMap="userRemarkResultMap">
+        select e.id,q.process_instance_id from mk_adata_expert e
+        inner join mk_task_quality_inspection q
+        on q.person_id=e.id
+        where e.id=#{personId}
+    </select>
+
 </mapper>
