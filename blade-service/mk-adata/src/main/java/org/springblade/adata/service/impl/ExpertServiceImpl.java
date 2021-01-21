@@ -418,7 +418,8 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			expert.getHomepage(),
 			expert.getHp(),
 			expert.getGs(),
-			expert.getDblp()
+			expert.getDblp(),
+			expert.getOtherHomepage()
 		)) {
 			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
 		} else {

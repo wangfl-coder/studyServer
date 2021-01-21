@@ -17,6 +17,7 @@
 package org.springblade.composition.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
@@ -32,6 +33,7 @@ import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
@@ -102,12 +104,19 @@ public class AnnotationDataController extends BladeController {
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
-	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO, BladeUser bladeUser) {
+		// 清理标注数据前后的多余空白字符
+		if (annotationDataVO.getAnnotationDataList() != null) {
+			annotationDataVO.getAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
+		}
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
-		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>update().lambda().eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId()).and(i->i.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())));
-
+		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+			.eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId())
+			.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())
+			.eq(AnnotationData::getCreateUser, bladeUser.getUserId())
+		);
 
 		// 删除原来的标注数据,同时更新修改时间
 		if (oldAnnotationDataList.size() != 0) {
@@ -130,22 +139,44 @@ public class AnnotationDataController extends BladeController {
 		Statistics statistics_query = new Statistics();
 		statistics_query.setSubTaskId(subTaskId);
 		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
+		statistics_query.setUserId(AuthUtil.getUserId());
 
 		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
 		if (statistics != null){
 			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
 			statistics.setStatus(2);
-			statistics.setUserId(AuthUtil.getUserId());
-		} else {
-			statistics = new Statistics();
-			statistics.setTime(annotationDataVO.getTime());
-			statistics.setStatus(2);
-			statistics.setUserId(AuthUtil.getUserId());
-			statistics.setCompositionId(annotationDataVO.getCompositionId());
-			statistics.setSubTaskId(subTaskId);
-			statistics.setTemplateId(annotationDataVO.getTemplateId());
+			statisticsService.saveOrUpdate(statistics);
+		} else {	//有两种情况:
+			// 1.组合没有被标;2.被标过但不是当前的人
+			boolean wrote = false;
+			Statistics stat_his_query = new Statistics();
+			stat_his_query.setSubTaskId(subTaskId);
+			stat_his_query.setCompositionId(annotationDataVO.getCompositionId());
+			List<Statistics> statistics_his = statisticsService.list(Condition.getQueryWrapper(stat_his_query));
+			for(Statistics statistics_history: statistics_his) {
+				if (null == statistics_history.getUserId()) {	//	组合没有被标
+					statistics_history.setTime(annotationDataVO.getTime());
+					statistics_history.setStatus(2);
+					statistics_history.setUserId(AuthUtil.getUserId());
+					statistics_history.setCompositionId(annotationDataVO.getCompositionId());
+					statistics_history.setSubTaskId(subTaskId);
+					statistics_history.setTemplateId(annotationDataVO.getTemplateId());
+					wrote = true;
+					statisticsService.saveOrUpdate(statistics_history);
+				}
+			};
+			if (!wrote) {    //	被标过但不是当前的人
+				Statistics new_stat = new Statistics();
+				new_stat.setTime(annotationDataVO.getTime());
+				new_stat.setStatus(2);
+				new_stat.setUserId(AuthUtil.getUserId());
+				new_stat.setCompositionId(annotationDataVO.getCompositionId());
+				new_stat.setSubTaskId(subTaskId);
+				new_stat.setTemplateId(annotationDataVO.getTemplateId());
+				statisticsService.saveOrUpdate(new_stat);
+			}
 		}
-		statisticsService.saveOrUpdate(statistics);
+
 		if(annotationDataList != null){
 			return R.status(annotationDataService.saveBatch(annotationDataList));
 		}else{

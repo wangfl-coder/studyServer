@@ -28,6 +28,11 @@
         <result column="reason" property="reason"/>
         <result column="task_user" property="taskUser"/>
         <result column="apply_time" property="applyTime"/>
+    </resultMap>
+
+    <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
+        <result column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
         <result column="create_user" property="createUser"/>
         <result column="create_dept" property="createDept"/>
         <result column="create_time" property="createTime"/>
@@ -40,6 +45,13 @@
         <result column="priority" property="priority"/>
         <result column="person_id" property="personId"/>
         <result column="person_name" property="personName"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="name" property="name"/>
+        <result column="field" property="field"/>
+        <result column="annotation_type" property="annotationType"/>
     </resultMap>
 
     <select id="completeCount" resultType="int">
@@ -157,6 +169,18 @@
         <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
             #{item}
         </foreach>
+        AND flow.PROC_INST_ID_ NOT IN (
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            SELECT PROC_INST_ID_ FROM bladex_flow_dev.ACT_RU_VARIABLE
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            SELECT PROC_INST_ID_ FROM bladex_flow.ACT_RU_VARIABLE
+        </if>
+        WHERE NAME_ IN
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            concat(#{item},'-',#{param3})
+        </foreach>
+        )
         GROUP BY GROUP_ID_ ) t
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
             inner join bladex_dev.blade_role role
@@ -168,4 +192,9 @@
 
     </select>
 
+    <select id="allCompositions" resultMap="compositionResultMap">
+        select c.* from `mk_composition` c
+        inner join `mk_template_composition` tc
+        on c.id=tc.composition_id where tc.template_id=#{param1} and tc.is_deleted=0
+    </select>
 </mapper>

@@ -17,6 +17,7 @@
 package org.springblade.composition.service;
 
 import org.apache.ibatis.annotations.Param;
+import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.core.mp.base.BaseService;
@@ -40,4 +41,11 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @return
 	 */
 	List<TaskCompositionDTO> taskCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+
+	/**
+	 * 通过标注子任务id获取专家
+	 * @param id
+	 * @return
+	 */
+	Expert getExpertByLabelTaskId(Long id);
 }

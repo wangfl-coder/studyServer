@@ -89,7 +89,7 @@ public class TemplateController extends BladeController {
 			composition.setAnnotationType(3);
 			return R.data(composition);
 		}
-		templateComposition.setRoleName(userRoleName);
+		templateComposition.setLabelRoleName(userRoleName);
 		TemplateComposition detail = templateCompositionService.getOne(Condition.getQueryWrapper(templateComposition));
 		if (detail == null){
 			return R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");

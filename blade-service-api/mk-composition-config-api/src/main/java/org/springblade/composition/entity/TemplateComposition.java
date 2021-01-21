@@ -71,9 +71,20 @@ public class TemplateComposition extends BaseEntity {
 	/**
 	 * 角色名
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "角色名")
 	private String roleName;
+
+	/**
+	 * 标注角色名
+	 */
+	@ApiModelProperty(value = "标注角色名")
+	private String labelRoleName;
+
+	/**
+	 * 质检角色名
+	 */
+	@ApiModelProperty(value = "质检角色名")
+	private String inspectionRoleName;
 
 	/**
 	 * 重复标注次数

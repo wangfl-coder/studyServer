@@ -20,7 +20,9 @@ package org.springblade.composition.feign;
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.composition.entity.Composition;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,10 +38,17 @@ public interface IStatisticsClient {
 
 	String API_PREFIX = "/client";
 	String STATISTICS_INITIALIZE = API_PREFIX + "/statistics/initialize";
+	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
 
 	/**
 	 * 学者信息是否完整
 	 */
 	@GetMapping(STATISTICS_INITIALIZE)
 	R initialize(@RequestParam("taskId") Long taskId);
+
+	/**
+	 * 查询基本信息状态
+	 */
+	@GetMapping(QUERY_BASICINFO_STATUS)
+	R<Kv> queryBasicInfoStatus(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
 }

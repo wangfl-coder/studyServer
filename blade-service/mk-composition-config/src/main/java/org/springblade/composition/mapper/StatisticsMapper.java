@@ -18,6 +18,7 @@ package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.dto.UserCompositionDTO;
 import org.springblade.composition.dto.UserInspectionDTO;
@@ -62,4 +63,10 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 */
 	List<UserInspectionDTO> userInspectionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId);
 
+	/**
+	 * 通过标注子任务id获取专家
+	 * @param id
+	 * @return
+	 */
+	Expert getExpertByLabelTaskId(Long id);
 }

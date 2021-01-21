@@ -90,7 +90,7 @@ public interface FlowBusinessService {
 	 * @param leave 请假信息
 	 * @return boolean
 	 */
-	boolean completeTask(BladeFlow leave);
+	boolean completeTask(SingleFlow leave);
 
 	/**
 	 * 修改任务评论

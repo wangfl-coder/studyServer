@@ -17,7 +17,10 @@
 package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
+
+import java.util.List;
 
 
 /**
@@ -26,5 +29,7 @@ import org.springblade.composition.entity.Template;
  * @author KaiLun
  */
 public interface TemplateMapper extends BaseMapper<Template> {
+
+
 
 }

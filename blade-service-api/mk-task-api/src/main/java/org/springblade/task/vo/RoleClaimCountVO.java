@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @ApiModel(value = "返回当前用户所有角色及分别可接的任务数", description = "返回当前用户所有角色及分别可接的任务数")
 public class RoleClaimCountVO {
-
 	@ApiModelProperty(value = "角色id")
 	private String roleId;
 

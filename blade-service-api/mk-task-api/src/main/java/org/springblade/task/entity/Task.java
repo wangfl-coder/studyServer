@@ -47,7 +47,10 @@ public class Task extends TenantEntity {
 	@ApiModelProperty(value = "标注大任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long annotationTaskId;
-
+	@ApiModelProperty(value = "教育、工作经历质检百分比(0-100)")
+	private Integer eduWorkInspectPercent;
+	@ApiModelProperty(value = "中英文简介质检百分比(0-100)")
+	private Integer bioInspectPercent;
 
 
 

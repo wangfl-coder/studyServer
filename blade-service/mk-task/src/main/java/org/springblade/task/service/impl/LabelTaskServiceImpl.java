@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.composition.entity.Composition;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -12,6 +13,7 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.Holder;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -48,21 +51,34 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId, Task task, List<Expert> experts) {
+	public boolean startProcess(String processDefinitionId,
+								Task task,
+								List<Expert> experts) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 		//List<Expert> experts = persons.getData();
-		experts.forEach( expert -> {
+		experts.forEach(expert -> {
 			LabelTask labelTask = new LabelTask();
 			labelTask.setProcessDefinitionId(processDefinitionId);
 			if (Func.isEmpty(labelTask.getId())) {
 				// 保存leave
 				labelTask.setCreateTime(DateUtil.now());
 				boolean save = save(labelTask);
+				Kv variables = Kv.create();
+				List<Composition> compositions = baseMapper.allCompositions(task.getTemplateId());
+				for(Composition composition : compositions) {
+					if (2 == composition.getAnnotationType()) {
+						variables.set("biCounter"+composition.getId(), 0)
+								.set("biSame"+composition.getId(), 0)
+								.set("biNotfound"+composition.getId(), 0);
+					}
+				}
+				variables.set("isEduWorkEasy", false)
+						.set("isEduWorkNeedInspect", false)
+						.set("isBioNeedInspect", false);
 				// 启动流程
-				Kv variables = Kv.create()
-					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
-					.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
-					.set("priority", task.getPriority());
+				variables.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
+						.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
+						.set("priority", task.getPriority());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
 				if (result.isSuccess()) {
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
@@ -229,6 +245,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
-		return baseMapper.roleClaimCount(env, roleAlias);
+		return baseMapper.roleClaimCount(env, roleAlias, AuthUtil.getUserId());
 	}
 }

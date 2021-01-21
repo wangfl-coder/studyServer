@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.composition.mapper.TemplateCompositionMapper;
 import org.springblade.composition.mapper.TemplateMapper;
 import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.ITemplateCompositionService;
@@ -52,7 +53,7 @@ import java.util.List;
 public class TemplateServiceImpl extends BaseServiceImpl<TemplateMapper, Template> implements ITemplateService {
 	private final ITemplateCompositionService templateCompositionService;
 	private final ICompositionService compositionService;
-
+	private final TemplateCompositionMapper templateCompositionMapper;
 	/**
 	 * 构建模板下的组合
 	 * @param templateCompositions templateComposition集合
@@ -90,18 +91,19 @@ public class TemplateServiceImpl extends BaseServiceImpl<TemplateMapper, Templat
 
 	@Override
 	public List<Composition> allCompositions(Long templateId) {
-		TemplateComposition templateComposition = new TemplateComposition();
-		templateComposition.setTemplateId(templateId);
-		List<TemplateComposition> templateCompositionList = templateCompositionService.list(Condition.getQueryWrapper(templateComposition));
-		if (templateCompositionList.isEmpty()){
-			return null;
-		}
-		List<Long> compositionIdList = new ArrayList<>();
-		templateCompositionList.forEach(templateComposition1 -> compositionIdList.add(templateComposition1.getCompositionId()));
-		List<Composition> compositionList = compositionService.listByIds(compositionIdList);
-		if (compositionList.isEmpty()){
-			return null;
-		}
-		return compositionList;
+		// TemplateComposition templateComposition = new TemplateComposition();
+		// templateComposition.setTemplateId(templateId);
+		// List<TemplateComposition> templateCompositionList = templateCompositionService.list(Condition.getQueryWrapper(templateComposition));
+		// if (templateCompositionList.isEmpty()){
+		// 	return null;
+		// }
+		// List<Long> compositionIdList = new ArrayList<>();
+		// templateCompositionList.forEach(templateComposition1 -> compositionIdList.add(templateComposition1.getCompositionId()));
+		// List<Composition> compositionList = compositionService.listByIds(compositionIdList);
+		// if (compositionList.isEmpty()){
+		// 	return null;
+		// }
+		// return compositionList;
+		return templateCompositionMapper.allCompositions(templateId);
 	}
 }
