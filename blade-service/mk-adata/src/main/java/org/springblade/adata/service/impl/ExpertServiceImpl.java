@@ -19,12 +19,15 @@ package org.springblade.adata.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
 import org.springblade.adata.service.IExpertService;
@@ -461,5 +464,28 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		return baseMapper.userInspectionRemark(personId);
 	}
 
+	@Override
+	public List<ExpertExcel> exportExpert(Wrapper<Expert> queryWrapper) {
+		return baseMapper.exportExpert(queryWrapper);
+	}
 
+	@Override
+	public void importUser(List<ExpertExcel> data, Boolean isCovered) {
+		data.forEach(expertExcel -> {
+			Expert expert = Objects.requireNonNull(BeanUtil.copy(expertExcel, Expert.class));
+			// 覆盖数据
+			if (isCovered) {
+				// 查询用户是否存在
+				QueryWrapper<Expert> expertQueryWrapper = new QueryWrapper<>();
+				expertQueryWrapper.eq("expert_id",expert.getExpertId());
+				Expert oldExpert = getOne(expertQueryWrapper);
+				if (oldExpert != null && oldExpert.getId() != null) {
+					expert.setId(oldExpert.getId());
+					updateById(expert);
+					return;
+				}
+			}
+			save(expert);
+		});
+	}
 }

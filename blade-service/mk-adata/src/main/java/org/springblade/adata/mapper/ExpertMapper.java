@@ -16,9 +16,11 @@
  */
 package org.springblade.adata.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.vo.UserRemarkVO;
 
 import java.util.List;
@@ -51,5 +53,13 @@ public interface ExpertMapper extends BaseMapper<Expert> {
 	 * @return
 	 */
 	List<UserRemarkVO> userInspectionRemark(@Param("personId") Long personId);
+
+	/**
+	 * 获取导出专家数据
+	 *
+	 * @param queryWrapper
+	 * @return
+	 */
+	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<Expert> queryWrapper);
 
 }

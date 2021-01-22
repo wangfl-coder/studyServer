@@ -16,9 +16,11 @@
  */
 package org.springblade.adata.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
@@ -91,4 +93,21 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @return
 	 */
 	List<UserRemarkVO> userInspectionRemark(@Param("personId") Long personId);
+
+	/**
+	 * 获取导出专家数据
+	 *
+	 * @param queryWrapper
+	 * @return
+	 */
+	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<Expert> queryWrapper);
+
+	/**
+	 * 导入专家数据
+	 *
+	 * @param data
+	 * @param isCovered
+	 * @return
+	 */
+	void importUser(List<ExpertExcel> data, Boolean isCovered);
 }

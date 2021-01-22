@@ -16,6 +16,7 @@
  */
 package org.springblade.adata.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
@@ -23,6 +24,8 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.excel.ExpertExcel;
+import org.springblade.adata.excel.ExpertImporter;
 import org.springblade.adata.magic.ExportMagicRequest;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
@@ -32,11 +35,14 @@ import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.adata.wrapper.ExpertWrapper;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.cache.utils.CacheUtil;
+import org.springblade.core.excel.util.ExcelUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.oss.model.BladeFile;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.constant.BladeConstant;
+import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowEngineClient;
@@ -45,6 +51,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +77,8 @@ public class ExpertController extends BladeController {
 
 	private final IExpertService expertService;
 	private final IFlowEngineClient flowEngineClient;
+	private final ExpertMapper expertMapper;
+
 	/**
 	 * 详情
 	 */
@@ -217,7 +226,7 @@ public class ExpertController extends BladeController {
 	/**
 	 * 导出质检完成的专家信息
 	 */
-	@GetMapping("/export-experts")
+	@GetMapping("/export-experts-aminer")
 	@ApiOperationSupport(order = 10)
 	@ApiOperation(value = "导出质检完成的专家信息", notes = "导出质检完成的专家信息")
 	public R exportExperts(Long taskId){
@@ -228,37 +237,37 @@ public class ExpertController extends BladeController {
 		boolean bi;
 		boolean remark;
 		boolean result;
-//		List<Expert> experts = expertMapper.queryExportExperts(taskId);
+		List<Expert> experts = expertMapper.queryExportExperts(taskId);
 
-		ArrayList<Expert> experts = new ArrayList<>();
-		Expert expert1 = new Expert();
-		expert1.setWork("中南大学湘雅三医院 博士生导师，一级主任医师");
-		expert1.setEdu("毕业于湖南医科大学");
+//		ArrayList<Expert> experts = new ArrayList<>();
+//		Expert expert1 = new Expert();
+//		expert1.setWork("中南大学湘雅三医院 博士生导师，一级主任医师");
+//		expert1.setEdu("毕业于湖南医科大学");
 //		expert1.setBio("dalao");
-		expert1.setBioZh("医学博士，博士生导师，一级主任医师，中南大学首届湘雅名医，全国医德标兵，中国最美女医师，湖南省十大同心人物，享受国务院政府特殊津贴。主要研究方向妇科肿瘤及妇科微无创技术。擅长达芬奇机器人手术。现担任国际微创与无创理事会理事，世界华人妇产科医师协会常务委员,中国医师协会微无创专业委员会副主任委员，中国医师协会微无创医学专业委员会第一届子宫肌瘤专业委员会（学组）主任委员，中国医师协会妇产科医师分会第三届委员会常务委员，湖南省医师协会第一届妇产科医师分会会长，湖南省医学会妇产科专业委员会副主任委员等国际国内学术职务20余项。担任《中南大学学报(医学版)》等7部杂志编委及审稿专家。近年主持及参与国家级课题5项,主持省自然科学基金重点项目、省自然科学基金及科技计划重点项目3项，省厅级一般科研课题20余项，国家专利20余项；在国内外期刊发表论文200余篇，其中SCI论文40余篇；主编/副主编专著10部、参编11部；获省级科技进步奖及省医学科学技术奖6项，省级教学成果奖1项。她是湖南省最早开展妇科腔镜技术的专家之一；她所领导的妇产科目前是湖南省唯一的宫内疾病微创诊治临床研究中心。她于2015年10月15日完成湖南省首例达芬奇机器人手术，在短短两个多月时间即创下2015年度全国妇科达芬奇机器人手术量单月第一的佳绩！也是国内首个妇科机器人手术单月完成达40例的妇产科专家。她2016年度及2017年度达芬奇机器人手术量居全国第一。她是在最短时间内完成手术种类最多的妇科术者之一，且实现了单人单日手术达7台的纪录。");
+//		expert1.setBioZh("医学博士，博士生导师，一级主任医师，中南大学首届湘雅名医，全国医德标兵，中国最美女医师，湖南省十大同心人物，享受国务院政府特殊津贴。主要研究方向妇科肿瘤及妇科微无创技术。擅长达芬奇机器人手术。现担任国际微创与无创理事会理事，世界华人妇产科医师协会常务委员,中国医师协会微无创专业委员会副主任委员，中国医师协会微无创医学专业委员会第一届子宫肌瘤专业委员会（学组）主任委员，中国医师协会妇产科医师分会第三届委员会常务委员，湖南省医师协会第一届妇产科医师分会会长，湖南省医学会妇产科专业委员会副主任委员等国际国内学术职务20余项。担任《中南大学学报(医学版)》等7部杂志编委及审稿专家。近年主持及参与国家级课题5项,主持省自然科学基金重点项目、省自然科学基金及科技计划重点项目3项，省厅级一般科研课题20余项，国家专利20余项；在国内外期刊发表论文200余篇，其中SCI论文40余篇；主编/副主编专著10部、参编11部；获省级科技进步奖及省医学科学技术奖6项，省级教学成果奖1项。她是湖南省最早开展妇科腔镜技术的专家之一；她所领导的妇产科目前是湖南省唯一的宫内疾病微创诊治临床研究中心。她于2015年10月15日完成湖南省首例达芬奇机器人手术，在短短两个多月时间即创下2015年度全国妇科达芬奇机器人手术量单月第一的佳绩！也是国内首个妇科机器人手术单月完成达40例的妇产科专家。她2016年度及2017年度达芬奇机器人手术量居全国第一。她是在最短时间内完成手术种类最多的妇科术者之一，且实现了单人单日手术达7台的纪录。");
 //		expert1.setPhone("234567");
-		expert1.setName("Min Xue");
-		expert1.setNameZh("李树春");
-		expert1.setExpertId("542a516fdabfae86fd95158b");
-		expert1.setTitles("0");
+//		expert1.setName("Min Xue");
+//		expert1.setNameZh("李树春");
+//		expert1.setExpertId("542a516fdabfae86fd95158b");
+//		expert1.setTitles("0");
 //		expert1.setTitlesDesc("董事长");
-		expert1.setPhone("0731-88638888%_%88618577%_%88618120");
-		expert1.setFax("0731—88921910");
+//		expert1.setPhone("0731-88638888%_%88618577%_%88618120");
+//		expert1.setFax("0731—88921910");
 //		expert1.setEmail("jasonlsc@126.com");
-		expert1.setAffiliation("The Third Xiangya Hospital of Central South University");
-		expert1.setAffiliationZh("中南大学湘雅三医院");
-		expert1.setHp("http://www.xy3yy.com/zjfc/fk2019/15670.html");
+//		expert1.setAffiliation("The Third Xiangya Hospital of Central South University");
+//		expert1.setAffiliationZh("中南大学湘雅三医院");
+//		expert1.setHp("http://www.xy3yy.com/zjfc/fk2019/15670.html");
 //		expert1.setHomepage("http://cpa.cqu.edu.cn/info/1071/3475.htm");
 //		expert1.setGs("http://cpa.cqu.edu.cn/info/1071/3475.htm");
 //		expert1.setDblp("http://cpa.cqu.edu.cn/info/1071/3475.htm");
-		expert1.setGender("female");
-		expert1.setLanguage("chinese");
-		expert1.setId(1341597796091850753L);
+//		expert1.setGender("female");
+//		expert1.setLanguage("chinese");
+//		expert1.setId(1341597796091850753L);
 //		expert1.setAddress("中央民族大学中国少数民族传统医学中心１号楼301室");
-		expert1.setAvatar("https://static.aminer.cn/upload/avatar/1306/1243/1303/542a516fdabfae86fd95158b_0.jpg");
+//		expert1.setAvatar("https://static.aminer.cn/upload/avatar/1306/1243/1303/542a516fdabfae86fd95158b_0.jpg");
 //		expert1.setRemark("没有主页");
-		expert1.setUpdateUser(1341216104114147329L);
-		experts.add(expert1);
+//		expert1.setUpdateUser(1341216104114147329L);
+//		experts.add(expert1);
 
 		for(Expert expert:experts){
 			if(expert.getExpertId()!=null){
@@ -271,7 +280,7 @@ public class ExpertController extends BladeController {
 				if(expert.getRemark()!=null){
 					userRealName = expertService.queryNameById(expert.getUpdateUser()).getRealName();
 				}else{
-					userRealName = "xxx";
+					userRealName = "任意值";
 				}
 				List<UserRemarkVO> userRemarkVOS = expertService.userRemark(expert.getId());
 				List<UserRemarkVO> userInspectionRemarkVOS = expertService.userInspectionRemark(expert.getId());
@@ -282,12 +291,14 @@ public class ExpertController extends BladeController {
 				for(UserRemarkVO userRemarkVO:userRemarkVOS){
 					if(userRemarkVO.getProcessInstanceId()!=null){
 						R<List<BladeFlow>> listR = flowEngineClient.historyFlow(userRemarkVO.getProcessInstanceId(), "start", "end");
-						for(BladeFlow bladeFlow:listR.getData()){
-							if(!bladeFlow.getComment().equals("") & !bladeFlow.getComment().equals("同意")){
-								HashMap<String, Object> userComment = new HashMap<>();
-								userComment.put("user",bladeFlow.getAssigneeName());
-								userComment.put("comment",bladeFlow.getComment());
-								userCommentList.add(userComment);
+						if(listR.getData()!=null) {
+							for (BladeFlow bladeFlow : listR.getData()) {
+								if (!bladeFlow.getComment().equals("") & !bladeFlow.getComment().equals("同意")) {
+									HashMap<String, Object> userComment = new HashMap<>();
+									userComment.put("user", bladeFlow.getAssigneeName());
+									userComment.put("comment", bladeFlow.getComment());
+									userCommentList.add(userComment);
+								}
 							}
 						}
 					}
@@ -311,16 +322,44 @@ public class ExpertController extends BladeController {
 		for(UserRemarkVO userRemarkVO:userRemarkVOS){
 			if(userRemarkVO.getProcessInstanceId()!=null){
 				R<List<BladeFlow>> listR = flowEngineClient.historyFlow(userRemarkVO.getProcessInstanceId(),"start","end");
-				for(BladeFlow bladeFlow:listR.getData()){
-					if(!bladeFlow.getComment().equals("") & !bladeFlow.getComment().equals("同意")){
-						HashMap<String, Object> userComment = new HashMap<>();
-						userComment.put("user",bladeFlow.getAssigneeName());
-						userComment.put("comment",bladeFlow.getComment());
-						userCommentList.add(userComment);
+				if(listR.getData()!=null) {
+					for (BladeFlow bladeFlow : listR.getData()) {
+						if (!bladeFlow.getComment().equals("") & !bladeFlow.getComment().equals("同意")) {
+							HashMap<String, Object> userComment = new HashMap<>();
+							userComment.put("user", bladeFlow.getAssigneeName());
+							userComment.put("comment", bladeFlow.getComment());
+							userCommentList.add(userComment);
+						}
 					}
 				}
 			}
 		}
 		return R.data(userCommentList);
 	}
+
+	/**
+	 * 导出专家
+	 */
+	@GetMapping("export-experts-excel")
+	@ApiOperationSupport(order = 12)
+	@ApiOperation(value = "导出专家", notes = "传入expert")
+	public void exportUser(@ApiIgnore @RequestParam Map<String, Object> expert, HttpServletResponse response) {
+		QueryWrapper<Expert> queryWrapper = Condition.getQueryWrapper(expert, Expert.class);
+		queryWrapper.lambda().eq(Expert::getIsDeleted, BladeConstant.DB_NOT_DELETED);
+		List<ExpertExcel> list = expertService.exportExpert(queryWrapper);
+		ExcelUtil.export(response, "专家数据" + DateUtil.time(), "专家数据表", list, ExpertExcel.class);
+	}
+
+	/**
+	 * 导入专家
+	 */
+	@PostMapping("import-experts-excel")
+	@ApiOperationSupport(order = 13)
+	@ApiOperation(value = "导入用户", notes = "传入excel")
+	public R importUser(MultipartFile file, Integer isCovered) {
+		ExpertImporter userImporter = new ExpertImporter(expertService, isCovered == 1);
+		ExcelUtil.save(file, userImporter, ExpertExcel.class);
+		return R.success("操作成功");
+	}
+
 }

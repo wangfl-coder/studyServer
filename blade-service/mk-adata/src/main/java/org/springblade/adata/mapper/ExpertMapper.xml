@@ -63,4 +63,8 @@
         where e.id=#{personId}
     </select>
 
+    <select id="exportExpert" resultType="org.springblade.adata.excel.ExpertExcel">
+        SELECT * FROM mk_adata_expert ${ew.customSqlSegment}
+    </select>
+
 </mapper>
