@@ -359,9 +359,9 @@ public class ExpertController extends BladeController {
 	@PostMapping("import-experts-excel")
 	@ApiOperationSupport(order = 13)
 	@ApiOperation(value = "从excel导入专家", notes = "传入excel")
-	public R importUser(MultipartFile file, Integer isCovered) {
-		ExpertImporter userImporter = new ExpertImporter(expertService, isCovered == 1);
-		ExcelUtil.save(file, userImporter, ExpertExcel.class);
+	public R importExpert(MultipartFile file, Integer isCovered) {
+		ExpertImporter expertImporter = new ExpertImporter(expertService, isCovered == 1);
+		ExcelUtil.save(file, expertImporter, ExpertExcel.class);
 		return R.success("操作成功");
 	}
 

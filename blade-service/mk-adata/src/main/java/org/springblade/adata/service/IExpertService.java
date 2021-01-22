@@ -109,5 +109,5 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param isCovered
 	 * @return
 	 */
-	void importUser(List<ExpertExcel> data, Boolean isCovered);
+	void importExpert(List<ExpertExcel> data, Boolean isCovered);
 }

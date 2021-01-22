@@ -470,7 +470,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 	}
 
 	@Override
-	public void importUser(List<ExpertExcel> data, Boolean isCovered) {
+	public void importExpert(List<ExpertExcel> data, Boolean isCovered) {
 		data.forEach(expertExcel -> {
 			Expert expert = Objects.requireNonNull(BeanUtil.copy(expertExcel, Expert.class));
 			// 覆盖数据
