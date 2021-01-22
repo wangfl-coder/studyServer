@@ -15,6 +15,6 @@ public class ExpertImporter implements ExcelImporter<ExpertExcel> {
 
 	@Override
 	public void save(List<ExpertExcel> data) {
-		service.importUser(data, isCovered);
+		service.importExpert(data, isCovered);
 	}
 }

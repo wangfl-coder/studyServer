@@ -109,34 +109,35 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		return baseMapper.personIdToProcessInstance(expertId);
 	}
 
-//	/**
-//	 * 创建不去重质检任务查询完成的标注任务
-//	 * @param taskId  标注大任务id
-//	 * @return
-//	 */
-//	@Override
-//	public List<LabelTask> queryCompleteTask(Long taskId) {
-//		return baseMapper.queryCompleteTask(env, taskId);
-//	}
-//	/**
-//	 * 创建去重质检任务查询完成的标注任务
-//	 * @param taskId  标注大任务id
-//	 * @return
-//	 */
-//	@Override
-//	public List<LabelTask> queryUniqueCompleteTask(Long taskId) {
-//		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(env, taskId);
-//		List<LabelTask> uniqueCompleteTasks = new ArrayList<>();
-//		for(LabelTask labelTask:labelTasks){
-//			QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
-//			qualityInspectionTaskQueryWrapper.eq("label_task_id",labelTask.getId());
-//			List<QualityInspectionTask> qualityInspectionTasks = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
-//			if(qualityInspectionTasks.size()==0){
-//				uniqueCompleteTasks.add(labelTask);
-//			}
-//		}
-//		return uniqueCompleteTasks;
-//	}
+	/**
+	 * 创建不去重质检任务查询完成的标注任务
+	 * @param taskId  标注大任务id
+	 * @return
+	 */
+	@Override
+	public List<LabelTask> queryCompleteTask(Long taskId) {
+		return baseMapper.queryCompleteTask(env, taskId);
+	}
+
+	/**
+	 * 创建去重质检任务查询完成的标注任务
+	 * @param taskId  标注大任务id
+	 * @return
+	 */
+	@Override
+	public List<LabelTask> queryUniqueCompleteTask(Long taskId) {
+		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(env, taskId);
+		List<LabelTask> uniqueCompleteTasks = new ArrayList<>();
+		for(LabelTask labelTask:labelTasks){
+			QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
+			qualityInspectionTaskQueryWrapper.eq("label_task_id",labelTask.getId());
+			List<QualityInspectionTask> qualityInspectionTasks = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
+			if(qualityInspectionTasks.size()==0){
+				uniqueCompleteTasks.add(labelTask);
+			}
+		}
+		return uniqueCompleteTasks;
+	}
 
 //	@Override
 //	public Map<Long, Integer> batchQueryCompleteTaskCount(List<Long> taskIds) {
@@ -168,59 +169,33 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 //		return null;
 //	}
 
-	/**
-	 * 创建不去重质检任务查询完成的标注任务
-	 * @param taskId  标注大任务id
-	 * @return
-	 */
-	@Override
-	public List<LabelTask> queryCompleteTask(Long taskId) {
-		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
-		List<String> ids = new ArrayList<>();
-		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
-		List<LabelTask> labelTasks = new ArrayList<>();
-		if (processInstancesFinished.isSuccess()) {
-			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
-			list.forEach(labelTask -> {
-				String processInstanceId = labelTask.getProcessInstanceId();
-				if ((boolean)kv.get(processInstanceId)) {
-//					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
-//					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
-//					labelTaskService.update(labelTaskUpdateWrapper);
-					labelTasks.add(labelTask);
-				}
-			});
-		}
-		return labelTasks;
-	}
+//	/**
+//	 * 创建不去重质检任务查询完成的标注任务
+//	 * @param taskId  标注大任务id
+//	 * @return
+//	 */
+//	@Override
+//	public List<LabelTask> queryCompleteTask(Long taskId) {
+//		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
+//		List<String> ids = new ArrayList<>();
+//		list.forEach(task -> ids.add(task.getProcessInstanceId()));
+//		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
+//		List<LabelTask> labelTasks = new ArrayList<>();
+//		if (processInstancesFinished.isSuccess()) {
+//			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
+//			list.forEach(labelTask -> {
+//				String processInstanceId = labelTask.getProcessInstanceId();
+//				if ((boolean)kv.get(processInstanceId)) {
+////					UpdateWrapper<LabelTask> labelTaskUpdateWrapper = new UpdateWrapper<>();
+////					labelTaskUpdateWrapper.eq("process_instance_id",processInstanceId).set("status",2);
+////					labelTaskService.update(labelTaskUpdateWrapper);
+//					labelTasks.add(labelTask);
+//				}
+//			});
+//		}
+//		return labelTasks;
+//	}
 
-	/**
-	 * 创建去重质检任务查询完成的标注任务
-	 * @param taskId  标注大任务id
-	 * @return
-	 */
-	@Override
-	public List<LabelTask> queryUniqueCompleteTask(Long taskId) {
-		List<LabelTask> list = list(Wrappers.<LabelTask>query().lambda().eq(LabelTask::getTaskId, taskId));
-		List<String> ids = new ArrayList<>();
-		list.forEach(task -> ids.add(task.getProcessInstanceId()));
-		R processInstancesFinished = flowClient.isProcessInstancesFinished(ids);
-		List<LabelTask> labelTasks = new ArrayList<>();
-		if (processInstancesFinished.isSuccess()) {
-			LinkedHashMap kv = (LinkedHashMap)processInstancesFinished.getData();
-			list.forEach(labelTask -> {
-				String processInstanceId = labelTask.getProcessInstanceId();
-				QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
-				qualityInspectionTaskQueryWrapper.eq("label_task_id",labelTask.getId());
-				List<QualityInspectionTask> list1 = qualityInspectionTaskService.list(qualityInspectionTaskQueryWrapper);
-				if ((boolean)kv.get(processInstanceId) && list1.size() == 0) {
-					labelTasks.add(labelTask);
-				}
-			});
-		}
-		return labelTasks;
-	}
 
 	@Override
 	public List<LabelTask> getByTaskId(Long taskId) {
