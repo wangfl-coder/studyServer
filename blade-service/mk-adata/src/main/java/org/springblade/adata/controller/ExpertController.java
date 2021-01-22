@@ -224,11 +224,11 @@ public class ExpertController extends BladeController {
 	}
 
 	/**
-	 * 导出质检完成的专家信息
+	 * 标注数据生效到aminer
 	 */
 	@GetMapping("/export-experts-aminer")
 	@ApiOperationSupport(order = 10)
-	@ApiOperation(value = "导出质检完成的专家信息", notes = "导出质检完成的专家信息")
+	@ApiOperation(value = "标注数据生效", notes = "标注数据生效")
 	public R exportExperts(Long taskId){
 		boolean avatar;
 		boolean work;
@@ -342,7 +342,7 @@ public class ExpertController extends BladeController {
 	 */
 	@GetMapping("export-experts-excel")
 	@ApiOperationSupport(order = 12)
-	@ApiOperation(value = "导出专家", notes = "传入expert")
+	@ApiOperation(value = "导出专家到excel", notes = "传入expert")
 	public void exportUser(@ApiIgnore @RequestParam Map<String, Object> expert, HttpServletResponse response) {
 		QueryWrapper<Expert> queryWrapper = Condition.getQueryWrapper(expert, Expert.class);
 		queryWrapper.lambda().eq(Expert::getIsDeleted, BladeConstant.DB_NOT_DELETED);
@@ -355,7 +355,7 @@ public class ExpertController extends BladeController {
 	 */
 	@PostMapping("import-experts-excel")
 	@ApiOperationSupport(order = 13)
-	@ApiOperation(value = "导入用户", notes = "传入excel")
+	@ApiOperation(value = "从excel导入专家", notes = "传入excel")
 	public R importUser(MultipartFile file, Integer isCovered) {
 		ExpertImporter userImporter = new ExpertImporter(expertService, isCovered == 1);
 		ExcelUtil.save(file, userImporter, ExpertExcel.class);
