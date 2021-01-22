@@ -228,7 +228,7 @@ public class ExpertController extends BladeController {
 	 */
 	@GetMapping("/export-experts-aminer")
 	@ApiOperationSupport(order = 10)
-	@ApiOperation(value = "标注数据生效", notes = "标注数据生效")
+	@ApiOperation(value = "标注数据生效到aminer", notes = "标注数据生效到aminer")
 	public R exportExperts(Long taskId){
 		boolean avatar;
 		boolean work;
@@ -342,6 +342,9 @@ public class ExpertController extends BladeController {
 	 */
 	@GetMapping("export-experts-excel")
 	@ApiOperationSupport(order = 12)
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "taskId", value = "查询条件", paramType = "query", dataType = "Long"),
+	})
 	@ApiOperation(value = "导出专家到excel", notes = "传入expert")
 	public void exportUser(@ApiIgnore @RequestParam Map<String, Object> expert, HttpServletResponse response) {
 		QueryWrapper<Expert> queryWrapper = Condition.getQueryWrapper(expert, Expert.class);
