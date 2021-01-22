@@ -51,6 +51,9 @@ public class Task extends TenantEntity {
 	private Integer eduWorkInspectPercent;
 	@ApiModelProperty(value = "中英文简介质检百分比(0-100)")
 	private Integer bioInspectPercent;
+	@ApiModelProperty(value = "真题的比例")
+	private Integer realSetRate;
+
 
 
 

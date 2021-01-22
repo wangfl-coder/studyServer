@@ -41,5 +41,17 @@ public class SingleFlow extends BladeFlow{
 	private String compositionField;
 	@ApiModelProperty(value = "质检类型")
 	private Integer inspectionType;
+	@ApiModelProperty(value = "hp")
+	private String hp;
+	@ApiModelProperty(value = "gs")
+	private String gs;
+	@ApiModelProperty(value = "dblp")
+	private String dblp;
+	@ApiModelProperty(value = "otherHomepage")
+	private String otherHomepage;
+	@ApiModelProperty(value = "homepage")
+	private String homepage;
+	@ApiModelProperty(value = "是否是真题标志(-1:不是，1:是)")
+	private int isRealSet;
 
 }

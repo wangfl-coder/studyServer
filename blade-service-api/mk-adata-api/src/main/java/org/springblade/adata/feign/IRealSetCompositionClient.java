@@ -14,12 +14,11 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.flow.core.feign;
+package org.springblade.adata.feign;
 
-import org.springblade.composition.dto.TemplateDTO;
-import org.springblade.core.launch.constant.AppConstant;
+import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
-import org.springblade.flow.core.entity.BladeFlow;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,40 +26,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * 工作流远程调用接口.
+ * Notice Feign接口类
  *
  * @author Chill
  */
 @FeignClient(
-	value = AppConstant.APPLICATION_FLOW_NAME
+	value = LauncherConstant.MKAPP_ADATA_NAME
 )
-public interface IFlowEngineClient {
+public interface IRealSetCompositionClient {
 
-	String API_PREFIX = "/client";
-	String DEPLOY_MODEL_BY_TEMPLATE = API_PREFIX + "/deploy-model-by-template";
-	String FLOW_HISTORY = API_PREFIX + "/flow-history";
-
+	String API_PREFIX = "/client_real_set_composition";
+	String SAVE_REAL_SET_COMPOSITION = API_PREFIX + "/mk-adata/real_set_composition";
 
 	/**
-	 * 通过模版部署流程
-	 *
-	 * @param templateDTO templateDTO
-	 * @return R
-	 */
-	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
-	R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO);
-
-	/**
-	 * 获取流转历史列表
-	 *
-	 * @param processInstanceId 流程实例id
-	 * @param startActivityId   开始节点id
-	 * @param endActivityId     结束节点id
+	 * 生成任务的真题领取数据
+	 * @param templateId
+	 * @param taskId
+	 * @param realSetExpertList
 	 * @return
 	 */
-	@GetMapping(FLOW_HISTORY)
-	 R<List<BladeFlow>> historyFlow(@RequestParam String processInstanceId, String startActivityId, String endActivityId);
+	@GetMapping(SAVE_REAL_SET_COMPOSITION)
+	R save_real_set_composition(@RequestParam("templateId") Long templateId, @RequestParam("taskId") Long taskId,@RequestParam("realSetExpertList") List<RealSetExpert> realSetExpertList);
+
+
+
 }

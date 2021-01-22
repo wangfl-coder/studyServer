@@ -24,6 +24,18 @@
         <result column="COUNT(c.id)" property="count"/>
     </resultMap>
 
+    <resultMap id="labelTask" type="org.springblade.task.entity.LabelTask">
+        <result column="id" property="id"/>
+        <result column="process_definition_id" property="processDefinitionId"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+        <result column="task_id" property="taskId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="EndTime"/>
+        <result column="reason" property="reason"/>
+        <result column="task_user" property="taskUser"/>
+        <result column="apply_time" property="applyTime"/>
+    </resultMap>
+
     <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
         <result column="id" property="id"/>
         <result column="tenant_id" property="tenantId"/>
@@ -31,6 +43,14 @@
         <result column="create_dept" property="createDept"/>
         <result column="create_time" property="createTime"/>
         <result column="update_user" property="updateUser"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="composition_id" property="compositionId"/>
+        <result column="template_id" property="templateId"/>
+        <result column="duration" property="duration"/>
+        <result column="priority" property="priority"/>
+        <result column="person_id" property="personId"/>
+        <result column="person_name" property="personName"/>
         <result column="update_time" property="updateTime"/>
         <result column="status" property="status"/>
         <result column="description" property="description"/>
@@ -42,6 +62,21 @@
 
     <select id="completeCount" resultType="int">
         SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_PROCINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_PROCINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE t.task_id = #{param2} AND !isnull(flow.END_TIME_)
+
+    </select>
+
+    <select id="queryCompleteTask" resultMap="labelTask">
+        SELECT * FROM
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
             bladex_dev.mk_task_label t
             left join bladex_flow_dev.ACT_HI_PROCINST flow

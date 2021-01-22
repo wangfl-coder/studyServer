@@ -21,6 +21,15 @@ public interface LabelTaskMapper extends BaseMapper<LabelTask> {
 	int completeCount(String env, Long taskId);
 
 	/**
+	 * 查询完成子任务列表
+	 *
+	 * @param env    	运行环境
+	 * @param taskId    任务Id
+	 * @return
+	 */
+	List<LabelTask> queryCompleteTask(String env, Long taskId);
+
+	/**
 	 * 根据专家id查对应子任务流程实例id
 	 * @param expertId    专家真正的id
 	 * @return
