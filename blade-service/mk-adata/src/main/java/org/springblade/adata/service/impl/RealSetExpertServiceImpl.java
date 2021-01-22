@@ -264,13 +264,21 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 					if (first.getString("id").equals("dblp")) {
 						dblp = first.getString("url");
 					}
+					if (first.getString("id").equals("hp")) {
+						hp = first.getString("url");
+					}
 				} else if (resource_link.size() == 2) {
 					first = resource_link.getJSONObject(0);
 					second = resource_link.getJSONObject(1);
 					if (first.getString("id").equals("dblp")) {
 						dblp = first.getString("url");
-					} else {
+					} else if(second.getString("id").equals("dblp")){
 						dblp = second.getString("url");
+					}
+					if (first.getString("id").equals("hp")) {
+						hp = first.getString("url");
+					} else if(second.getString("id").equals("hp")){
+						hp = second.getString("url");
 					}
 				}
 			}
