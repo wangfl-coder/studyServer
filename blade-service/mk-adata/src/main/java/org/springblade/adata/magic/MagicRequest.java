@@ -64,7 +64,7 @@ public class MagicRequest {
 		body.add("file",	  fileAsResource);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
-		headers.add("Authorization", Authorization);
+		headers.add("Authorization" , Authorization);
 
 		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 

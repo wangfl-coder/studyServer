@@ -82,7 +82,7 @@ public class TaskController extends BladeController {
 	@GetMapping(value = "/inspection/count")
 	@ApiOperation(value = "查询可以质检的标注子任务数量")
 	public R queryIsInspectionTaskCount(@RequestParam("taskId") Long taskId) {
-		List<LabelTask> labelTasks = labelTaskService.queryCompleteTask1(taskId);
+		List<LabelTask> labelTasks = labelTaskService.queryUniqueCompleteTask(taskId);
 		return R.data(labelTasks.size());
 	}
 
@@ -103,9 +103,9 @@ public class TaskController extends BladeController {
 		if(qualityInspectionDTO.getInspectionType()==1){
 			labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
 		}else if(qualityInspectionDTO.getInspectionType()==2){
-			labelTasks = labelTaskService.queryCompleteTask1(task.getAnnotationTaskId());
+			labelTasks = labelTaskService.queryUniqueCompleteTask(task.getAnnotationTaskId());
 		}
-		if (labelTasks.size() > 0){
+		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()){
 			boolean save = taskService.save(task);
 			try {
 				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getCount(), task.getInspectionType(), task, labelTasks);
@@ -114,7 +114,9 @@ public class TaskController extends BladeController {
 				taskService.removeById(task.getId());
 				return R.fail("创建质检小任务失败");
 			}
-		}else {
+		}else if(labelTasks.size()<qualityInspectionDTO.getCount()) {
+			return R.fail("质检count超过最大可以质检的数量，最大可以质检的数量为："+labelTasks.size());
+		}else{
 			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
 		}
 	}
