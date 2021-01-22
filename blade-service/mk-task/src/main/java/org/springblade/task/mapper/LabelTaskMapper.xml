@@ -69,20 +69,20 @@
 
     </select>
 
-<!--    <select id="queryCompleteTask" resultMap="labelTask">-->
-<!--        SELECT * FROM-->
-<!--        <if test="param1!= null and param1!= '' and param1 == 'dev'">-->
-<!--            bladex_dev.mk_task_label t-->
-<!--            left join bladex_flow_dev.ACT_HI_PROCINST flow-->
-<!--        </if>-->
-<!--        <if test="param1!= null and param1!= '' and param1 == 'prod'">-->
-<!--            bladex.mk_task_label t-->
-<!--            left join bladex_flow.ACT_HI_PROCINST flow-->
-<!--        </if>-->
-<!--        ON t.process_instance_id = flow.PROC_INST_ID_-->
-<!--        WHERE t.task_id = #{param2} AND !isnull(flow.END_TIME_)-->
+    <select id="queryCompleteTask" resultMap="labelTask">
+        SELECT * FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label t
+            left join bladex_flow_dev.ACT_HI_PROCINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label t
+            left join bladex_flow.ACT_HI_PROCINST flow
+        </if>
+        ON t.process_instance_id = flow.PROC_INST_ID_
+        WHERE t.task_id = #{param2} AND !isnull(flow.END_TIME_)
 
-<!--    </select>-->
+    </select>
 
     <select id="personIdToProcessInstance" resultMap="personProcessInstance">
         select l.id,l.person_id,l.person_name,l.template_id,e.expert_id,l.process_instance_id from mk_adata_expert e
