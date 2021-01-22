@@ -10,7 +10,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -61,6 +63,7 @@ public class TaskController extends BladeController {
 	private IFlowClient flowClient;
 	private TaskMapper taskMapper;
 	private LabelTaskMapper labelTaskMapper;
+	private IRealSetExpertClient realSetExpertClient;
 
 
 	@GetMapping(value = "/complete/count")
@@ -125,14 +128,23 @@ public class TaskController extends BladeController {
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
 		boolean save = taskService.save(task);
 		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());
-		if (res_eb.isSuccess()) {
+
+		boolean flag = true;
+		// 导入真题数据库中的所有专家
+		if(expertBaseTaskDTO.getRealSetEbId()!=null) {
+			R res_real_set_eb = realSetExpertClient.importExpertBase(expertBaseTaskDTO.getRealSetEbId(), task.getId());
+			flag = res_real_set_eb.isSuccess();
+		}
+
+		if (res_eb.isSuccess() && flag) {
 			R<List<Expert>> rexperts = expertClient.getExpertIds(task.getId());
 			if (rexperts.isSuccess()) {
 				List<Expert> experts = rexperts.getData();
-				result = labelTaskService.startProcess(
-					expertBaseTaskDTO.getProcessDefinitionId(),
-					task,
-					experts);
+				if(expertBaseTaskDTO.getRealSetCount() != null) {
+					// 设置任务的真题比例，[0,100)
+					task.setRealSetRate(expertBaseTaskDTO.getRealSetCount() * 100 / (expertBaseTaskDTO.getRealSetCount() + experts.size()));
+				}
+				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, experts);
 				task.setCount(experts.size());
 				taskService.saveOrUpdate(task);
 			} else {

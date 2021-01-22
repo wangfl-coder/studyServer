@@ -23,6 +23,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.flowable.engine.TaskService;
+import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.adata.feign.IExpertClient;
+import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tenant.annotation.NonDS;
@@ -37,9 +41,11 @@ import org.springblade.flow.engine.service.FlowEngineService;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.feign.ITaskClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * 流程事务通用接口
@@ -56,6 +62,9 @@ public class WorkController {
 	private final TaskService taskService;
 	private final FlowEngineService flowEngineService;
 	private final FlowBusinessService flowBusinessService;
+	private final ITaskClient taskClient;
+	private final IExpertClient expertClient;
+	private final IRealSetExpertClient realSetExpertClient;
 
 
 	/**
@@ -100,6 +109,35 @@ public class WorkController {
 //		}
 		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId);
 		if(flow.getTaskId()!=null){
+			// 判断是否出现真题
+			// 这个地方需要重新规定一下composition的类型，2代表可以掺真题的。要把中文简介一类的基本信息去掉
+			String compositionField = flow.getCompositionField();
+			if (flow.getCompositionType() == 2 && !StringUtil.containsAny(compositionField,"bio")
+				&& !StringUtil.containsAny(compositionField,"bio") && !StringUtil.containsAny(compositionField,"edu")
+				&& !StringUtil.containsAny(compositionField,"work")) {
+				Expert expert = new Expert();
+				expert.setId(flow.getPersonId());
+				Expert expertDetail = expertClient.detail(expert).getData();
+				Task task = taskClient.getById(expertDetail.getTaskId()).getData();
+				Random r = new Random();
+				int randomResult = r.nextInt(100);
+				if (randomResult < task.getRealSetRate()) {
+					List<RealSetExpert> realSetExpertList = realSetExpertClient.getExpertIds(task.getId()).getData();
+					RealSetExpert realSetExpert = realSetExpertList.get(r.nextInt(realSetExpertList.size()));
+					flow.setPersonId(realSetExpert.getId());
+					flow.setPersonName(realSetExpert.getName());
+					flow.setExpertId(realSetExpert.getExpertId());
+					flow.setHomepage(realSetExpert.getHomepage());
+					flow.setHp(realSetExpert.getHp());
+					flow.setGs(realSetExpert.getGs());
+					flow.setDblp(realSetExpert.getDblp());
+					flow.setOtherHomepage(realSetExpert.getOtherHomepage());
+					// 前端通过这个标志是1判断是真题
+					flow.setIsRealSet(1);
+					return R.data(flow);
+				}
+			}
+
 			taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
 			return R.data(flow);
 		}else{

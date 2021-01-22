@@ -23,13 +23,18 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
+import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.RealSetAnnotationData;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.ICompositionService;
+import org.springblade.composition.service.IRealSetAnnotationDataService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
+import org.springblade.composition.vo.RealSetAnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
@@ -67,6 +72,8 @@ public class AnnotationDataController extends BladeController {
 	private final ILabelTaskClient labelTaskClient;
 	private final IStatisticsService statisticsService;
 	private final ICompositionService compositionService;
+	private final IRealSetAnnotationDataService realSetAnnotationDataService;
+	private final IRealSetExpertClient realSetExpertClient;
 
 	/**
 	 * 查询标注数据
@@ -183,6 +190,40 @@ public class AnnotationDataController extends BladeController {
 			return R.success("没有数据保存");
 		}
 
+	}
+
+	/**
+	 * 提交真题标志数据接口
+	 */
+	@PostMapping("/submit_real_set")
+	@ApiOperationSupport(order = 4)
+	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入AnnotationDataVO对象")
+	public R submitRealSet(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
+		// 清理标注数据前后的多余空白字符
+		if (annotationDataVO.getRealSetAnnotationDataList() != null) {
+			annotationDataVO.getRealSetAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
+		}
+		List<RealSetAnnotationData> annotationDataList = annotationDataVO.getRealSetAnnotationDataList();
+		// 获取真题答案
+		RealSetExpert realSetExpert = new RealSetExpert();
+		realSetExpert.setId(annotationDataVO.getExpertId());
+		RealSetExpert realData = realSetExpertClient.detail(realSetExpert).getData();
+
+		// 逐个字段检查正确与否
+		annotationDataList.forEach(realSetAnnotationData -> {
+			int is_true = 2;
+			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
+			if (answer == null){
+				answer = "";
+			}
+			if(realSetAnnotationData.getValue().equals(answer)){
+				is_true = 1;
+			}
+			realSetAnnotationData.setIsTrue(is_true);
+		});
+		// 保存结果
+		return R.status(realSetAnnotationDataService.saveBatch(annotationDataList));
 	}
 
 }
