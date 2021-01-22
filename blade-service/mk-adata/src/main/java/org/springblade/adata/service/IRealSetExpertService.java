@@ -16,13 +16,11 @@
  */
 package org.springblade.adata.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
-import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
-
 
 import java.util.Map;
 
@@ -31,7 +29,7 @@ import java.util.Map;
  *
  * @author Chill
  */
-public interface IExpertService extends BaseService<Expert> {
+public interface IRealSetExpertService extends BaseService<RealSetExpert> {
 
 	/**
 	 * 详情
@@ -56,7 +54,6 @@ public interface IExpertService extends BaseService<Expert> {
 	Boolean importDetail(String id, Long taskId);
 
 
-
 	/**
 	 * 导入智库下所有学者
 	 * @param id
@@ -65,10 +62,4 @@ public interface IExpertService extends BaseService<Expert> {
 	Boolean importExpertBase(String id, Long taskId);
 
 
-	/**
-	 * 学者信息是否完整
-	 * @param expertId
-	 * @return
-	 */
-	Kv isInfoComplete(Long expertId, Long templateId);
 }

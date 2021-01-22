@@ -39,5 +39,17 @@ public class SingleFlow extends BladeFlow{
 	private Integer compositionType;
 	@ApiModelProperty(value = "组合字段")
 	private String compositionField;
+	@ApiModelProperty(value = "hp")
+	private String hp;
+	@ApiModelProperty(value = "gs")
+	private String gs;
+	@ApiModelProperty(value = "dblp")
+	private String dblp;
+	@ApiModelProperty(value = "otherHomepage")
+	private String otherHomepage;
+	@ApiModelProperty(value = "homepage")
+	private String homepage;
+	@ApiModelProperty(value = "是否是真题标志(-1:不是，1:是)")
+	private int isRealSet;
 
 }

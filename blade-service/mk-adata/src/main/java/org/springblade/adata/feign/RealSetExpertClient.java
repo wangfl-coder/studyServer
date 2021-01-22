@@ -19,14 +19,15 @@ package org.springblade.adata.feign;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.adata.service.IExpertService;
+import org.springblade.adata.service.IRealSetExpertService;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
-import org.springblade.adata.service.IExpertService;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
 
 import java.util.List;
 
@@ -39,27 +40,27 @@ import java.util.List;
 @ApiIgnore()
 @RestController
 @AllArgsConstructor
-public class ExpertClient implements IExpertClient {
+public class RealSetExpertClient implements IRealSetExpertClient {
 
-	private final IExpertService service;
+	private final IRealSetExpertService service;
 
 	@Override
 	@PostMapping(GET_EXPERT)
-	public R<Expert> detail(@RequestBody Expert expert) {
-		Expert detail = service.getOne(Condition.getQueryWrapper(expert));
+	public R<RealSetExpert> detail(@RequestBody RealSetExpert expert) {
+		RealSetExpert detail = service.getOne(Condition.getQueryWrapper(expert));
 		return R.data(detail);
 	}
 
 	@Override
 	@GetMapping(GET_EXPERT_IDS)
-	public R<List<Expert>> getExpertIds(@RequestParam Long taskId) {
-		List<Expert> experts = service.list(Wrappers.<Expert>query().lambda().eq(Expert::getTaskId, taskId));
+	public R<List<RealSetExpert>> getExpertIds(@RequestParam Long taskId) {
+		List<RealSetExpert> experts = service.list(Wrappers.<RealSetExpert>query().lambda().eq(RealSetExpert::getTaskId, taskId));
 		return R.data(experts);
 	}
 
 	@Override
 	@PostMapping(SAVE_EXPERT)
-	public R saveExpert(@RequestBody Expert expert) {
+	public R saveExpert(@RequestBody RealSetExpert expert) {
 		return R.status(service.saveOrUpdate(expert));
 	}
 
@@ -70,11 +71,5 @@ public class ExpertClient implements IExpertClient {
 		return R.status(res);
 	}
 
-	@Override
-	@GetMapping(IS_INFO_COMPLETE)
-	public R<Kv> isInfoComplete(@RequestParam("expertId") Long expertId, @RequestParam("templateId") Long templateId) {
-		Kv kv = service.isInfoComplete(expertId, templateId);
-		return R.data(kv);
-	}
 
 }

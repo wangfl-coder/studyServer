@@ -25,6 +25,7 @@ g/dtd/mybatis-3-mapper.dtd">
         <result column="is_deleted" property="isDeleted"/>
         <result column="status" property="status"/>
         <result column="annotation_task_id" property="annotationTaskId"/>
+        <result column="real_set_rate" property="realSetRate"/>
     </resultMap>
 
     <resultMap id="taskMapVOResultMap" type="org.springblade.task.vo.TaskVO">

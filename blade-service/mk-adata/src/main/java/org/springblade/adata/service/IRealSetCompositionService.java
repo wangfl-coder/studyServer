@@ -16,59 +16,16 @@
  */
 package org.springblade.adata.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetComposition;
 import org.springblade.core.mp.base.BaseService;
-import org.springblade.core.mp.support.Query;
-import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.support.Kv;
 
-
-import java.util.Map;
 
 /**
  * 服务类
  *
  * @author Chill
  */
-public interface IExpertService extends BaseService<Expert> {
-
-	/**
-	 * 详情
-	 * @param id
-	 * @return
-	 */
-	String fetchDetail(String id);
-
-	/**
-	 * 列表
-	 * @param params
-	 * @param query
-	 * @return
-	 */
-	String fetchList(Map<String, Object> params, Query query);
-
-	/**
-	 * 导入
-	 * @param id
-	 * @return
-	 */
-	Boolean importDetail(String id, Long taskId);
+public interface IRealSetCompositionService extends BaseService<RealSetComposition> {
 
 
-
-	/**
-	 * 导入智库下所有学者
-	 * @param id
-	 * @return
-	 */
-	Boolean importExpertBase(String id, Long taskId);
-
-
-	/**
-	 * 学者信息是否完整
-	 * @param expertId
-	 * @return
-	 */
-	Kv isInfoComplete(Long expertId, Long templateId);
 }
