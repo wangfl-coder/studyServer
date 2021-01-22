@@ -18,6 +18,12 @@
         <result column="COUNT(GROUP_ID_)" property="count"/>
     </resultMap>
 
+    <resultMap id="compositionClaimCountResultMap" type="org.springblade.task.vo.CompositionClaimCountVO">
+        <result column="id" property="compositionId"/>
+        <result column="name" property="name"/>
+        <result column="COUNT(c.id)" property="count"/>
+    </resultMap>
+
     <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
         <result column="id" property="id"/>
         <result column="tenant_id" property="tenantId"/>
@@ -155,6 +161,57 @@
         </if>
         ON t.GROUP_ID_=role.role_alias
 
+    </select>
+
+    <select id="compositionClaimCount" resultMap="compositionClaimCountResultMap">
+        SELECT c.id,c.name,COUNT(c.id) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label tl
+            inner join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label tl
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_flow_dev.ACT_HI_IDENTITYLINK id
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        </if>
+        ON id.TASK_ID_=flow.ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_dev.mk_template_composition tc
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex.mk_template_composition tc
+        </if>
+        ON tl.template_id=tc.template_id
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_dev.mk_composition c
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex.mk_composition c
+        </if>
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND flow.PROC_INST_ID_ NOT IN (
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            SELECT PROC_INST_ID_ FROM bladex_flow_dev.ACT_RU_VARIABLE
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            SELECT PROC_INST_ID_ FROM bladex_flow.ACT_RU_VARIABLE
+        </if>
+        WHERE NAME_ IN
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            concat(#{item},'-',#{param3})
+        </foreach>
+        )
+        GROUP BY c.id
     </select>
 
     <select id="allCompositions" resultMap="compositionResultMap">

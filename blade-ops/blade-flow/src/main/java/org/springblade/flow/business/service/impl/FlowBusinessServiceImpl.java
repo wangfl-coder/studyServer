@@ -17,7 +17,7 @@
 package org.springblade.flow.business.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -30,7 +30,6 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
-import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
@@ -38,6 +37,7 @@ import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -62,7 +62,6 @@ import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.IQualityInspectionTaskClient;
 import org.springblade.task.feign.ITaskClient;
 import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
-import org.springblade.task.vo.TaskVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -96,14 +95,21 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final RepositoryService repositoryService;
 
 	@Override
-	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
+	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, SingleFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup;
 		if (null != bladeFlow.getRoleId()) {
 			List<String> res = SysCache.getRoleAliases(bladeFlow.getRoleId().toString());
 			if (Func.isNotEmpty(res)) {
 				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
-			}else {
+			} else {
+				return null;
+			}
+		}else if (null != bladeFlow.getCompositionId()) {
+			List<String> res = flowMapper.getRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
+			if (Func.isNotEmpty(res)) {
+				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
+			} else {
 				return null;
 			}
 		}else {
@@ -240,7 +246,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	}
 
 	@Override
-	public SingleFlow selectOneClaimPage(String categoryName, Long roleId) {
+	public SingleFlow selectOneClaimPage(String categoryName, Long roleId, Long compositionId) {
 //		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup;
 		if (null != roleId) {
@@ -248,6 +254,13 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			if (Func.isNotEmpty(res)) {
 				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
 			}else {
+				return null;
+			}
+		}else if (null != compositionId) {
+			List<String> res = flowMapper.getRoleAliasByCompositionId(env, Long.valueOf(compositionId));
+			if (Func.isNotEmpty(res)) {
+				taskGroup = StringUtil.collectionToCommaDelimitedString(res);
+			} else {
 				return null;
 			}
 		}else {
@@ -294,6 +307,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());
+			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+			if (Func.isNotEmpty(inspectionType))
+				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 
 			if (categoryName.equals("标注流程")) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
@@ -446,6 +462,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 				if (Func.isNotEmpty(extField))
 					flow.setCompositionField(extField.get(0).getElementText());
+				List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+				if (Func.isNotEmpty(inspectionType))
+					flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 			}
 			// Status
 			if (historicProcessInstance.getEndActivityId() != null) {
@@ -572,6 +591,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());
+			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+			if (Func.isNotEmpty(inspectionType))
+				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 
 			if (bladeFlow.getCategoryName().equals("标注流程")){
 				LabelTask labelTask = labelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
@@ -696,6 +718,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
+						List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+						if (Func.isNotEmpty(inspectionType))
+							flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 						flowList.add(flow);
 					});
 				}
@@ -783,6 +808,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 						if (Func.isNotEmpty(extField))
 							flow.setCompositionField(extField.get(0).getElementText());
+						List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+						if (Func.isNotEmpty(inspectionType))
+							flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 						flowList.add(flow);
 					});
 				}
@@ -980,6 +1008,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
 			if (Func.isNotEmpty(extField))
 				flow.setCompositionField(extField.get(0).getElementText());
+			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+			if (Func.isNotEmpty(inspectionType))
+				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 			if (bladeFlow.getCategoryName().equals("标注流程")) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 				if (labelTask.getId() != null) {

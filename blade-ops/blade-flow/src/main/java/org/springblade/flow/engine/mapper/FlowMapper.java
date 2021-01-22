@@ -59,4 +59,10 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @param compositionId 组合Id
 	 */
 	Role getRoleByTemplateComposition(String env, Long templateId, Long compositionId);
+
+	/**
+	 * 根据组合Id获取角色别名
+	 * @param compositionId 组合Id
+	 */
+	List<String> getRoleAliasByCompositionId(String env, Long compositionId);
 }

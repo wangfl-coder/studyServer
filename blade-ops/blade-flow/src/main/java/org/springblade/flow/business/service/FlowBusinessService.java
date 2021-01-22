@@ -17,11 +17,8 @@
 package org.springblade.flow.business.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springblade.core.tool.api.R;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
-import org.springblade.task.entity.Task;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -39,7 +36,7 @@ public interface FlowBusinessService {
 	 * @param bladeFlow 流程类
 	 * @return
 	 */
-	IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, BladeFlow bladeFlow);
+	IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, SingleFlow bladeFlow);
 
 
 	/**
@@ -47,7 +44,7 @@ public interface FlowBusinessService {
 	 *
 	 * @return
 	 */
-	SingleFlow selectOneClaimPage(String categoryName, Long roleId);
+	SingleFlow selectOneClaimPage(String categoryName, Long roleId, Long compositionId);
 
 	/**
 	 * 流程待办列表

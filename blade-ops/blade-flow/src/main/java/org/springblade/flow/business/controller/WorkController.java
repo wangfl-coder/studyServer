@@ -75,7 +75,7 @@ public class WorkController {
 	@GetMapping("claim-list")
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "待签事务列表页", notes = "传入流程信息")
-	public R<IPage<SingleFlow>> claimList(@ApiParam("流程信息") BladeFlow bladeFlow, Query query) {
+	public R<IPage<SingleFlow>> claimList(@ApiParam("流程信息") SingleFlow bladeFlow, Query query) {
 		IPage<SingleFlow> pages = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
 		return R.data(pages);
 	}
@@ -86,7 +86,9 @@ public class WorkController {
 	@GetMapping("claim-one")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "返回一个待签事务并签收", notes = "传入流程信息")
-	public R<SingleFlow> claimOne(@RequestParam String categoryName, @RequestParam(value="roleId", required=false) Long roleId) {
+	public R<SingleFlow> claimOne(@RequestParam String categoryName,
+								  @RequestParam(value="roleId", required=false) Long roleId,
+								  @RequestParam(value="compositionId", required=false) Long compositionId) {
 //		Query query = new Query();
 //		query.setCurrent(1).setSize(1);
 //		IPage<BladeFlow> bladeFlowIPage = flowBusinessService.selectClaimPage(Condition.getPage(query), bladeFlow);
@@ -98,7 +100,7 @@ public class WorkController {
 //		}else {
 //			return null;
 //		}
-		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId);
+		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId, compositionId);
 		if(flow.getTaskId()!=null){
 			taskService.claim(flow.getTaskId(), TaskUtil.getTaskUser());
 			return R.data(flow);

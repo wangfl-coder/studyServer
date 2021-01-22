@@ -371,7 +371,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				basicInfoTask.setIncomingFlows(incomingFlows);
 				basicInfoTask.setOutgoingFlows(outgoingFlows);
 
-				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
 				basicInfoTask.setCustomProperties(customPropertyList);
 
 				flowElementList.add(incomingFlow);
@@ -587,8 +587,8 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				labelBiTask.setCandidateGroups(labelCandidateGroups);
 				labelBiTask.setIncomingFlows(labelBiTaskIncomingFlows);
 				labelBiTask.setOutgoingFlows(labelBiTaskOutgoingFlows);
-				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
-				labelBiTask.setCustomProperties(customPropertyList);
+				List<CustomProperty> labelPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
+				labelBiTask.setCustomProperties(labelPropertyList);
 
 				UserTask inspectBiTask = new UserTask();
 				inspectBiTask.setId("inspectBiTask"+counter.get());
@@ -598,8 +598,8 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				inspectBiTask.setCandidateGroups(inspectionCandidateGroups);
 				inspectBiTask.setIncomingFlows(inspectBiTaskIncomingFlows);
 				inspectBiTask.setOutgoingFlows(inspectBiTaskOutgoingFlows);
-//				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
-				inspectBiTask.setCustomProperties(customPropertyList);
+				List<CustomProperty> inspectPropertyList = buildCustomPropertyListWithComposition(templateComposition, true);
+				inspectBiTask.setCustomProperties(inspectPropertyList);
 
 				Gateway exclusiveCollectGateway = new ExclusiveGateway();
 				exclusiveCollectGateway.setId("exclusiveCollectGateway"+counter.get());
@@ -774,7 +774,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		}
 	}
 
-	private List<CustomProperty> buildCustomPropertyListWithComposition(TemplateCompositionDTO templateComposition) {
+	private List<CustomProperty> buildCustomPropertyListWithComposition(TemplateCompositionDTO templateComposition, boolean isInspection) {
 		List<CustomProperty> customPropertyList = new ArrayList<>();
 		CustomProperty compositionIdProperty = new CustomProperty();
 		compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
@@ -785,6 +785,12 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		CustomProperty compositionFieldProperty = new CustomProperty();
 		compositionFieldProperty.setName(ProcessConstant.COMPOSITION_FIELD);
 		compositionFieldProperty.setSimpleValue(templateComposition.getCompositionField());
+		if (isInspection) {
+			CustomProperty compositionInspectionTypeProperty = new CustomProperty();
+			compositionInspectionTypeProperty.setName(ProcessConstant.INSPECTION_TYPE);
+			compositionInspectionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
+			customPropertyList.add(compositionInspectionTypeProperty);
+		}
 		customPropertyList.add(compositionIdProperty);
 		customPropertyList.add(compositionTypeProperty);
 		customPropertyList.add(compositionFieldProperty);
@@ -804,7 +810,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 						candidateGroups.add(templateComposition.getLabelRoleName());
 						userTask.setCandidateGroups(candidateGroups);
 
-						List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+						List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
 						userTask.setCustomProperties(customPropertyList);
 					}
 					if (null != templateComposition.getInspectionRoleName() ) {
@@ -815,7 +821,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 							candidateGroups.add(templateComposition.getInspectionRoleName());
 							userTask.setCandidateGroups(candidateGroups);
 
-							List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+							List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition, true);
 							userTask.setCustomProperties(customPropertyList);
 						}
 					}
@@ -826,7 +832,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				labelCandidateGroups.add(templateComposition.getLabelRoleName());
 				labelTask.setCandidateGroups(labelCandidateGroups);
 
-				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition);
+				List<CustomProperty> customPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
 				labelTask.setCustomProperties(customPropertyList);
 
 				flowElementMap.remove(labelTaskName);
@@ -839,7 +845,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 					inspectionCandidateGroups.add(templateComposition.getInspectionRoleName());
 					inspectionTask.setCandidateGroups(inspectionCandidateGroups);
 
-					List<CustomProperty> customPropertyList2 = buildCustomPropertyListWithComposition(templateComposition);
+					List<CustomProperty> customPropertyList2 = buildCustomPropertyListWithComposition(templateComposition, true);
 					inspectionTask.setCustomProperties(customPropertyList2);
 
 					flowElementMap.remove(inspectionTaskName);
