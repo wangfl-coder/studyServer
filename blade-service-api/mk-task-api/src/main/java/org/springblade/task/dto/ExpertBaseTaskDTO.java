@@ -22,6 +22,14 @@ public class ExpertBaseTaskDTO extends BaseEntity {
 	@ApiModelProperty(value = "智库id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private String ebId;
+    // realSet
+	@ApiModelProperty(value = "真题智库id")
+	@JsonSerialize(using = ToStringSerializer.class)
+	private String realSetEbId;
+
+	@ApiModelProperty(value = "掺入真题数量")
+	private Integer realSetCount;
+
 	@ApiModelProperty(value = "任务名字")
 	private String taskName;
 	@ApiModelProperty(value = "任务类型")
