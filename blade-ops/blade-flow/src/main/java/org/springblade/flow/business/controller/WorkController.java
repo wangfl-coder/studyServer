@@ -111,14 +111,17 @@ public class WorkController {
 		if(flow.getTaskId()!=null){
 			// 判断是否出现真题
 			// 这个地方需要重新规定一下composition的类型，2代表可以掺真题的。要把中文简介一类的基本信息去掉
-			if (flow.getCompositionType() == 2) {
+			String compositionField = flow.getCompositionField();
+			if (flow.getCompositionType() == 2 && !StringUtil.containsAny(compositionField,"bio")
+				&& !StringUtil.containsAny(compositionField,"bio") && !StringUtil.containsAny(compositionField,"edu")
+				&& !StringUtil.containsAny(compositionField,"work")) {
 				Expert expert = new Expert();
 				expert.setId(flow.getPersonId());
 				Expert expertDetail = expertClient.detail(expert).getData();
 				Task task = taskClient.getById(expertDetail.getTaskId()).getData();
 				Random r = new Random();
 				int randomResult = r.nextInt(100);
-				if (randomResult <= task.getRealSetRate()) {
+				if (randomResult < task.getRealSetRate()) {
 					List<RealSetExpert> realSetExpertList = realSetExpertClient.getExpertIds(task.getId()).getData();
 					RealSetExpert realSetExpert = realSetExpertList.get(r.nextInt(realSetExpertList.size()));
 					flow.setPersonId(realSetExpert.getId());

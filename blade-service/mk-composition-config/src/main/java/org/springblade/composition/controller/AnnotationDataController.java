@@ -198,7 +198,7 @@ public class AnnotationDataController extends BladeController {
 	@PostMapping("/submit_real_set")
 	@ApiOperationSupport(order = 4)
 	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
+	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入AnnotationDataVO对象")
 	public R submitRealSet(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getRealSetAnnotationDataList() != null) {
@@ -213,7 +213,11 @@ public class AnnotationDataController extends BladeController {
 		// 逐个字段检查正确与否
 		annotationDataList.forEach(realSetAnnotationData -> {
 			int is_true = 2;
-			if(realSetAnnotationData.getValue() == BeanUtil.getProperty(realData,realSetAnnotationData.getField())){
+			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
+			if (answer == null){
+				answer = "";
+			}
+			if(realSetAnnotationData.getValue().equals(answer)){
 				is_true = 1;
 			}
 			realSetAnnotationData.setIsTrue(is_true);
