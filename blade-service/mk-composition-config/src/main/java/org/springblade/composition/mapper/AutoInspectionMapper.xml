@@ -3,7 +3,7 @@
 <mapper namespace="org.springblade.composition.mapper.AutoInspectionMapper">
 
     <select id="realSetCount" resultType="org.springblade.composition.vo.AutoInspectionVO">
-        SELECT count(*) realSetTotal,round(avg(time)/1000,0) avgTime from mk_auto_inspection
+        SELECT is_composition_true isCompositionTrue, count(*) count, round(avg(time)/1000,0) avgTime from mk_auto_inspection
         where 1=1
         <if test="taskId!=null">
             and task_id=#{taskId}
@@ -17,28 +17,29 @@
         <if test="userId!=null">
             and create_user=#{userId}
         </if>
+        group by is_composition_true;
 
     </select>
 
-    <select id="realSetCorrectOrErrorCount" resultType="org.springblade.composition.vo.AutoInspectionVO">
-        SELECT count(*) correctOrErrorCount from mk_auto_inspection
-        where 1=1
-        <if test="isCompositionTrue!=null">
-            and is_composition_true=#{isCompositionTrue}
-        </if>
-        <if test="taskId!=null">
-            and task_id=#{taskId}
-        </if>
-        <if test="startTime!=null">
-            and update_time &gt; #{startTime}
-        </if>
-        <if test="endTime!=null">
-            and update_time &lt; #{endTime}
-        </if>
-        <if test="userId!=null">
-            and create_user=#{userId}
-        </if>
+<!--    <select id="realSetCorrectOrErrorCount" resultType="org.springblade.composition.vo.AutoInspectionVO">-->
+<!--        SELECT count(*) correctOrErrorCount from mk_auto_inspection-->
+<!--        where 1=1-->
+<!--        <if test="isCompositionTrue!=null">-->
+<!--            and is_composition_true=#{isCompositionTrue}-->
+<!--        </if>-->
+<!--        <if test="taskId!=null">-->
+<!--            and task_id=#{taskId}-->
+<!--        </if>-->
+<!--        <if test="startTime!=null">-->
+<!--            and update_time &gt; #{startTime}-->
+<!--        </if>-->
+<!--        <if test="endTime!=null">-->
+<!--            and update_time &lt; #{endTime}-->
+<!--        </if>-->
+<!--        <if test="userId!=null">-->
+<!--            and create_user=#{userId}-->
+<!--        </if>-->
 
-    </select>
+<!--    </select>-->
 
 </mapper>

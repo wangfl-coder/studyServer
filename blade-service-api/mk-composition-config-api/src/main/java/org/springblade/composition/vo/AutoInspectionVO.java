@@ -8,7 +8,18 @@ import lombok.Data;
 @ApiModel(value = "AutoInspectionVO对象", description = "AutoInspectionVO对象")
 public class AutoInspectionVO {
 
-	Integer realSetTotal;
-	Integer correctOrErrorCount;
+	/**
+	 * 正确或错误
+	 */
+	Integer isCompositionTrue;
+
+	/**
+	 * 正确数量或错误数量
+	 */
+	Integer count;
+
+	/**
+	 * 平均时间
+	 */
 	Integer avgTime;
 }
