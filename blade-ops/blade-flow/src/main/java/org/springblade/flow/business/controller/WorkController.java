@@ -111,12 +111,12 @@ public class WorkController {
 //		}
 		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId, compositionId);
 		if(flow.getTaskId()!=null){
-			// 判断是否出现真题
-			// 这个地方需要重新规定一下composition的类型，2代表可以掺真题的。要把中文简介一类的基本信息去掉
+			// 判断是否出现真题,主页，补充信息，含有bio,bioZh,work,edu等基本信息字段的组合没有真题。其他情况通过掺入比例依概率产生真题。
 			String compositionField = flow.getCompositionField();
 			if (flow.getCompositionType() == 2 && !StringUtil.containsAny(compositionField,"bio")
 				&& !StringUtil.containsAny(compositionField,"bio") && !StringUtil.containsAny(compositionField,"edu")
 				&& !StringUtil.containsAny(compositionField,"work")) {
+				// 获取到要领取的是哪个任务，查询出任务的掺入真题比例。
 				Expert expert = new Expert();
 				expert.setId(flow.getPersonId());
 				Expert expertDetail = expertClient.detail(expert).getData();
@@ -124,6 +124,7 @@ public class WorkController {
 				Random r = new Random();
 				int randomResult = r.nextInt(100);
 				if (randomResult < task.getRealSetRate()) {
+					// 每次产生真题，随机从任务绑定的真题库中抽取一个真题。把真题的主页相关信息，例如hp,name等返回给前端。
 					List<RealSetExpert> realSetExpertList = realSetExpertClient.getExpertIds(task.getId()).getData();
 					RealSetExpert realSetExpert = realSetExpertList.get(r.nextInt(realSetExpertList.size()));
 					flow.setPersonId(realSetExpert.getId());
