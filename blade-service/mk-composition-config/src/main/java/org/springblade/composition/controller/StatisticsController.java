@@ -75,52 +75,6 @@ public class StatisticsController extends BladeController {
 	private final StatisticsMapper statisticsMapper;
 
 	/**
-	 * 查询标注数据
-	 */
-	@GetMapping("/task")
-	@ApiOperationSupport(order = 1)
-	@ApiOperation(value = "查询智库任务完成情况", notes = "传入智库任务id")
-	public R<TaskProgressVO> statisticsTaskProgress(Long taskId) {
-		TaskProgressVO taskProgressVO = new TaskProgressVO();
-		// 查询一个智库下有多少任务（人）
-		R<List<LabelTask>> res = labelTaskClient.queryLabelTaskAll(taskId);
-		List<Long> labelTaskIds = new ArrayList<>();
-		if (res.isSuccess()){
-			List<LabelTask> labelTaskList = res.getData();
-			labelTaskList.forEach(labelTask -> labelTaskIds.add(labelTask.getId()));
-			taskProgressVO.setAnnotationTotal(labelTaskList.size());
-			// 查询完成的任务
-			R<Integer> result = labelTaskClient.completeCount(taskId);
-			if (result.isSuccess()){
-				taskProgressVO.setFinishCount(result.getData());
-			}
-		}
-		// 统计每种组合的完成（提交）个数
-		List<Composition> compositionList = new ArrayList<>();
-		QueryWrapper<Statistics> wrapper = new QueryWrapper<>();
-		wrapper.groupBy("composition_id");
-		wrapper.select("composition_id,count(*) as composition_submit_count");
-		wrapper.in("sub_task_id",labelTaskIds);
-		wrapper.eq("status",2);
-		List<Statistics> statisticsList = statisticsService.list(wrapper);
-		statisticsList.forEach(statistics -> {
-			Composition composition = compositionService.getById(statistics.getCompositionId());
-			// 现在因为补充信息没有composition_id，所以需要加一个非空判断。
-			if(composition != null) {
-				composition.setSubmitCount(statistics.getCompositionSubmitCount());
-				compositionList.add(composition);
-			} else {
-				Composition composition_supplement = new Composition();
-				composition_supplement.setSubmitCount(statistics.getCompositionSubmitCount());
-				composition_supplement.setName("补充信息");
-				compositionList.add(composition_supplement);
-			}
-
-		});
-		taskProgressVO.setCompositionList(compositionList);
-		return R.data(taskProgressVO);
-	}
-	/**
 	 * 查询用户在一段时间内标注的各种组合的数量
 	 */
 	@GetMapping("/user_composition")

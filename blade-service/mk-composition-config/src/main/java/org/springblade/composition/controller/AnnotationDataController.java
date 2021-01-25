@@ -230,10 +230,13 @@ public class AnnotationDataController extends BladeController {
 //			totalTime.addAndGet(realSetAnnotationData.getTime());
 //			realSetAnnotationData.setIsTrue(is_true);
 //		});
+		// 每次提交的通过时间戳生成一个唯一id
 		Long timestamp=System.currentTimeMillis();
+		// 判断这次提交的正确错误，有一个字段错，这次提交就是错的。1是正确，2是错误
 		int isCompositionTrue = 1;
 		for(RealSetAnnotationData realSetAnnotationData:annotationDataList){
 			realSetAnnotationData.setRealSetId(timestamp);
+			// 判断字段是正确还是错误，2是错误，1是正确。
 			int is_true = 2;
 			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
 			if (answer == null){
