@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.composition.mapper.AutoInspectionMapper">
 
-    <select id="realSetCount" resultType="org.springblade.composition.dto.AutoInspectionDTO">
-        SELECT count(*) realSetTotal,round(avg(time)/1000,1) avgTime from mk_auto_inspection
+    <select id="realSetCount" resultType="org.springblade.composition.vo.AutoInspectionVO">
+        SELECT count(*) realSetTotal,round(avg(time)/1000,0) avgTime from mk_auto_inspection
         where 1=1
         <if test="taskId!=null">
             and task_id=#{taskId}
@@ -20,7 +20,7 @@
 
     </select>
 
-    <select id="realSetCorrectOrErrorCount" resultType="org.springblade.composition.dto.AutoInspectionDTO">
+    <select id="realSetCorrectOrErrorCount" resultType="org.springblade.composition.vo.AutoInspectionVO">
         SELECT count(*) correctOrErrorCount from mk_auto_inspection
         where 1=1
         <if test="isCompositionTrue!=null">
