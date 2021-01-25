@@ -23,7 +23,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
 
 /**
@@ -32,9 +35,12 @@ import org.springblade.core.mp.base.BaseEntity;
  * @author Chill
  */
 @Data
-@TableName("mk_real_set_annotation_data")
-@ApiModel(value = "RealSetAnnotationData对象", description = "RealSetAnnotationData对象")
-public class RealSetAnnotationData extends BaseEntity {
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@TableName("mk_auto_inspection")
+@ApiModel(value = "AutoInspection对象", description = "AutoInspection对象")
+public class AutoInspection extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -67,18 +73,6 @@ public class RealSetAnnotationData extends BaseEntity {
 	private Long expertId;
 
 	/**
-	 * 标注字段
-	 */
-	@ApiModelProperty(value = "标注字段")
-	private String field;
-
-	/**
-	 * 标注值
-	 */
-	@ApiModelProperty(value = "标注值")
-	private String value;
-
-	/**
 	 * 备注
 	 */
 	@ApiModelProperty(value = "备注")
@@ -101,7 +95,7 @@ public class RealSetAnnotationData extends BaseEntity {
 	 * 标注是否正确
 	 */
 	@ApiModelProperty(value = "标注是否正确")
-	private Integer isTrue ;
+	private Integer isCompositionTrue ;
 
 	/**
 	 * 标注时间

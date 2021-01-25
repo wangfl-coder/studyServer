@@ -17,7 +17,6 @@
 package org.springblade.composition.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
@@ -27,12 +26,10 @@ import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.AutoInspection;
 import org.springblade.composition.entity.RealSetAnnotationData;
 import org.springblade.composition.entity.Statistics;
-import org.springblade.composition.service.IAnnotationDataService;
-import org.springblade.composition.service.ICompositionService;
-import org.springblade.composition.service.IRealSetAnnotationDataService;
-import org.springblade.composition.service.IStatisticsService;
+import org.springblade.composition.service.*;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.composition.vo.RealSetAnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
@@ -53,6 +50,8 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -74,6 +73,7 @@ public class AnnotationDataController extends BladeController {
 	private final ICompositionService compositionService;
 	private final IRealSetAnnotationDataService realSetAnnotationDataService;
 	private final IRealSetExpertClient realSetExpertClient;
+	private IAutoInspectionService autoInspectionService;
 
 	/**
 	 * 查询标注数据
@@ -211,7 +211,29 @@ public class AnnotationDataController extends BladeController {
 		RealSetExpert realData = realSetExpertClient.detail(realSetExpert).getData();
 
 		// 逐个字段检查正确与否
-		annotationDataList.forEach(realSetAnnotationData -> {
+//		AtomicInteger isCompositionTrue = new AtomicInteger(1);
+//		Long timestamp=System.currentTimeMillis();
+//		AtomicInteger totalTime = new AtomicInteger();
+//		annotationDataList.forEach(realSetAnnotationData -> {
+//			realSetAnnotationData.setRealSetId(timestamp);
+//			int is_true = 2;
+//			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
+//			if (answer == null){
+//				answer = "";
+//			}
+//			if(realSetAnnotationData.getValue().equals(answer)){
+//				is_true = 1;
+//			}
+//			if(is_true==2){
+//				isCompositionTrue.set(2);
+//			}
+//			totalTime.addAndGet(realSetAnnotationData.getTime());
+//			realSetAnnotationData.setIsTrue(is_true);
+//		});
+		Long timestamp=System.currentTimeMillis();
+		int isCompositionTrue = 1;
+		for(RealSetAnnotationData realSetAnnotationData:annotationDataList){
+			realSetAnnotationData.setRealSetId(timestamp);
 			int is_true = 2;
 			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
 			if (answer == null){
@@ -220,9 +242,15 @@ public class AnnotationDataController extends BladeController {
 			if(realSetAnnotationData.getValue().equals(answer)){
 				is_true = 1;
 			}
+			if(is_true==2){
+				isCompositionTrue = 2;
+			}
 			realSetAnnotationData.setIsTrue(is_true);
-		});
+		}
 		// 保存结果
+		AutoInspection autoInspection = Objects.requireNonNull(BeanUtil.copy(annotationDataList.get(0), AutoInspection.class));
+		autoInspection.setIsCompositionTrue(isCompositionTrue);
+		autoInspectionService.save(autoInspection);
 		return R.status(realSetAnnotationDataService.saveBatch(annotationDataList));
 	}
 
