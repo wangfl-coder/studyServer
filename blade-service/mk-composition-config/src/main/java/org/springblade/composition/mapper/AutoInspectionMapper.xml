@@ -3,7 +3,7 @@
 <mapper namespace="org.springblade.composition.mapper.AutoInspectionMapper">
 
     <select id="realSetCount" resultType="org.springblade.composition.vo.AutoInspectionVO">
-        SELECT count(*) realSetTotal,round(avg(time)/1000,1) avgTime from mk_auto_inspection
+        SELECT count(*) realSetTotal,round(avg(time)/1000,0) avgTime from mk_auto_inspection
         where 1=1
         <if test="taskId!=null">
             and task_id=#{taskId}

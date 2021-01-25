@@ -10,5 +10,5 @@ public class AutoInspectionVO {
 
 	Integer realSetTotal;
 	Integer correctOrErrorCount;
-	float avgTime;
+	Integer avgTime;
 }
