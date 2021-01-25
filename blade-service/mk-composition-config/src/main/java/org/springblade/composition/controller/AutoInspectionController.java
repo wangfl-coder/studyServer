@@ -27,7 +27,7 @@ public class AutoInspectionController extends BladeController {
 	 */
 	@GetMapping("/correct-or-error-count")
 	@ApiOperationSupport(order = 1)
-	@ApiOperation(value = "真题集总数统计", notes = "真题集总数统计")
+	@ApiOperation(value = "真题集正确错误数量统计", notes = "真题集正确错误数量统计")
 	public R<List<AutoInspectionVO>> realSetCount(String startTime, String endTime, Long taskId, Long userId) {
 		return R.data(autoInspectionMapper.realSetCount(startTime,endTime,taskId,userId));
 	}
