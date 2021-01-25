@@ -136,6 +136,8 @@ public class WorkController {
 					flow.setDblp(realSetExpert.getDblp());
 					flow.setPersonNameZh(realSetExpert.getNameZh());
 					flow.setOtherHomepage(realSetExpert.getOtherHomepage());
+					Long timestamp=System.currentTimeMillis();
+					flow.setTaskId(String.valueOf(timestamp));
 					// 前端通过这个标志是1判断是真题
 					flow.setIsRealSet(1);
 					return R.data(flow);
