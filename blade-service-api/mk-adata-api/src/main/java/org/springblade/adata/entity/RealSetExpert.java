@@ -189,10 +189,4 @@ public class RealSetExpert extends BaseEntity {
 	@ApiModelProperty(value = "备注")
 	private String remark;
 
-	/**
-	 * 序号
-	 */
-	@ApiModelProperty(value = "序号")
-	private int number;
-
 }
