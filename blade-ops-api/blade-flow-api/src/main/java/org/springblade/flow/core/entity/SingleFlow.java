@@ -14,8 +14,10 @@ public class SingleFlow extends BladeFlow{
 //	@ApiModelProperty(value = "专家id")
 //	@JsonSerialize(using = ToStringSerializer.class)
 //	private Long personId;
-	@ApiModelProperty(value = "专家名字")
+	@ApiModelProperty(value = "专家英文名字")
 	private String personName;
+	@ApiModelProperty(value = "专家中文名字")
+	private String personNameZh;
 	@ApiModelProperty(value = "模版id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long templateId;

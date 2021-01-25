@@ -133,6 +133,7 @@ public class WorkController {
 					flow.setHp(realSetExpert.getHp());
 					flow.setGs(realSetExpert.getGs());
 					flow.setDblp(realSetExpert.getDblp());
+					flow.setPersonNameZh(realSetExpert.getNameZh());
 					flow.setOtherHomepage(realSetExpert.getOtherHomepage());
 					// 前端通过这个标志是1判断是真题
 					flow.setIsRealSet(1);
