@@ -39,6 +39,8 @@ public class SingleFlow extends BladeFlow{
 	private Integer compositionType;
 	@ApiModelProperty(value = "组合字段")
 	private String compositionField;
+	@ApiModelProperty(value = "质检类型")
+	private Integer inspectionType;
 	@ApiModelProperty(value = "hp")
 	private String hp;
 	@ApiModelProperty(value = "gs")

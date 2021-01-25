@@ -15,6 +15,7 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.flow.core.constant.ProcessConstant;
@@ -221,5 +222,10 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
 		return baseMapper.roleClaimCount(env, roleAlias, AuthUtil.getUserId());
+	}
+
+	@Override
+	public List<CompositionClaimCountVO> compositionClaimCount(List<String> roleAlias) {
+		return baseMapper.compositionClaimCount(env, roleAlias, AuthUtil.getUserId());
 	}
 }

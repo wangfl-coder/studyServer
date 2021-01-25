@@ -93,4 +93,9 @@ public interface ProcessConstant {
 	 * 组合字段
 	 */
 	String COMPOSITION_FIELD = "compositionField";
+
+	/**
+	 * 质检类型
+	 */
+	String INSPECTION_TYPE = "inspectionType";
 }

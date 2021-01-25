@@ -24,6 +24,7 @@ import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.RoleClaimCountVO;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -79,6 +80,14 @@ public class LabelTaskController extends BladeController implements CacheNames {
 	public R<List<RoleClaimCountVO>> roleClaimCount(BladeUser user) {
 		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
 		List<RoleClaimCountVO> res = labelTaskService.roleClaimCount(roleAlias);
+		return R.data(res);
+	}
+
+	@GetMapping("/composition-claim-count")
+	@ApiOperation(value = "返回当前用户所有组合及分别可接的任务数")
+	public R<List<CompositionClaimCountVO>> compositionClaimCount(BladeUser user) {
+		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
+		List<CompositionClaimCountVO> res = labelTaskService.compositionClaimCount(roleAlias);
 		return R.data(res);
 	}
 }

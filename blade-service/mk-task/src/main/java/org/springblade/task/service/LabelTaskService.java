@@ -3,6 +3,7 @@ package org.springblade.task.service;
 import org.springblade.adata.entity.Expert;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.tool.support.Kv;
+import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
@@ -40,4 +41,12 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 	 * @return
 	 */
 	List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias);
+
+	/**
+	 * 返回当前用户所有组合及分别可接的任务数
+	 *
+	 * @param roleAlias
+	 * @return
+	 */
+	List<CompositionClaimCountVO> compositionClaimCount(List<String> roleAlias);
 }
