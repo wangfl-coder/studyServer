@@ -53,6 +53,9 @@ public class Task extends TenantEntity {
 	private Integer bioInspectPercent;
 	@ApiModelProperty(value = "真题的比例")
 	private Integer realSetRate;
+	@ApiModelProperty(value = "真题集智库id")
+	private String realSetEbId;
+
 
 
 
