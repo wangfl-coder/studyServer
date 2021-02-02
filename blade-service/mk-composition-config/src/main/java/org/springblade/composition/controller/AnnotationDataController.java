@@ -40,6 +40,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -114,7 +116,9 @@ public class AnnotationDataController extends BladeController {
 	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO, BladeUser bladeUser) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getAnnotationDataList() != null) {
-			annotationDataVO.getAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
+			annotationDataVO.getAnnotationDataList().forEach(annotationData -> annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue())));
+			List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList().stream().filter(annotationData -> Func.isNotBlank(annotationData.getField())).collect(Collectors.toList());
+			annotationDataVO.setAnnotationDataList(annotationDataList);
 		}
 		Long subTaskId  = annotationDataVO.getSubTaskId();
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();

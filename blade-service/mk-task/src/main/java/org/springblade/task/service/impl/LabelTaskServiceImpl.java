@@ -1,10 +1,14 @@
 package org.springblade.task.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.entity.Composition;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
@@ -44,6 +48,7 @@ import java.util.Random;
 public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, LabelTask> implements LabelTaskService {
 
 	private final IFlowClient flowClient;
+	private final IRealSetExpertClient realSetExpertClient;
 	private final QualityInspectionTaskService qualityInspectionTaskService;
 
 	@Value("${spring.profiles.active}")
@@ -60,43 +65,66 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		experts.forEach(expert -> {
 			LabelTask labelTask = new LabelTask();
 			labelTask.setProcessDefinitionId(processDefinitionId);
-			if (Func.isEmpty(labelTask.getId())) {
-				// 保存leave
-				labelTask.setCreateTime(DateUtil.now());
-				boolean save = save(labelTask);
-				Kv variables = Kv.create();
-				List<Composition> compositions = baseMapper.allCompositions(task.getTemplateId());
-				for(Composition composition : compositions) {
-					if (2 == composition.getAnnotationType()) {
-						variables.set("biCounter"+composition.getId(), 0)
-								.set("biSame"+composition.getId(), 0)
-								.set("biNotfound"+composition.getId(), 0);
-					}
-				}
-				variables.set("isEduWorkEasy", false)
-						.set("isEduWorkNeedInspect", false)
-						.set("isBioNeedInspect", false);
-				// 启动流程
-				variables.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
-						.set("taskUser", TaskUtil.getTaskUser(labelTask.getTaskUser()))
-						.set("priority", task.getPriority());
-				R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
-				if (result.isSuccess()) {
-					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
-					// 返回流程id写入leave
-					labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					labelTask.setTemplateId(task.getTemplateId());
-					labelTask.setTaskId(task.getId());
-					labelTask.setPersonId(expert.getId());
-					labelTask.setPersonName(expert.getName());
-					updateById(labelTask);
-				} else {
-					throw new ServiceException("开启流程失败");
-				}
-			} else {
+			// 保存任务
+			labelTask.setCreateTime(DateUtil.now());
+			boolean save = save(labelTask);
+			Kv variables = createProcessVariables(task, labelTask);
+			variables.put("isRealSet", false);
+			R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
+			if (result.isSuccess()) {
+				log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
+				// 返回流程id写入任务
+				labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
+				labelTask.setTemplateId(task.getTemplateId());
+				labelTask.setTaskId(task.getId());
+				labelTask.setPersonId(expert.getId());
+				labelTask.setPersonName(expert.getName());
 				updateById(labelTask);
+			} else {
+				throw new ServiceException("开启流程失败");
 			}
 		});
+		return true;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	// @GlobalTransactional
+	public boolean startRealSetProcess(String realSetProcessDefinitions,
+								Task task) {
+		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertIds(task.getId());
+		if (!expertsRealSetResult.isSuccess()) {
+			return false;
+		}
+		List<RealSetExpert> expertsRealSet = expertsRealSetResult.getData();
+		Random random = Holder.RANDOM;
+		RealSetExpert expert = expertsRealSet.get(random.nextInt(expertsRealSet.size()));
+		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
+
+		JSONObject realSetJSONObject = JSONObject.parseObject(realSetProcessDefinitions);
+		realSetJSONObject.entrySet().forEach(entry -> {
+			LabelTask labelTask = new LabelTask();
+			labelTask.setProcessDefinitionId((String)entry.getValue());
+			// 保存任务
+			labelTask.setCreateTime(DateUtil.now());
+			boolean save = save(labelTask);
+			Kv variables = createProcessVariables(task, labelTask);
+			variables.put("isRealSet", true);
+			R<BladeFlow> result = flowClient.startProcessInstanceById((String)entry.getValue(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
+			if (result.isSuccess()) {
+				log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
+				// 返回流程id写入任务
+				labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
+				labelTask.setTemplateId(task.getTemplateId());
+				labelTask.setTaskId(task.getId());
+				labelTask.setPersonId(expert.getId());
+				labelTask.setPersonName(expert.getName());
+				updateById(labelTask);
+			} else {
+				throw new ServiceException("开启流程失败");
+			}
+		});
+
 		return true;
 	}
 
@@ -216,7 +244,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public int annotationClaimCount(List<String> roleAlias) {
-		return baseMapper.annotationClaimCount(env, roleAlias);
+		return baseMapper.annotationClaimCount2(env, roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
@@ -227,5 +255,25 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	public List<CompositionClaimCountVO> compositionClaimCount(List<String> roleAlias) {
 		return baseMapper.compositionClaimCount(env, roleAlias, AuthUtil.getUserId());
+	}
+
+	private Kv createProcessVariables(Task task, LabelTask labelTask) {
+		Kv variables = Kv.create();
+		List<Composition> compositions = baseMapper.allCompositions(task.getTemplateId());
+		for(Composition composition : compositions) {
+			if (2 == composition.getAnnotationType()) {
+				variables.set("biCounter"+composition.getId(), 0)
+					.set("biSame"+composition.getId(), 0)
+					.set("biNotfound"+composition.getId(), 0);
+			}
+		}
+		variables.set("isEduWorkEasy", false)
+			.set("isEduWorkNeedInspect", false)
+			.set("isBioNeedInspect", false);
+		// 启动流程
+		variables.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
+			.set("taskUser", null)
+			.set("priority", task.getPriority());
+		return variables;
 	}
 }

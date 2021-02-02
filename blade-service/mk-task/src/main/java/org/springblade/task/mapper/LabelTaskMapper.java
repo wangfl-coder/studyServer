@@ -61,6 +61,14 @@ public interface LabelTaskMapper extends BaseMapper<LabelTask> {
 	int annotationClaimCount(String env, List<String> param2);
 
 	/**
+	 * 查询用户标注任务待签数量
+	 * @param env     环境
+	 * @param param2  角色列表
+	 * @return
+	 */
+	int annotationClaimCount2(String env, List<String> param2, Long userId);
+
+	/**
 	 * 返回当前用户所有角色及分别可接的任务数
 	 * @param env     环境
 	 * @param roleAlias  角色列表

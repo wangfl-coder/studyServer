@@ -16,6 +16,7 @@
  */
 package org.springblade.composition.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
@@ -194,7 +195,10 @@ public class TemplateController extends BladeController {
 			if (!result.isSuccess()) {
 				return R.fail("部署模版流程失败");
 			}
-			templateDTO.setProcessDefinitionId((String) result.getData());
+			JSONObject jsonObject = JSONObject.parseObject((String) result.getData());
+			templateDTO.setProcessDefinitionId(jsonObject.getString("label_process_definition_id"));
+			jsonObject.remove("label_process_definition_id");
+			templateDTO.setRealSetProcessDefinitions(jsonObject.toString());
 		}
 		Template template = Objects.requireNonNull(BeanUtil.copy(templateDTO, Template.class));
 		boolean tmp = templateService.saveOrUpdate(template);

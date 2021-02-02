@@ -16,6 +16,8 @@
  */
 package org.springblade.flow.engine.feign;
 
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.flowable.engine.HistoryService;
@@ -79,6 +81,18 @@ public class FlowEngineClient implements IFlowEngineClient {
 	private String categoryV2;
 
 	/**
+	 * 从模版部署真集流程的参考模型Id
+	 */
+	@Value("${blade.template-process.realSet.model-id}")
+	private String modelIdRealSet;
+
+	/**
+	 * 从模版部署真集流程的流程类型
+	 */
+	@Value("${blade.template-process.realSet.category}")
+	private String categoryRealSet;
+
+	/**
 	 * 用哪个版本的模型
 	 */
 	@Value("${blade.template-process.using}")
@@ -90,10 +104,21 @@ public class FlowEngineClient implements IFlowEngineClient {
 		String processDefinitionId;
 		if (using.equals("v2")) {
 			processDefinitionId = flowEngineService.deployModelByTemplateV2(modelIdV2, categoryV2, null, templateDTO);
+			Map<String, String> realSetProcessDefinitionMap = flowEngineService.deployRealSetModelByTemplate(modelIdRealSet, categoryRealSet, null, templateDTO);
+			realSetProcessDefinitionMap.put("label_process_definition_id", processDefinitionId);
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonStr = "";
+			try {
+				jsonStr = mapper.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(realSetProcessDefinitionMap);
+			}catch(Exception e){
+
+			}
+			return R.data(jsonStr);
 		} else {
 			processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, null, templateDTO);
+			return R.data(processDefinitionId);
 		}
-		return R.data(processDefinitionId);
 	}
 
 	@Override

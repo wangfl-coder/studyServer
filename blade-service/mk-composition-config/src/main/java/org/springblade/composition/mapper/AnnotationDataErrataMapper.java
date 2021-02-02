@@ -17,7 +17,12 @@
 package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+import org.springblade.adata.entity.Expert;
 import org.springblade.composition.entity.AnnotationDataErrata;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
+
+import java.util.List;
 
 /**
  * Mapper 接口
@@ -26,4 +31,21 @@ import org.springblade.composition.entity.AnnotationDataErrata;
  */
 public interface AnnotationDataErrataMapper extends BaseMapper<AnnotationDataErrata> {
 
+	/**
+	 * 获取标注组合勘误列表
+	 * @param labelerId
+	 * @param offset
+	 * @param pageSize
+	 *
+	 * @return
+	 */
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+
+	/**
+	 * 获取标注组合勘误列表
+	 * @param labelerId
+	 *
+	 * @return
+	 */
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId);
 }

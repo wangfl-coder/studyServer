@@ -64,5 +64,11 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * 根据组合Id获取角色别名
 	 * @param compositionId 组合Id
 	 */
-	List<String> getRoleAliasByCompositionId(String env, Long compositionId);
+	List<String> getLabelRoleAliasByCompositionId(String env, Long compositionId);
+
+	/**
+	 * 根据组合Id获取角色别名
+	 * @param compositionId 组合Id
+	 */
+	List<String> getInspectionRoleAliasByCompositionId(String env, Long compositionId);
 }

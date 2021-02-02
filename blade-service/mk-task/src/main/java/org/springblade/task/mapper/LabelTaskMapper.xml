@@ -165,6 +165,58 @@
 
     </select>
 
+    <select id="annotationClaimCount2" resultType="int">
+        SELECT COUNT(*) FROM
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            bladex_dev.mk_task_label tl
+            inner join bladex_flow_dev.ACT_HI_TASKINST flow
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            bladex.mk_task_label tl
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        </if>
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_flow_dev.ACT_HI_IDENTITYLINK id
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        </if>
+        ON id.TASK_ID_=flow.ID_
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_dev.mk_template_composition tc
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex.mk_template_composition tc
+        </if>
+        ON tl.template_id=tc.template_id
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            inner join bladex_dev.mk_composition c
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            inner join bladex.mk_composition c
+        </if>
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.name=flow.NAME_
+        AND flow.PROC_INST_ID_ NOT IN (
+        <if test="param1!= null and param1!= '' and param1 == 'dev'">
+            SELECT PROC_INST_ID_ FROM bladex_flow_dev.ACT_RU_VARIABLE
+        </if>
+        <if test="param1!= null and param1!= '' and param1 == 'prod'">
+            SELECT PROC_INST_ID_ FROM bladex_flow.ACT_RU_VARIABLE
+        </if>
+        WHERE NAME_ IN
+        <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            concat(#{item},'-',#{param3})
+        </foreach>
+        )
+
+    </select>
+
     <select id="roleClaimCount" resultMap="roleClaimCountResultMap">
         SELECT role.id,t.*,role.role_name FROM (
         SELECT GROUP_ID_,COUNT(GROUP_ID_) FROM
@@ -243,10 +295,11 @@
             inner join bladex.mk_composition c
         </if>
         ON tc.composition_id=c.id
-        WHERE ISNULL(flow.ASSIGNEE_) AND id.GROUP_ID_ in
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
         <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
             #{item}
         </foreach>
+        AND c.name=flow.NAME_
         AND flow.PROC_INST_ID_ NOT IN (
         <if test="param1!= null and param1!= '' and param1 == 'dev'">
             SELECT PROC_INST_ID_ FROM bladex_flow_dev.ACT_RU_VARIABLE
@@ -263,8 +316,8 @@
     </select>
 
     <select id="allCompositions" resultMap="compositionResultMap">
-        select c.* from `mk_composition` c
-        inner join `mk_template_composition` tc
+        select c.* from mk_composition c
+        inner join mk_template_composition tc
         on c.id=tc.composition_id where tc.template_id=#{param1} and tc.is_deleted=0
     </select>
 </mapper>

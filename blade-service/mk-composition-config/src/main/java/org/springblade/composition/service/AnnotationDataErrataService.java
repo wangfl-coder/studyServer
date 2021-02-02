@@ -16,8 +16,12 @@
  */
 package org.springblade.composition.service;
 
+import org.apache.ibatis.annotations.Param;
 import org.springblade.composition.entity.AnnotationDataErrata;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
 import org.springblade.core.mp.base.BaseService;
+
+import java.util.List;
 
 /**
  * 服务类
@@ -26,4 +30,21 @@ import org.springblade.core.mp.base.BaseService;
  */
 public interface AnnotationDataErrataService extends BaseService<AnnotationDataErrata> {
 
+	/**
+	 * 获取标注组合勘误列表
+	 * @param labelerId
+	 * @param offset
+	 * @param pageSize
+	 *
+	 * @return
+	 */
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+
+	/**
+	 * 获取标注组合勘误总数
+	 * @param labelerId
+	 *
+	 * @return
+	 */
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId);
 }

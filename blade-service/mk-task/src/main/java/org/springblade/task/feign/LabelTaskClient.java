@@ -32,9 +32,17 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@Override
 	@PostMapping(START_LABEL_PROCESS)
 	public R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO) {
-		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
-		boolean b = labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExperts());
-		return R.status(b);
+//		Task task = Objects.requireNonNull(BeanUtil.copy(expertTaskDTO, Task.class));
+//		boolean b = labelTaskService.startProcess(expertTaskDTO.getProcessDefinitionId(), task, expertTaskDTO.getExperts());
+//		return R.status(b);
+		return R.status(false);
+	}
+
+	@Override
+	@PostMapping(START_LABEL_REALSET_PROCESS)
+	public R<Boolean> startRealSetProcess(@RequestParam String realSetProcessDefinitions, @RequestBody Task task) {
+		boolean b = labelTaskService.startRealSetProcess(realSetProcessDefinitions, task);
+		return R.data(b);
 	}
 
 	@Override

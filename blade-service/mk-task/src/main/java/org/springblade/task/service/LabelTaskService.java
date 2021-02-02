@@ -1,6 +1,7 @@
 package org.springblade.task.service;
 
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.task.vo.CompositionClaimCountVO;
@@ -16,6 +17,9 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 	boolean startProcess(String ProcessDefinitionId,
 						 Task task,
 						 List<Expert> experts);
+
+	boolean startRealSetProcess(String realSetProcessDefinitions,
+						 Task task);
 
 	int completeCount(Long taskId);
 //

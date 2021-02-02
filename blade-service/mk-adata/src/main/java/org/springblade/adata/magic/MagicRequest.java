@@ -25,8 +25,10 @@ public class MagicRequest {
 	private String API_LOGIN = "https://api.aminer.cn/api/auth/signin";
 
 	private OkHttpClient client = new OkHttpClient();
-	private String username = "zhangff_love@sina.com";
-	private String password = "123456";
+//	private String username = "zhangff_love@sina.com";
+//	private String password = "123456";
+	private String username = "pdm@aminer.cn";
+	private String password = "Shujubu123456";
 	private String Authorization = "";
 	public static final MediaType JSONMediaType = MediaType.parse("application/json;charset=utf-8");
 	/**

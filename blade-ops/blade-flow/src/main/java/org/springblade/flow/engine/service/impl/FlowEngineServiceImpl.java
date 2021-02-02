@@ -639,6 +639,12 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				List<String> candidateGroups = new ArrayList<>();
 				candidateGroups.add(templateDTO.getMoreMessageRoleName());
 				userTask.setCandidateGroups(candidateGroups);
+				List<CustomProperty> customPropertyList = new ArrayList<>();
+				CustomProperty compositionIdProperty = new CustomProperty();
+				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
+				compositionIdProperty.setSimpleValue("-1");
+				customPropertyList.add(compositionIdProperty);
+				userTask.setCustomProperties(customPropertyList);
 			}
 		});
 		UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
@@ -664,6 +670,69 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			return deployTemplate(deployment, category);
 		}
 		return null;
+	}
+
+	@Override
+	public Map<String, String> deployRealSetModelByTemplate(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO) {
+		FlowModel model = this.getById(modelId);
+		if (model == null) {
+			throw new ServiceException("No model found with the given id: " + modelId);
+		}
+		BpmnModel bpmnModel = getBpmnModel(model);
+
+		// filter
+		String[] filterArr = {"biFlow*", "biPassFlow*", "basicInfoTask*"};
+		Process process = bpmnModel.getProcesses().get(0);
+		List<FlowElement> flowElementList = (List<FlowElement>) process.getFlowElements();
+		flowElementList.removeIf(flowElement -> StringUtil.simpleMatch(filterArr, flowElement.getId()) );
+
+		Map<String,FlowElement> flowElementMap = process.getFlowElementMap();
+
+		Map<String,String> processDefinitionMap = new HashMap<>();
+		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
+		templateCompositions.forEach(templateComposition -> {
+			if (2 == templateComposition.getCompositionType()) {    //基本信息标注
+				flowElementList.stream().forEach(flowElement -> {
+					if (flowElement.getId().equals("labelTask")) {
+						UserTask userTask = (UserTask) flowElement;
+						userTask.setName(templateComposition.getCompositionName());
+						List<String> candidateGroups = new ArrayList<>();
+						candidateGroups.add(templateComposition.getLabelRoleName());
+						userTask.setCandidateGroups(candidateGroups);
+						List<CustomProperty> labelPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
+						userTask.setCustomProperties(labelPropertyList);
+					}
+				});
+				UserTask userTask = (UserTask) flowElementMap.get("labelTask");
+				userTask.setName(templateComposition.getCompositionName());
+				List<String> candidateGroups = new ArrayList<>();
+				candidateGroups.add(templateComposition.getLabelRoleName());
+				userTask.setCandidateGroups(candidateGroups);
+				List<CustomProperty> labelPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
+				userTask.setCustomProperties(labelPropertyList);
+				flowElementMap.put("labelTask", userTask);
+
+				process.setFlowElementMap(flowElementMap);
+				byte[] bytes = getBpmnXML(bpmnModel);
+				String processName = model.getName();
+				if (!StringUtil.endsWithIgnoreCase(processName, FlowEngineConstant.SUFFIX)) {
+					processName += FlowEngineConstant.SUFFIX;
+				}
+				String finalProcessName = processName;
+				String processDefinitionId = "";
+				if (Func.isNotEmpty(tenantIdList)) {
+					tenantIdList.forEach(tenantId -> {
+						Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
+						String tenantProcessDefinitionId = deployTemplate(deployment, category);
+					});
+				} else {
+					Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
+					processDefinitionId = deployTemplate(deployment, category);
+				}
+				processDefinitionMap.put(templateComposition.getCompositionId().toString(), processDefinitionId);
+			}
+		});
+		return processDefinitionMap;
 	}
 
 	@Override

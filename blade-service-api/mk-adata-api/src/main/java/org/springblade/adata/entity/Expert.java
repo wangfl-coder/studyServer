@@ -126,7 +126,7 @@ public class Expert extends BaseEntity {
 	 */
 	@ApiModelProperty(value = "第三方个人主页")
 	private String otherHomepage;
-	
+
 	/**
 	 * 官方主页
 	 */

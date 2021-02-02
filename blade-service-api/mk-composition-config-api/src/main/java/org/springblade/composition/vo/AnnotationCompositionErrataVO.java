@@ -14,75 +14,68 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.entity;
+package org.springblade.composition.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.AnnotationDataErrata;
 
 import java.io.Serializable;
+import java.util.Date;
+
 
 /**
- * 实体类
+ * 视图实体类
  *
  * @author Chill
  */
 @Data
-@TableName("mk_template")
-@EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Template对象", description = "Template对象")
-public class Template extends BaseEntity {
-
+@ApiModel(value = "AnnotationCompositionErrataVO对象", description = "标注组合勘误视图对象")
+public class AnnotationCompositionErrataVO implements Serializable {
 	private static final long serialVersionUID = 1L;
-
 	/**
-	 * 主键
+	 * 标注子任务id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "主键")
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
-	private Long id;
+	@ApiModelProperty(value = "标注子任务id")
+	private Long subTaskId;
 
 	/**
-	 * 租户ID
+	 * 组合id
 	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
-
-
-	/**
-	 * 模板名
-	 */
-	@ApiModelProperty(value = "模板名")
-	private String templateName;
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "组合id")
+	private Long compositionId;
 
 	/**
-	 * 备注
+	 * 组合名
 	 */
-	@ApiModelProperty(value = "备注")
-	private String remark;
+	@ApiModelProperty(value = "组合名")
+	private String compositionName;
 
 	/**
-	 * 做补充信息的角色名
+	 * 专家id
 	 */
-	@ApiModelProperty(value = "做补充信息的角色名")
-	private String moreMessageRoleName;
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "专家id")
+	private Long expertId;
 
 	/**
-	 * 流程模型ID
+	 * 专家名
 	 */
-	@ApiModelProperty(value = "流程模型ID")
-	private String processDefinitionId;
+	@ApiModelProperty(value = "专家名")
+	private String expertName;
 
 	/**
-	 * 真集流程模型ID
+	 * 更新时间
 	 */
-	@TableField(value="realset_process_definitions")
-	@ApiModelProperty(value = "真集流程模型JSON {组合Id: processDefinitionId}")
-	private String realSetProcessDefinitions;
+	@ApiModelProperty(value = "更新时间")
+	private Date updateTime;
 }

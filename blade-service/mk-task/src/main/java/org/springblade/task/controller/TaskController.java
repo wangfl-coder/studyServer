@@ -137,14 +137,17 @@ public class TaskController extends BladeController {
 		}
 
 		if (res_eb.isSuccess() && flag) {
-			R<List<Expert>> rexperts = expertClient.getExpertIds(task.getId());
-			if (rexperts.isSuccess()) {
-				List<Expert> experts = rexperts.getData();
+			R<List<Expert>> expertsResult = expertClient.getExpertIds(task.getId());
+			if (expertsResult.isSuccess()) {
+				List<Expert> experts = expertsResult.getData();
 				if(expertBaseTaskDTO.getRealSetRate() != null) {
 					// 设置任务的真题比例，[0,100)
 					task.setRealSetRate(expertBaseTaskDTO.getRealSetRate());
 				}
-				result = labelTaskService.startProcess(expertBaseTaskDTO.getProcessDefinitionId(), task, experts);
+				result = labelTaskService.startProcess(
+					expertBaseTaskDTO.getProcessDefinitionId(),
+					task,
+					experts);
 				task.setCount(experts.size());
 				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
 				taskService.saveOrUpdate(task);

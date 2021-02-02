@@ -26,6 +26,7 @@ import org.springblade.flow.engine.entity.FlowProcess;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * FlowService
@@ -129,6 +130,16 @@ public interface FlowEngineService extends IService<FlowModel> {
 	 * @return
 	 */
 	String deployModelByTemplateV2(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO);
+
+	/**
+	 * 通过模版部署流程
+	 *
+	 * @param modelId      模型id
+	 * @param category     分类
+	 * @param tenantIdList 租户id集合
+	 * @return
+	 */
+	Map<String, String> deployRealSetModelByTemplate(String modelId, String category, List<String> tenantIdList, TemplateDTO templateDTO);
 
 	/**
 	 * 删除流程实例

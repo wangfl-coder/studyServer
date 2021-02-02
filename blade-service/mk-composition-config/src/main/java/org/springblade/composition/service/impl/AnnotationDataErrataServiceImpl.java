@@ -16,11 +16,16 @@
  */
 package org.springblade.composition.service.impl;
 
+import lombok.AllArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.springblade.composition.entity.AnnotationDataErrata;
 import org.springblade.composition.mapper.AnnotationDataErrataMapper;
 import org.springblade.composition.service.AnnotationDataErrataService;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 服务实现类
@@ -28,6 +33,16 @@ import org.springframework.stereotype.Service;
  * @author KaiLun
  */
 @Service
+@AllArgsConstructor
 public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationDataErrataMapper, AnnotationDataErrata> implements AnnotationDataErrataService {
 
+	AnnotationDataErrataMapper annotationDataErrataMapper;
+
+	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Long labelerId, Integer offset, Integer pageSize) {
+		return annotationDataErrataMapper.getAnnotationCompositionErrataList(labelerId, offset, pageSize);
+	}
+
+	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Long labelerId) {
+		return annotationDataErrataMapper.getAnnotationCompositionErrataAll(labelerId);
+	}
 }

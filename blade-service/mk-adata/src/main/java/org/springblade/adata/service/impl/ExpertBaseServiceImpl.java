@@ -219,7 +219,7 @@ public class ExpertBaseServiceImpl extends ServiceImpl<ExpertBaseMapper, ExpertB
 		}
 		if (expertBase.getParentId() > 0) {
 			ExpertBase parent = getById(expertBase.getParentId());
-			if (Func.toLong(expertBase.getParentId()) == Func.toLong(expertBase.getId())) {
+			if (expertBase.getParentId().equals(expertBase.getId())) {
 				throw new ServiceException("父节点不可选择自身!");
 			}
 			expertBase.setTenantId(parent.getTenantId());

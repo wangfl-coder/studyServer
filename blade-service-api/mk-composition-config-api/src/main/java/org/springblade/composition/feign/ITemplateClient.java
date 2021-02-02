@@ -19,6 +19,7 @@ package org.springblade.composition.feign;
 
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.Template;
 import org.springblade.core.tool.api.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +39,17 @@ public interface ITemplateClient {
 
 	String API_PREFIX = "/client";
 	String ALL_COMPOSITIONS = API_PREFIX + "/mk-composition-config/all-compositions";
+	String GET_TEMPLATE_BY_ID = API_PREFIX + "/mk-composition-config/get-template-by-id";
 
 	/**
 	 * 学者信息是否完整
 	 */
 	@GetMapping(ALL_COMPOSITIONS)
 	R<List<Composition>> allCompositions(@RequestParam("id") Long templateId);
+
+	/**
+	 * 获取模版
+	 */
+	@GetMapping(GET_TEMPLATE_BY_ID)
+	R<Template> getTemplateById(@RequestParam("id") Long templateId);
 }

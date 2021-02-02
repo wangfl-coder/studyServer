@@ -42,6 +42,7 @@ import org.springblade.core.tool.api.R;
 
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.CollectionUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.constant.ProcessConstant;
@@ -429,22 +430,42 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 				.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
 			return kv;
 		}
-		if (StringUtil.isAllBlank(
-			expert.getHomepage(),
-			expert.getHp(),
-			expert.getGs(),
-			expert.getDblp(),
-			expert.getOtherHomepage()
-		)) {
-			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
-		} else {
-			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
-		}
 		List<Composition> compositions = (List<Composition>)iTemplateClient.allCompositions(templateId).getData();
+		List<String> homepageFields = new ArrayList<>();
+		compositions.forEach(composition -> {
+			if (1 == composition.getAnnotationType()) {
+				String[] fields = composition.getField().split(",");
+				homepageFields.addAll(Arrays.asList(fields));
+			}
+		});
+		AtomicInteger homepageExists = new AtomicInteger(0);
+		homepageFields.forEach(field -> {
+			if (StringUtil.isNotBlank((String)BeanUtil.getProperty(expert, field))){
+				homepageExists.getAndIncrement();
+			}
+		});
+		if (homepageExists.get() > 0) {
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
+		} else {
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
+		}
+//		if (StringUtil.isAllBlank(
+//			expert.getHomepage(),
+//			expert.getHp(),
+//			expert.getGs(),
+//			expert.getDblp(),
+//			expert.getOtherHomepage()
+//		)) {
+//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
+//		} else {
+//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
+//		}
+
 		List<String> allFields = new ArrayList<>();
 		compositions.forEach(composition -> {
 			String[] fields = composition.getField().split(",");
 			allFields.addAll(Arrays.asList(fields));
+			allFields.removeAll(Arrays.asList(""));
 		});
 		AtomicInteger counter = new AtomicInteger(0);
 		allFields.forEach(field -> {

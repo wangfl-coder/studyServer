@@ -30,11 +30,9 @@ import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.dto.AnnotationDataErrataDTO;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.AnnotationDataErrata;
-import org.springblade.composition.entity.RealSetAnnotationData;
-import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.entity.*;
 import org.springblade.composition.service.*;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
 import org.springblade.composition.vo.AnnotationDataErrataVO;
 import org.springblade.composition.vo.RealSetAnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
@@ -115,6 +113,24 @@ public class AnnotationDataErrataController extends BladeController {
 		IPage<AnnotationDataErrataVO> annotationDataErrataVO = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
 		annotationDataErrataVO.setRecords(recordList);
 		return R.data(annotationDataErrataVO);
+	}
+
+	/**
+	 * 分页
+	 *
+	 */
+	@GetMapping("/composition-list")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "sub_task_id", value = "子任务ID", paramType = "query", dataType = "string")
+	})
+	@ApiOperationSupport(order = 2)
+	@ApiOperation(value = "分页", notes = "传入annotationDataErrata")
+	public R<IPage<AnnotationCompositionErrataVO>> compositionList(@ApiIgnore @RequestParam Map<String, Object> annotationDataErrata, Query query) {
+		List<AnnotationCompositionErrataVO> recordList = annotationDataErrataService.getAnnotationCompositionErrataList(Long.valueOf((String)annotationDataErrata.get("labelerId")), (query.getCurrent()-1)*query.getSize(), query.getSize());
+		int total = annotationDataErrataService.getAnnotationCompositionErrataAll(Long.valueOf((String)annotationDataErrata.get("labelerId"))).size();
+		IPage<AnnotationCompositionErrataVO> annotationCompositionErrataVO = new Page(query.getCurrent(), query.getSize(), total);
+		annotationCompositionErrataVO.setRecords(recordList);
+		return R.data(annotationCompositionErrataVO);
 	}
 
 	/**

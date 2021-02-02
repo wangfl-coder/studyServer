@@ -2,6 +2,7 @@ package org.springblade.task.feign;
 
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
+import org.springblade.task.entity.Task;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
@@ -17,6 +18,7 @@ import java.util.List;
 public interface ILabelTaskClient {
 	String API_PREFIX = "/client";
 	String START_LABEL_PROCESS = API_PREFIX + "/start-label-process";
+	String START_LABEL_REALSET_PROCESS = API_PREFIX + "/start-label-realset-process";
 	String QUERY_LABEL_TASK = API_PREFIX + "/query-label-task";
 	String CHANGE_STATUS = API_PREFIX + "/change-status";
 	String QUERY_COMPLETE_LABEL_TASK = API_PREFIX + "/complete-label-task";
@@ -30,7 +32,10 @@ public interface ILabelTaskClient {
 	String QUERY_LABEL_TASK_CLAIM_COUNT = API_PREFIX + "/query-label-task-claim-count";
 
 	@PostMapping(START_LABEL_PROCESS)
-	R startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
+	R<Boolean> startProcess(@RequestBody ExpertTaskDTO expertTaskDTO);
+
+	@PostMapping(START_LABEL_REALSET_PROCESS)
+	R<Boolean> startRealSetProcess(@RequestParam String realSetProcessDefinitions, @RequestBody Task task);
 
 	@GetMapping(QUERY_LABEL_TASK)
 	R<LabelTask> queryLabelTask(@RequestParam(value = "processInstanceId") String processInstanceId);

@@ -88,12 +88,22 @@
         where tc.template_id=#{param2} and tc.composition_id=#{param3} and tc.is_deleted=0 limit 1
     </select>
 
-    <select id="getRoleAliasByCompositionId" resultType="java.lang.String">
+    <select id="getLabelRoleAliasByCompositionId" resultType="java.lang.String">
         <if test="param1 == 'dev'">
-            select label_role_name from bladex_dev.mk_template_composition
+            select distinct label_role_name from bladex_dev.mk_template_composition
         </if>
         <if test="param1 == 'prod'">
-            select label_role_name from bladex.mk_template_composition tc
+            select distinct label_role_name from bladex.mk_template_composition
+        </if>
+        where composition_id=#{param2} and is_deleted=0
+    </select>
+
+    <select id="getInspectionRoleAliasByCompositionId" resultType="java.lang.String">
+        <if test="param1 == 'dev'">
+            select distinct inspection_role_name from bladex_dev.mk_template_composition
+        </if>
+        <if test="param1 == 'prod'">
+            select distinct inspection_role_name from bladex.mk_template_composition
         </if>
         where composition_id=#{param2} and is_deleted=0
     </select>

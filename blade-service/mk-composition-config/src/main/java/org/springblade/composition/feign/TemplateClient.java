@@ -19,6 +19,7 @@ package org.springblade.composition.feign;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.Template;
 import org.springblade.composition.service.ITemplateService;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
@@ -54,4 +55,13 @@ public class TemplateClient implements ITemplateClient {
 		return R.data(compositionList);
 	}
 
+	/**
+	 * 获取模版
+	 */
+	@Override
+	@GetMapping(GET_TEMPLATE_BY_ID)
+	public R<Template> getTemplateById(@RequestParam("id") Long templateId) {
+		Template template = service.getById(templateId);
+		return R.data(template);
+	}
 }

@@ -46,9 +46,9 @@ public class LauncherServiceImpl implements LauncherService {
 		// 开启elk日志
 
 		// PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
-		if (profile.equals(AppConstant.PROD_CODE)) {
-			PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
-		}
+//		if (profile.equals(AppConstant.PROD_CODE)) {
+//			PropsUtil.setProperty(props, "blade.log.elk.destination", LauncherConstant.elkAddr(profile));
+//		}
 
 		// seata注册地址
 		// PropsUtil.setProperty(props, "seata.service.grouplist.default", LauncherConstant.seataAddr(profile));

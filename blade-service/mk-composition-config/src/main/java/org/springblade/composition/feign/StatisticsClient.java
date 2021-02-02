@@ -21,18 +21,17 @@ import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.composition.entity.AnnotationDataErrata;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
-import org.springblade.composition.service.IAnnotationDataService;
-import org.springblade.composition.service.ICompositionService;
-import org.springblade.composition.service.IStatisticsService;
-import org.springblade.composition.service.ITemplateService;
+import org.springblade.composition.service.*;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +60,7 @@ public class StatisticsClient implements IStatisticsClient {
 	private final IStatisticsService statisticsService;
 	private final ICompositionService compositionService;
 	private final IAnnotationDataService annotationDataService;
+	private final AnnotationDataErrataService annotationDataErrataService;
 	private final IExpertClient expertClient;
 
 
@@ -101,10 +101,10 @@ public class StatisticsClient implements IStatisticsClient {
 
 		int count = 0;
 		Kv kv = Kv.create();
-		List<Statistics> res = statisticsService.list(Condition.getQueryWrapper(statistics_query));
-		if (res != null){
-			count = res.size();
-			kv.put("biCounter", res.size());	//标注了几次，初始化就是1
+		List<Statistics> statisticsList = statisticsService.list(Condition.getQueryWrapper(statistics_query));
+		if (statisticsList != null){
+			count = statisticsList.size();
+			kv.put("biCounter", statisticsList.size());	//标注了几次，初始化就是1
 		}
 		List<Composition> compositionList = templateService.allCompositions(templateId);
 		Composition composition = compositionService.getById(compositionId);
@@ -115,52 +115,224 @@ public class StatisticsClient implements IStatisticsClient {
 		Map<String, List<AnnotationData>> dataPerField = annotationDataList.stream()
 			.collect(groupingBy(AnnotationData::getField));
 		HashMap<String, Integer> notFound = new HashMap<>();
+		HashMap<String, Integer> notFoundCount = new HashMap<>();
 		boolean allNotFound = false;
+		int allNotFoundNum = 0;
 		for (Map.Entry<String,List<AnnotationData>> entry : dataPerField.entrySet()) {
-			int notFoundNum = count - entry.getValue().size();
-			if (0 < notFoundNum && notFoundNum < count)		//全找到的不感兴趣
-				notFound.put(entry.getKey(), count - entry.getValue().size());
-			else if (notFoundNum == count)
-				allNotFound = true;
+			int notFoundNum = 0;
+			if (entry.getKey().equals("titles") || entry.getKey().equals("titlesDesc")) {
+				if (entry.getKey().equals("titles")) {
+					List<AnnotationData> list = entry.getValue();
+					for (int i = 0; i < list.size(); i++) {
+						AnnotationData annotationData = list.get(i);
+						if (Func.isBlank(annotationData.getValue())) {
+							notFoundNum++;
+						}
+					}
+					notFoundCount.put("titles", notFoundNum);
+					if (0 < notFoundNum && notFoundNum < count)        //全找到的不感兴趣
+						notFound.put("titles", notFoundNum);
+					else if (notFoundNum == count) {
+						allNotFound = true;
+						allNotFoundNum++;
+					}
+					notFoundNum = 0;
+					int titleNotFound = 0;
+					for (int i = 0; i < list.size(); i++) {
+						AnnotationData annotationData = list.get(i);
+						if ("-1".equals(annotationData.getValue())) {
+							titleNotFound++;
+						}
+					}
+					List<AnnotationData> desclist = dataPerField.get("titlesDesc");
+					int descFound = desclist.size();
+					notFoundNum = titleNotFound - descFound;
+					notFoundCount.put("titlesDesc", notFoundNum);
+					if (0 < notFoundNum && notFoundNum < count)        //全找到的不感兴趣
+						notFound.put("titlesDesc", notFoundNum);
+					else if (notFoundNum == count) {
+						allNotFound = true;
+						allNotFoundNum++;
+					}
+				}
+			}else {
+				for (AnnotationData annotationData : entry.getValue()) {
+					if (Func.isBlank(annotationData.getValue())) {
+						notFoundNum++;
+					}
+				}
+				notFoundCount.put(entry.getKey(), notFoundNum);
+				if (0 < notFoundNum && notFoundNum < count)        //全找到的不感兴趣
+					notFound.put(entry.getKey(), notFoundNum);
+				else if (notFoundNum == count) {
+					allNotFound = true;
+					allNotFoundNum++;
+				}
+			}
 		}
 		if (notFound.size() > 0) {
 			Optional<Map.Entry<String, Integer>> maxEntry = notFound.entrySet()
 				.stream()
 				.max(Comparator.comparing(Map.Entry::getValue));
 			kv.put("biNotfound", maxEntry.get().getValue());
-		} else if (allNotFound) {
+		} else if (allNotFound == true) {
 			kv.put("biNotfound", count);
 		} else {
 			kv.put("biNotfound", 0);
 		}
 
 		Expert expert = statisticsService.getExpertByLabelTaskId(labelTaskId);
-		HashMap<String, Integer> same = new HashMap<>();
+		HashMap<String, Integer> sameCount = new HashMap<>();
+		HashMap<String, String> sameValue = new HashMap<>();
 		for (Map.Entry<String,List<AnnotationData>> entry : dataPerField.entrySet()) {
 			int sameNum = 0;
-			List<AnnotationData> list = entry.getValue();
-			for (int i = 0; i < list.size(); i++) {
-				for (int j = i+1; j < list.size(); j++) {
-					if(list.get(i).getValue().equals(list.get(j).getValue())) {
-						sameNum++;
-						if (sameNum >= 2) {
-							BeanUtil.setProperty(expert, entry.getKey(),list.get(i).getValue());
+			if (entry.getKey().equals("avatar")) {
+				continue;
+			} else if (entry.getKey().equals("titles") || entry.getKey().equals("titlesDesc")) {
+				if (entry.getKey().equals("titles")) {
+					//职称字段先两两对比，在-1时需要对比职称其它字段中的内容
+					List<AnnotationData> list = entry.getValue();
+					for (int i = 0; i < list.size(); i++) {
+						for (int j = i + 1; j < list.size(); j++) {
+							if (Func.isNoneBlank(list.get(i).getValue(), list.get(j).getValue())) {
+								if (list.get(i).getValue().equals(list.get(j).getValue())) {
+									if (!"-1".equals(list.get(i).getValue())) {
+										sameNum++;
+										if (sameNum >= 1) {
+											BeanUtil.setProperty(expert, "titles", list.get(i).getValue());
+											BeanUtil.setProperty(expert, "titlesDesc", "");
+											sameValue.put(entry.getKey(), list.get(i).getValue());
+										}
+									}else {
+										List<AnnotationData> titlesDescList = dataPerField.get("titlesDesc");
+										String left = titlesDescList.get(i).getValue();
+										String right = titlesDescList.get(j).getValue();
+										if (left.equals(right)) {
+											sameNum++;
+											if (sameNum >= 1) {
+												BeanUtil.setProperty(expert, "titles", -1);
+												BeanUtil.setProperty(expert, "titlesDesc", titlesDescList.get(i).getValue());
+												sameValue.put(entry.getKey(), list.get(i).getValue());
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					if (sameNum > 0) {
+						sameCount.put("titles", sameNum);
+						sameCount.put("titlesDesc", sameNum);
+					}
+				}
+			} else {
+				//普通字段两两对比
+				List<AnnotationData> list = entry.getValue();
+				for (int i = 0; i < list.size(); i++) {
+					for (int j = i + 1; j < list.size(); j++) {
+						if (Func.isNoneBlank(list.get(i).getValue(), list.get(j).getValue())) {
+							if (list.get(i).getValue().equals(list.get(j).getValue())) {
+								sameNum++;
+								if (sameNum >= 1) {
+									BeanUtil.setProperty(expert, entry.getKey(), list.get(i).getValue());
+									sameValue.put(entry.getKey(), list.get(i).getValue());
+								}
+							}
 						}
 					}
 				}
+				sameCount.put(entry.getKey(), sameNum);
 			}
-			same.put(entry.getKey(), sameNum);
 		}
 		expertClient.saveExpert(expert);
-		if (same.size() > 0) {
+		if (sameCount.size() > 0) {
 			//只看最小的
-			Optional<Map.Entry<String, Integer>> minEntry = same.entrySet()
+			Optional<Map.Entry<String, Integer>> minEntry = sameCount.entrySet()
 				.stream()
 				.min(Comparator.comparing(Map.Entry::getValue));
 			kv.put("biSame", minEntry.get().getValue());
+			if ((int)kv.get("biCounter") == 2 && (int)kv.get("biNotfound") == 2 && (int)kv.get("biSame") == 1) {
+				//在count为2，same count为1时，因为有两个空所以要找第三人
+				kv.put("biSame", 0);
+			}
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 2 && (int)kv.get("biSame") == 1) {
+				//在count为3，same count为1时，因为有两个空所以要去质检
+				kv.put("biSame", 0);
+			}
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 3 && (int)kv.get("biSame") == 0) {
+				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去
+				if (allNotFoundNum < dataPerField.size()) {
+					boolean threeDiff = false;	//在count3 notfound3会跳过质检，这时寻找有没有3个都不一样的，有就要去质检
+					for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
+						if (entry.getValue() == 0) {
+							Integer notFoundNum = notFoundCount.get(entry.getKey());
+							if (null != notFoundNum) {
+								if (notFoundNum == 0)
+									threeDiff = true;
+							}
+						}
+					}
+					if (threeDiff)
+						kv.put("biNotfound", 0); //在count3 notfound3会跳过质检，这时不能跳过
+				}
+			}
 		} else {
-			kv.put("biSame", 0);
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 3) {
+				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去
+				if (allNotFoundNum < dataPerField.size()) {
+					kv.put("biNotfound", 0); //不能跳过
+				}
+				kv.put("biSame", 0);
+			}else {
+				kv.put("biSame", 0);
+			}
 		}
+
+		if (3 == (int)kv.get("biCounter")) {	// 3人中2人一致的情况，将剩下的计入错误日志
+			sameCount.entrySet().forEach(entry -> {
+				if (1 == entry.getValue()) {
+					statisticsList.forEach(statistics -> {
+						AnnotationData annoData = annotationDataList.stream().filter(elem -> {
+							if (statistics.getSubTaskId().equals(elem.getSubTaskId())
+								&& statistics.getCompositionId().equals(elem.getCompositionId())
+								&& statistics.getUserId().equals(elem.getCreateUser())
+								&& entry.getKey().equals(elem.getField())
+								&& Objects.equals(sameValue.get(entry.getKey()), elem.getValue())
+							) {
+								return true;
+							}
+							return false;
+						}).findAny().orElse(null);
+						if (annoData == null) {
+							AnnotationDataErrata annotationDataErrata = new AnnotationDataErrata();
+							annotationDataErrata.setTenantId(statistics.getTenantId());
+							annotationDataErrata.setSubTaskId(statistics.getSubTaskId());
+							annotationDataErrata.setCompositionId(statistics.getCompositionId());
+							annotationDataErrata.setLabelerId(statistics.getUserId());
+							annotationDataErrata.setExpertId(expert.getId());
+							annotationDataErrata.setField(entry.getKey());
+							annotationDataErrata.setValue(sameValue.get(entry.getKey()));
+							AnnotationData errData = annotationDataList.stream().filter(elem -> {
+								if (statistics.getSubTaskId().equals(elem.getSubTaskId())
+									&& statistics.getCompositionId().equals(elem.getCompositionId())
+									&& statistics.getUserId().equals(elem.getCreateUser())
+									&& entry.getKey().equals(elem.getField())
+								) {
+									return true;
+								}
+								return false;
+							}).findAny().orElse(null);
+							if (errData != null) {
+								annotationDataErrata.setAnnotationDataId(errData.getId());
+							}
+							annotationDataErrataService.saveOrUpdate(annotationDataErrata);
+						}
+					});
+
+				}
+			});
+		}
+
 		return R.data(kv);
 	}
 }

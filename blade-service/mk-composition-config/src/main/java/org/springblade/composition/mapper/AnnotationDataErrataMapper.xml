@@ -3,5 +3,25 @@
 <mapper namespace="org.springblade.composition.mapper.AnnotationDataErrataMapper">
 
 
+    <select id="getAnnotationCompositionErrataList" resultType="org.springblade.composition.vo.AnnotationCompositionErrataVO">
+        SELECT err.sub_task_id,err.composition_id,c.name AS composition_name,err.expert_id,ex.name AS expert_name,err.update_time
+        FROM mk_annotation_data_errata err
+        INNER JOIN mk_adata_expert ex
+        ON ex.id=err.expert_id
+        INNER JOIN mk_composition c
+        ON c.id=err.composition_id
+        WHERE labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, update_time
+        ORDER BY update_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
 
+    <select id="getAnnotationCompositionErrataAll" resultType="org.springblade.composition.vo.AnnotationCompositionErrataVO">
+        SELECT err.sub_task_id,err.composition_id,c.name AS composition_name,err.expert_id,ex.name AS expert_name,err.update_time
+        FROM mk_annotation_data_errata err
+        INNER JOIN mk_adata_expert ex
+        ON ex.id=err.expert_id
+        INNER JOIN mk_composition c
+        ON c.id=err.composition_id
+        WHERE labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, update_time
+    </select>
 </mapper>
