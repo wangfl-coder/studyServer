@@ -39,7 +39,12 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 	AnnotationDataErrataMapper annotationDataErrataMapper;
 
 	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Long labelerId, Integer offset, Integer pageSize) {
-		return annotationDataErrataMapper.getAnnotationCompositionErrataList(labelerId, offset, pageSize);
+		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(labelerId, offset, pageSize);
+		list.forEach(annotationCompositionErrataVO -> {
+			if (annotationCompositionErrataVO.getExpertName() == null)
+				annotationCompositionErrataVO.setExpertName(annotationCompositionErrataVO.getRealSetExpertName());
+		});
+		return list;
 	}
 
 	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Long labelerId) {
