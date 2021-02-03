@@ -110,4 +110,10 @@ public class AnnotationDataErrata extends BaseEntity {
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "标注员id")
 	private Long labelerId;
+
+	/**
+	 * 来源 1.质检员 2.真题
+	 */
+	@ApiModelProperty(value = "来源 1.质检员 2.真题")
+	private Integer source;
 }

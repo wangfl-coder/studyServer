@@ -24,15 +24,19 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.excel.ExpertImporter;
 import org.springblade.adata.magic.ExportMagicRequest;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
 import org.springblade.adata.service.IExpertService;
+import org.springblade.adata.service.IRealSetExpertService;
 import org.springblade.adata.vo.ExpertVO;
+import org.springblade.adata.vo.RealSetExpertVO;
 import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.adata.wrapper.ExpertWrapper;
+import org.springblade.adata.wrapper.RealSetExpertWrapper;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.excel.util.ExcelUtil;
@@ -76,6 +80,7 @@ import static org.springblade.core.cache.constant.CacheConstant.PARAM_CACHE;
 public class ExpertController extends BladeController {
 
 	private final IExpertService expertService;
+	private final IRealSetExpertService realSetExpertService;
 	private final IFlowEngineClient flowEngineClient;
 	private final ExpertMapper expertMapper;
 
@@ -88,6 +93,17 @@ public class ExpertController extends BladeController {
 	public R<ExpertVO> detail(Expert expert) {
 		Expert detail = expertService.getOne(Condition.getQueryWrapper(expert));
 		return R.data(ExpertWrapper.build().entityVO(detail));
+	}
+
+	/**
+	 * 真集学者详情
+	 */
+	@GetMapping("/detail-realset")
+	@ApiOperationSupport(order = 1)
+	@ApiOperation(value = "详情", notes = "传入expert")
+	public R<RealSetExpertVO> detail(RealSetExpert expert) {
+		RealSetExpert detail = realSetExpertService.getOne(Condition.getQueryWrapper(expert));
+		return R.data(RealSetExpertWrapper.build().entityVO(detail));
 	}
 
 	/**

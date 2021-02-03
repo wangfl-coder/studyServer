@@ -42,6 +42,35 @@ public class RealSetAnnotationDataVO {
 	@ApiModelProperty(value = "标注数据列表")
 	private List<RealSetAnnotationData> realSetAnnotationDataList;
 
+
+	/**
+	 * 标注的用时
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "标注的用时")
+	private Integer time;
+
+	/**
+	 * 模板id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "模板id")
+	private Long templateId;
+
+	/**
+	 * 组合id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "组合id")
+	private Long compositionId;
+
+	/**
+	 * sub_task_id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
+
 	/**
 	 * 学者id
 	 */

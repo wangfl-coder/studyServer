@@ -25,10 +25,8 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.AutoInspection;
-import org.springblade.composition.entity.RealSetAnnotationData;
-import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.dto.AnnotationDataErrataDTO;
+import org.springblade.composition.entity.*;
 import org.springblade.composition.service.*;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.composition.vo.RealSetAnnotationDataVO;
@@ -75,7 +73,8 @@ public class AnnotationDataController extends BladeController {
 	private final ICompositionService compositionService;
 	private final IRealSetAnnotationDataService realSetAnnotationDataService;
 	private final IRealSetExpertClient realSetExpertClient;
-	private IAutoInspectionService autoInspectionService;
+	private final IAutoInspectionService autoInspectionService;
+	private final AnnotationDataErrataService annotationDataErrataService;
 
 	/**
 	 * 查询标注数据
@@ -234,6 +233,7 @@ public class AnnotationDataController extends BladeController {
 //			totalTime.addAndGet(realSetAnnotationData.getTime());
 //			realSetAnnotationData.setIsTrue(is_true);
 //		});
+		List<AnnotationDataErrata> annotationDataErrataList = new ArrayList<>();
 		// 每次提交的通过时间戳生成一个唯一id
 		Long timestamp=System.currentTimeMillis();
 		// 判断这次提交的正确错误，有一个字段错，这次提交就是错的。1是正确，2是错误
@@ -249,16 +249,29 @@ public class AnnotationDataController extends BladeController {
 			if(realSetAnnotationData.getValue().equals(answer)){
 				is_true = 1;
 			}
+			realSetAnnotationData.setIsTrue(is_true);
+			realSetAnnotationDataService.save(realSetAnnotationData);
 			if(is_true==2){
 				isCompositionTrue = 2;
+				AnnotationDataErrata annotationDataErrata = Objects.requireNonNull(BeanUtil.copy(realSetAnnotationData, AnnotationDataErrata.class));
+				annotationDataErrata.setSubTaskId(annotationDataVO.getSubTaskId());
+				annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
+				annotationDataErrata.setLabelerId(AuthUtil.getUserId());
+				annotationDataErrata.setValue(answer);
+				annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
+				annotationDataErrata.setSource(2);
+				annotationDataErrataList.add(annotationDataErrata);
 			}
-			realSetAnnotationData.setIsTrue(is_true);
+
+		}
+		if (annotationDataErrataList.size() > 0) {
+			annotationDataErrataService.saveBatch(annotationDataErrataList);
 		}
 		// 保存结果
 		AutoInspection autoInspection = Objects.requireNonNull(BeanUtil.copy(annotationDataList.get(0), AutoInspection.class));
 		autoInspection.setIsCompositionTrue(isCompositionTrue);
 		autoInspectionService.save(autoInspection);
-		return R.status(realSetAnnotationDataService.saveBatch(annotationDataList));
+		return R.status(true);
 	}
 
 }
