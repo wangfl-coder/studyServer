@@ -4,7 +4,8 @@
 
 
     <select id="getAnnotationCompositionErrataList" resultType="org.springblade.composition.vo.AnnotationCompositionErrataVO">
-        SELECT err.sub_task_id,err.composition_id,c.name AS composition_name,err.expert_id,ex.name AS expert_name,rex.name AS real_set_expert_name,max(err.update_time) update_time
+        SELECT err.sub_task_id,err.composition_id,c.name AS composition_name,
+               err.expert_id,ex.name AS expert_name,rex.name AS real_set_expert_name,max(err.update_time) update_time, err.source
         FROM mk_annotation_data_errata err
         LEFT JOIN mk_adata_expert ex
         ON ex.id=err.expert_id
@@ -12,7 +13,7 @@
         ON rex.id=err.expert_id
         INNER JOIN mk_composition c
         ON c.id=err.composition_id
-        WHERE labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id
+        WHERE err.`is_deleted` = 0  and  err.is_ labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
         ORDER BY update_time DESC
         LIMIT #{offset}, #{pageSize}
     </select>
@@ -20,7 +21,7 @@
     <select id="getAnnotationCompositionErrataAll" resultType="org.springblade.composition.vo.AnnotationCompositionErrataVO">
         SELECT
                err.sub_task_id,err.composition_id,c.name AS composition_name,
-               err.expert_id,ex.name AS expert_name,rex.name AS real_set_expert_name,max(err.update_time) update_time
+               err.expert_id,ex.name AS expert_name,rex.name AS real_set_expert_name,max(err.update_time) update_time, err.source
         FROM mk_annotation_data_errata err
                  LEFT JOIN mk_adata_expert ex
                             ON ex.id=err.expert_id
@@ -28,7 +29,7 @@
                             ON rex.id=err.expert_id
                  INNER JOIN mk_composition c
                             ON c.id=err.composition_id
-        WHERE labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id
+        WHERE err.`is_deleted` = 0  and labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
         ORDER BY update_time DESC
     </select>
 </mapper>

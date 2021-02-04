@@ -84,4 +84,13 @@ public class AnnotationCompositionErrataVO implements Serializable {
 	 */
 	@ApiModelProperty(value = "更新时间")
 	private Date updateTime;
+
+	/**
+	 * 数据来源
+	 * 1、基本信息标注
+	 * 2、真题标注
+	 */
+	@ApiModelProperty(value = "数据来源")
+	private Integer source;
+
 }
