@@ -13,7 +13,7 @@
         ON rex.id=err.expert_id
         INNER JOIN mk_composition c
         ON c.id=err.composition_id
-        WHERE err.`is_deleted` = 0  and  err.is_ labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
+        WHERE err.`is_deleted` = 0  and  err.labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
         ORDER BY update_time DESC
         LIMIT #{offset}, #{pageSize}
     </select>
