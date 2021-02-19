@@ -14,38 +14,34 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.service;
+package org.springblade.composition.feign;
 
-import org.apache.ibatis.annotations.Param;
-import org.springblade.adata.entity.Expert;
-import org.springblade.composition.dto.TaskCompositionDTO;
-import org.springblade.composition.entity.Statistics;
-import org.springblade.core.mp.base.BaseService;
-import org.springblade.task.feign.ILabelTaskClient;
+
+import org.springblade.common.constant.LauncherConstant;
+import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.Template;
+import org.springblade.core.tool.api.R;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 /**
- * 服务类
+ * Notice Feign接口类
  *
- * @author KaiLun
+ * @author Chill
  */
-public interface IStatisticsService extends BaseService<Statistics> {
+@FeignClient(value = LauncherConstant.MKAPP_COMPOSITION_CONFIG_NAME)
+public interface ICompositionClient {
+
+	String API_PREFIX = "/client";
+	String GET_COMPOSITION_BY_ID = API_PREFIX + "/mk-composition-config/get-composition-by-id";
+
 
 	/**
-	 * 任务组合完成和待领取数量
-	 * @param startTime
-	 * @param endTime
-	 * @param taskId
-	 * @param type
-	 * @return
+	 * 获取模版
 	 */
-	List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer type);
-
-	/**
-	 * 通过标注子任务id获取专家
-	 * @param id
-	 * @return
-	 */
-	Expert getExpertByLabelTaskId(Long id);
+	@GetMapping(GET_COMPOSITION_BY_ID)
+	R<Composition> getById(@RequestParam("id") Long compositionId);
 }

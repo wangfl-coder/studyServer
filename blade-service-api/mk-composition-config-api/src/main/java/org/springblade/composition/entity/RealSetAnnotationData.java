@@ -56,8 +56,15 @@ public class RealSetAnnotationData extends BaseEntity {
 	 * 子任务id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "任务id")
-	private Long TaskId;
+	@ApiModelProperty(value = "子任务id")
+	private Long subTaskId;
+
+	/**
+	 * 组合id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "组合id")
+	private Long compositionId;
 
 	/**
 	 * 学者id
@@ -89,13 +96,6 @@ public class RealSetAnnotationData extends BaseEntity {
 	 */
 	@ApiModelProperty(value = "标注类型")
 	private Integer type ;
-
-	/**
-	 * 组合id
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "子任务id")
-	private Long compositionId;
 
 	/**
 	 * 标注是否正确

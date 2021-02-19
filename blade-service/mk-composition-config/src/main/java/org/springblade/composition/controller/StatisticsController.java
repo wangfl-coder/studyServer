@@ -80,8 +80,8 @@ public class StatisticsController extends BladeController {
 	@GetMapping("/user_composition")
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "查询用户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
-	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId) {
-		return R.data(statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId));
+	public R<List<UserCompositionDTO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId, @ApiParam(value="1.标注,2.真题标注") Integer type) {
+		return R.data(statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId,type));
 	}
 
 	/**
@@ -90,8 +90,8 @@ public class StatisticsController extends BladeController {
 	@GetMapping("/task_composition")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "查询大任务在一段时间内标注的各种组合的数量，或者还可以领取的组合数量", notes = "传入起止时间,大任务id,查询已完成还是待领取")
-	public R<List<TaskCompositionDTO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer type ) {
-		return R.data(statisticsService.taskCompositionCount(startTime,endTime,taskId,type));
+	public R<List<TaskCompositionDTO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer status, @ApiParam(value="1.标注,2.真题标注") Integer type ) {
+		return R.data(statisticsService.taskCompositionCount(startTime,endTime,taskId,status,type));
 	}
 
 	/**

@@ -158,7 +158,7 @@ public class TaskController extends BladeController {
 			taskService.removeById(task.getId());
 			return R.fail("导入智库失败");
 		}
-		statisticsClient.initialize(task.getId());
+		statisticsClient.initializeLabelTask(task.getId());
 		return R.status(result);
 	}
 

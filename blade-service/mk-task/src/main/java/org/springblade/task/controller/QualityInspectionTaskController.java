@@ -37,7 +37,7 @@ public class QualityInspectionTaskController extends BladeController implements 
 		QualityInspectionTask task = service.getById(businessId);
 		User user = UserCache.getUser(task.getCreateUser());
 //		User user = userClient.userInfoById(detail.getCreateUser()).getData();
-		task.getFlow().setAssigneeName(user.getName());
+//		task.getFlow().setAssigneeName(user.getName());
 		return R.data(task);
 	}
 

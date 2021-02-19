@@ -41,7 +41,7 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param endTime
 	 * @return
 	 */
-	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId);
+	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
 
 	/**
 	 * 查询一个标注大任务在起止时间完成各种组合的数量或者还可以做的数量
@@ -52,7 +52,7 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param type
 	 * @return
 	 */
-	List<TaskCompositionDTO> taskCompositionCount(@Param("env")String env,@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+	List<TaskCompositionDTO> taskCompositionCount(@Param("env")String env,@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("status") Integer status, @Param("type") Integer type);
 
 	/**
 	 * 查询用户在一段时间内质检的数量和速度

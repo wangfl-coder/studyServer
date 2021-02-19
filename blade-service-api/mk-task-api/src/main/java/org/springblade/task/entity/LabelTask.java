@@ -8,7 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springblade.flow.core.entity.FlowEntity;
+import org.springblade.core.mp.base.BaseEntity;
+
 
 import java.util.Date;
 
@@ -17,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "标注Task对象", description = "标注Task对象")
-public class LabelTask extends FlowEntity {
+public class LabelTask extends BaseEntity {
 
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;
@@ -51,6 +52,7 @@ public class LabelTask extends FlowEntity {
 	private double duration;
 	@ApiModelProperty(value = "优先级")
 	private Integer priority;
-
+	@ApiModelProperty(value = "类型 1.标注 2.真题")
+	private Integer type;
 }
 

@@ -36,6 +36,7 @@ import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
@@ -65,8 +66,9 @@ public class StatisticsClient implements IStatisticsClient {
 
 
 	@Override
+	@GetMapping(STATISTICS_INITIALIZE_LABELTASK)
 	@Transactional(rollbackFor = Exception.class)
-	public R initialize(Long taskId) {
+	public R initializeLabelTask(Long taskId) {
 		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
 		if (labelTaskListResult.isSuccess()){
 			List<LabelTask> labelTaskList = labelTaskListResult.getData();
@@ -79,16 +81,35 @@ public class StatisticsClient implements IStatisticsClient {
 					statistics.setSubTaskId(labelTask.getId());
 					statistics.setCompositionId(composition.getId());
 					statistics.setTemplateId(templateId);
+					statistics.setType(1);
 					statisticsService.save(statistics);
 				});
-				// 初始化补充信息
-				Statistics statistics = new Statistics();
-				statistics.setSubTaskId(labelTask.getId());
-				statistics.setCompositionId(-1L);
-				statistics.setTemplateId(templateId);
-				statisticsService.save(statistics);
 			});
 		}
+		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
+	@PostMapping(STATISTICS_INITIALIZE_REALSET_LABELTASK)
+	@Transactional(rollbackFor = Exception.class)
+	public R initializeRealSetLabelTask(LabelTask labelTask, Map<String, String> compositionLabelMap) {
+		Long templateId = labelTask.getTemplateId();
+		List<Composition> compositionList = templateService.allCompositions(templateId);
+
+		compositionList.forEach(composition ->{
+			if (composition.getAnnotationType() == 2) {
+				Statistics statistics = new Statistics();
+				String compositionId = composition.getId().toString();
+				String subTaskId = compositionLabelMap.get(compositionId);
+				statistics.setSubTaskId(Long.valueOf(subTaskId));
+				statistics.setCompositionId(composition.getId());
+				statistics.setTemplateId(templateId);
+				statistics.setType(2);
+				boolean res = statisticsService.save(statistics);
+				int k = 0;
+			}
+		});
+
 		return R.success("初始化Statistics表成功");
 	}
 
@@ -98,6 +119,7 @@ public class StatisticsClient implements IStatisticsClient {
 		Statistics statistics_query = new Statistics();
 		statistics_query.setSubTaskId(labelTaskId);
 		statistics_query.setCompositionId(compositionId);
+		statistics_query.setType(1);
 
 		int count = 0;
 		Kv kv = Kv.create();
@@ -145,14 +167,16 @@ public class StatisticsClient implements IStatisticsClient {
 						}
 					}
 					List<AnnotationData> desclist = dataPerField.get("titlesDesc");
-					int descFound = desclist.size();
-					notFoundNum = titleNotFound - descFound;
-					notFoundCount.put("titlesDesc", notFoundNum);
-					if (0 < notFoundNum && notFoundNum < count)        //全找到的不感兴趣
-						notFound.put("titlesDesc", notFoundNum);
-					else if (notFoundNum == count) {
-						allNotFound = true;
-						allNotFoundNum++;
+					if (desclist != null) {
+						int descFound = desclist.size();
+						notFoundNum = titleNotFound - descFound;
+						notFoundCount.put("titlesDesc", notFoundNum);
+						if (0 < notFoundNum && notFoundNum < count)        //全找到的不感兴趣
+							notFound.put("titlesDesc", notFoundNum);
+						else if (notFoundNum == count) {
+							allNotFound = true;
+							allNotFoundNum++;
+						}
 					}
 				}
 			}else {

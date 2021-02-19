@@ -244,7 +244,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			String homepage = p.getString("homepage");
 
 			String gender = p.getString("gender");
-			String language = p.getString("language");
+			String language = p.getString("lang");
 			String avatar = d.getString("avatar");
 			String edu = p.getString("edu");
 			String work = p.getString("work");

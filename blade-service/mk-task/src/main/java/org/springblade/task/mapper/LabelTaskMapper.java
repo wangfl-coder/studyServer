@@ -3,6 +3,7 @@ package org.springblade.task.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springblade.composition.entity.Composition;
 import org.springblade.task.vo.CompositionClaimCountVO;
+import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.vo.RoleClaimCountVO;
@@ -85,6 +86,15 @@ public interface LabelTaskMapper extends BaseMapper<LabelTask> {
 	 * @return
 	 */
 	List<CompositionClaimCountVO> compositionClaimCount(String env, List<String> roleAlias, Long userId);
+
+	/**
+	 * 返回当前用户所有组合及分别可接的任务列表
+	 * @param env     环境
+	 * @param roleAlias  角色列表
+	 * @param userId  用户Id
+	 * @return
+	 */
+	List<CompositionClaimListVO> compositionClaimList(String env, List<String> roleAlias, Long userId);
 
 	/**
 	 * 返回模版中所有的组合

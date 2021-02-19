@@ -21,6 +21,9 @@
         <if test="taskId!=null">
             and l.task_id=#{taskId}
         </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
 
         and s.is_deleted=0
         group by s.update_user,s.composition_id
@@ -44,10 +47,10 @@
         </if>
         on l.process_instance_id=t.PROC_INST_ID_
         where
-        <if test="type==1">
+        <if test="status==1">
             !ISNULL(END_TIME_)
         </if>
-        <if test="type==2">
+        <if test="status==2">
             ISNULL(END_TIME_)
         </if>
         <if test="startTime!=null">
@@ -58,6 +61,9 @@
         </if>
         <if test="taskId!=null">
             and l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
         </if>
         group by NAME_;
     </select>

@@ -22,6 +22,7 @@ import org.springblade.composition.vo.AnnotationCompositionErrataVO;
 import org.springblade.core.mp.base.BaseService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 服务类
@@ -32,19 +33,19 @@ public interface AnnotationDataErrataService extends BaseService<AnnotationDataE
 
 	/**
 	 * 获取标注组合勘误列表
-	 * @param labelerId
+	 * @param annotationDataErrata
 	 * @param offset
 	 * @param pageSize
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Map<String, Object> annotationDataErrata, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
 
 	/**
 	 * 获取标注组合勘误总数
-	 * @param labelerId
+	 * @param annotationDataErrata
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Map<String, Object> annotationDataErrata);
 }

@@ -53,7 +53,5 @@ public class SingleFlow extends BladeFlow{
 	private String otherHomepage;
 	@ApiModelProperty(value = "homepage")
 	private String homepage;
-	@ApiModelProperty(value = "是否是真题标志(-1:不是，1:是)")
-	private int isRealSet;
 
 }

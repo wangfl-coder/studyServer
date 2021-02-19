@@ -21,14 +21,19 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import liquibase.pro.packaged.C;
 import lombok.AllArgsConstructor;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.entity.AnnotationData;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.StringUtil;
@@ -38,14 +43,19 @@ import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.entity.FlowProcess;
 import org.springblade.flow.engine.service.FlowEngineService;
+import org.springblade.system.cache.SysCache;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.ITaskClient;
+import org.springblade.task.vo.CompositionClaimCountVO;
+import org.springblade.task.vo.CompositionClaimListVO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * 流程事务通用接口
@@ -60,9 +70,11 @@ import java.util.Random;
 public class WorkController {
 
 	private final TaskService taskService;
+	private final RuntimeService runtimeService;
 	private final FlowEngineService flowEngineService;
 	private final FlowBusinessService flowBusinessService;
 	private final ITaskClient taskClient;
+	private final ILabelTaskClient labelTaskClient;
 	private final IExpertClient expertClient;
 
 
@@ -249,4 +261,42 @@ public class WorkController {
 		return R.success("删除任务成功");
 	}
 
+	@GetMapping("/composition-claim-count")
+	@ApiOperation(value = "返回当前用户所有组合及分别可接的任务数")
+	public R<List<CompositionClaimCountVO>> compositionClaimCount(BladeUser user) {
+		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
+		R<List<CompositionClaimListVO>> res = labelTaskClient.compositionClaimList(roleAlias);
+		if (res.isSuccess()) {
+			Map<String, Object> processVariablesMap = new HashMap<>();
+
+			List<CompositionClaimListVO> list = res.getData();
+			List<CompositionClaimListVO> resList = new ArrayList<>();
+			for(CompositionClaimListVO compositionClaimListVO: list) {
+				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
+				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
+				if (processVariables == null) {
+					processVariables = runtimeService.getVariables(processInstanceId);
+					processVariablesMap.put(processInstanceId, processVariables);
+				}
+				if (processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
+					continue;
+				}else {
+					resList.add(compositionClaimListVO);
+				}
+			}
+			Map<String, List<CompositionClaimListVO>> dataPerComposition = resList.stream()
+				.collect(groupingBy(CompositionClaimListVO::getCompositionId));
+			List<CompositionClaimCountVO> result = new ArrayList<>();
+			for (Map.Entry<String, List<CompositionClaimListVO>> entry : dataPerComposition.entrySet()) {
+				CompositionClaimCountVO compositionClaimCountVO = new CompositionClaimCountVO();
+				compositionClaimCountVO.setCompositionId(entry.getKey());
+				compositionClaimCountVO.setName(entry.getValue().get(0).getName());
+				compositionClaimCountVO.setCount(entry.getValue().size());
+				result.add(compositionClaimCountVO);
+			}
+			return R.data(result);
+		} else {
+			return R.fail("获取组合信息错误");
+		}
+	}
 }

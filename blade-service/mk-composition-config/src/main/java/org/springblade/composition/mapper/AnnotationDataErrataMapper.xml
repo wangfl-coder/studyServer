@@ -13,7 +13,11 @@
         ON rex.id=err.expert_id
         INNER JOIN mk_composition c
         ON c.id=err.composition_id
-        WHERE err.`is_deleted` = 0  and  err.labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
+        WHERE err.`is_deleted` = 0  and  err.labeler_id=#{labelerId} and annotation_data_id IS NOT NULL
+        <if test="compositionName!=null and compositionName != ''">
+            and c.name like CONCAT(CONCAT('%', #{compositionName}), '%')
+        </if>
+        GROUP BY sub_task_id, composition_id, expert_id, err.source
         ORDER BY update_time DESC
         LIMIT #{offset}, #{pageSize}
     </select>
@@ -29,7 +33,11 @@
                             ON rex.id=err.expert_id
                  INNER JOIN mk_composition c
                             ON c.id=err.composition_id
-        WHERE err.`is_deleted` = 0  and labeler_id=#{labelerId} GROUP BY sub_task_id, composition_id, expert_id, err.source
+        WHERE err.`is_deleted` = 0  and labeler_id=#{labelerId} and annotation_data_id IS NOT NULL
+        <if test="compositionName!=null and compositionName != ''">
+            and c.name like CONCAT(CONCAT('%', #{compositionName}), '%')
+        </if>
+        GROUP BY sub_task_id, composition_id, expert_id, err.source
         ORDER BY update_time DESC
     </select>
 </mapper>

@@ -19,7 +19,9 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.system.cache.SysCache;
 import org.springblade.task.vo.CompositionClaimCountVO;
+import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.flow.core.constant.ProcessConstant;
@@ -37,10 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -79,6 +78,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
+				labelTask.setType(1);	//标注
 				updateById(labelTask);
 			} else {
 				throw new ServiceException("开启流程失败");
@@ -90,18 +90,24 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startRealSetProcess(String realSetProcessDefinitions,
-								Task task) {
+	public Map<String, String> startRealSetProcess(String realSetProcessDefinitions,
+											   Task task) {
 		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertIds(task.getId());
 		if (!expertsRealSetResult.isSuccess()) {
-			return false;
+			return null;
 		}
 		List<RealSetExpert> expertsRealSet = expertsRealSetResult.getData();
-		Random random = Holder.RANDOM;
-		RealSetExpert expert = expertsRealSet.get(random.nextInt(expertsRealSet.size()));
+//		Random random = Holder.RANDOM;
+//		RealSetExpert expert = expertsRealSet.get(random.nextInt(expertsRealSet.size()));
+		Optional<RealSetExpert> expertRes = expertsRealSet.stream().filter(elem -> elem.getStatus().equals(1)).findAny();
+		if (!expertRes.isPresent()) {
+			return null;
+		}
+		RealSetExpert expert = expertRes.get();
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 
 		JSONObject realSetJSONObject = JSONObject.parseObject(realSetProcessDefinitions);
+		Map<String, String> resultMap = new HashMap<>();
 		realSetJSONObject.entrySet().forEach(entry -> {
 			LabelTask labelTask = new LabelTask();
 			labelTask.setProcessDefinitionId((String)entry.getValue());
@@ -119,13 +125,17 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
+				labelTask.setType(2);	//真集
 				updateById(labelTask);
+
+				resultMap.put(entry.getKey(), labelTask.getId().toString());
 			} else {
 				throw new ServiceException("开启流程失败");
 			}
 		});
-
-		return true;
+		expert.setStatus(2);	//已使用
+		realSetExpertClient.saveExpert(expert);
+		return resultMap;
 	}
 
 	@Override
@@ -257,6 +267,11 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		return baseMapper.compositionClaimCount(env, roleAlias, AuthUtil.getUserId());
 	}
 
+	@Override
+	public List<CompositionClaimListVO> compositionClaimList(List<String> roleAliases) {
+		return baseMapper.compositionClaimList(env, roleAliases, AuthUtil.getUserId());
+	}
+
 	private Kv createProcessVariables(Task task, LabelTask labelTask) {
 		Kv variables = Kv.create();
 		List<Composition> compositions = baseMapper.allCompositions(task.getTemplateId());
@@ -274,6 +289,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 		variables.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
 			.set("taskUser", null)
 			.set("priority", task.getPriority());
+		variables.put("templateId", task.getTemplateId());
 		return variables;
 	}
 }

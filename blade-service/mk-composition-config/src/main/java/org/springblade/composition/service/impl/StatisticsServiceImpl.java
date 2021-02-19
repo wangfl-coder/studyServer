@@ -42,9 +42,9 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	@Value("${spring.profiles.active}")
 	public String env;
 	@Override
-	public List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer type){
+	public List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer type){
 
-		return statisticsMapper.taskCompositionCount(env,startTime, endTime,taskId,type);
+		return statisticsMapper.taskCompositionCount(env,startTime, endTime,taskId,status,type);
 	}
 
 	@Override

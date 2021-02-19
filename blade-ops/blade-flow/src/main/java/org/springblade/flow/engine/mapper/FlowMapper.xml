@@ -107,4 +107,54 @@
         </if>
         where composition_id=#{param2} and is_deleted=0
     </select>
+
+    <select id="getLabelRoleAliasByProcessInstanceId" resultType="java.lang.String">
+        <if test="param1 == 'dev'">
+            select distinct label_role_name from bladex_dev.mk_template_composition tc inner join bladex_dev.mk_task_label tl
+        </if>
+        <if test="param1 == 'prod'">
+            select distinct label_role_name from bladex.mk_template_composition tc inner join bladex.mk_task_label tl
+        </if>
+        on tc.template_id=tl.template_id
+        where tl.process_instance_id=#{param2} and tc.is_deleted=0
+    </select>
+
+    <select id="getInspectionRoleAliasByProcessInstanceId" resultType="java.lang.String">
+        <if test="param1 == 'dev'">
+            select distinct inspection_role_name from bladex_dev.mk_template_composition tc inner join bladex_dev.mk_task_label tl
+        </if>
+        <if test="param1 == 'prod'">
+            select distinct inspection_role_name from bladex.mk_template_composition tc inner join bladex.mk_task_label tl
+        </if>
+        on tc.template_id=tl.template_id
+        where tl.process_instance_id=#{param2} and tc.is_deleted=0
+    </select>
+
+    <select id="getRoleAliasCountByProcessInstanceId" resultType="int">
+        select count(*) from (
+        <if test="param1 == 'dev'">
+            select distinct label_role_name from bladex_dev.mk_template_composition tc inner join bladex_dev.mk_task_label tl
+        </if>
+        <if test="param1 == 'prod'">
+            select distinct label_role_name from bladex.mk_template_composition tc inner join bladex.mk_task_label tl
+        </if>
+        on tc.template_id=tl.template_id
+        where tl.process_instance_id=#{param2} and tc.is_deleted=0 AND label_role_name in
+        <foreach item="item" index="index" collection="param3" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        union
+        <if test="param1 == 'dev'">
+            select distinct inspection_role_name from bladex_dev.mk_template_composition tc inner join bladex_dev.mk_task_label tl
+        </if>
+        <if test="param1 == 'prod'">
+            select distinct inspection_role_name from bladex.mk_template_composition tc inner join bladex.mk_task_label tl
+        </if>
+        on tc.template_id=tl.template_id
+        where tl.process_instance_id=#{param2} and tc.is_deleted=0 AND inspection_role_name in
+        <foreach item="item" index="index" collection="param3" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ) u
+    </select>
 </mapper>

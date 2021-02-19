@@ -223,13 +223,39 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 		String nameZh = d.getString("name_zh");
 		String titles = d.getString("titles");
 		JSONObject p = d.getJSONObject("profile");
-		String phone = p.getString("phone");
-		String fax = p.getString("fax");
-		String email = p.getString("email");
-		String affiliation = p.getString("affiliation");
-		String affiliation_zh = p.getString("affiliation_zh");
-		String address = p.getString("address");
-		String homepage = p.getString("homepage");
+		if (p != null) {
+			String phone = p.getString("phone");
+			String fax = p.getString("fax");
+			String email = p.getString("email");
+			String affiliation = p.getString("affiliation");
+			String affiliation_zh = p.getString("affiliation_zh");
+			String address = p.getString("address");
+			String homepage = p.getString("homepage");
+
+			String gender = p.getString("gender");
+			String language = p.getString("lang");
+			String avatar = d.getString("avatar");
+			String edu = p.getString("edu");
+			String work = p.getString("work");
+			String bio = p.getString("bio");
+			String bioZh = p.getString("bio_zh");
+
+			expert.setPhone(phone);
+			expert.setFax(fax);
+			expert.setEmail(email);
+			expert.setAffiliation(affiliation);
+			expert.setAffiliationZh(affiliation_zh);
+			expert.setAddress(address);
+			expert.setHomepage(homepage);
+
+			expert.setGender(gender);
+			expert.setLanguage(language);
+			expert.setAvatar(avatar);
+			expert.setEdu(edu);
+			expert.setWork(work);
+			expert.setBio(bio);
+			expert.setBioZh(bioZh);
+		}
 		JSONObject links = d.getJSONObject("links");
 
 
@@ -289,14 +315,6 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 			}
 		}
 
-		String gender = p.getString("gender");
-		String language = p.getString("language");
-		String avatar = d.getString("avatar");
-		String edu = p.getString("edu");
-		String work = p.getString("work");
-		String bio = p.getString("bio");
-		String bioZh = p.getString("bio_zh");
-
 		expert.setExpertId(expertId);
 		expert.setName(name);
 		expert.setNameZh(nameZh);
@@ -312,23 +330,10 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 				expert.setTitlesDesc(titles);
 			}
 		}
-		expert.setPhone(phone);
-		expert.setFax(fax);
-		expert.setEmail(email);
-		expert.setAffiliation(affiliation);
-		expert.setAffiliationZh(affiliation_zh);
-		expert.setAddress(address);
-		expert.setHomepage(homepage);
 		expert.setHp(hp);
 		expert.setGs(gs);
 		expert.setDblp(dblp);
-		expert.setGender(gender);
-		expert.setLanguage(language);
-		expert.setAvatar(avatar);
-		expert.setEdu(edu);
-		expert.setWork(work);
-		expert.setBio(bio);
-		expert.setBioZh(bioZh);
+
 		expert.setTaskId(taskId);
 
 		saveOrUpdate(expert);

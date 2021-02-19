@@ -18,6 +18,7 @@ package org.springblade.flow.business.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -39,6 +40,7 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.entity.TemplateComposition;
+import org.springblade.composition.feign.ICompositionClient;
 import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -89,6 +91,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final IStatisticsClient statisticsClient;
 	private final RuntimeService runtimeService;
 	private final ITemplateClient templateClient;
+	private final ICompositionClient compositionClient;
 
 
 	@Value("${spring.profiles.active}")
@@ -99,6 +102,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	public IPage<SingleFlow> selectClaimPage(IPage<SingleFlow> page, SingleFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup;
+		List<String> labelRes = new ArrayList<>();
+		List<String> inspectionRes = new ArrayList<>();
 		if (null != bladeFlow.getRoleId()) {
 			List<String> res = SysCache.getRoleAliases(bladeFlow.getRoleId().toString());
 			if (Func.isNotEmpty(res)) {
@@ -107,8 +112,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				return null;
 			}
 		}else if (null != bladeFlow.getCompositionId()) {
-			List<String> labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
-			List<String> inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
+			labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
+			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
 			String roles[] = AuthUtil.getUserRole().split(",");
 			labelRes.retainAll(Arrays.asList(roles));
 			inspectionRes.retainAll(Arrays.asList(roles));
@@ -133,117 +138,129 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
-		List<String> roleAliases = Func.toStrList(taskGroup);
-		int idx = 0;
-		for (String roleAlias : roleAliases) {
-			claimRoleWithoutTenantIdQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
-			idx++;
-			if (idx > 8)
-				break;
-		}
+//ws0204
+//		List<String> roleAliases = Func.toStrList(taskGroup);
+//		int idx = 0;
+//		for (String roleAlias : roleAliases) {
+//			claimRoleWithoutTenantIdQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
+//			idx++;
+//			if (idx > 8)
+//				break;
+//		}
+
 		// 构建列表数据
 		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, page, FlowEngineConstant.STATUS_CLAIM);
 		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
-		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
+//		buildFlowTaskList(bladeFlow, flowList, claimRoleWithoutTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
 
-//		TaskQuery taskQuery = claimRoleWithoutTenantIdQuery;
-//		if (bladeFlow.getCategory() != null) {
-//			taskQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
-//		}
-//		if (bladeFlow.getBeginDate() != null) {
-//			taskQuery.taskCreatedAfter(bladeFlow.getBeginDate());
-//		}
-//		if (bladeFlow.getEndDate() != null) {
-//			taskQuery.taskCreatedBefore(bladeFlow.getEndDate());
-//		}
-//		List<Task> taskList = taskQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
-////		List<Task> taskList = taskQuery.list();
+		if (bladeFlow.getCategory() != null) {
+			claimRoleWithoutTenantIdQuery.processCategoryIn(Func.toStrList(bladeFlow.getCategory()));
+		}
+		if (bladeFlow.getBeginDate() != null) {
+			claimRoleWithoutTenantIdQuery.taskCreatedAfter(bladeFlow.getBeginDate());
+		}
+		if (bladeFlow.getEndDate() != null) {
+			claimRoleWithoutTenantIdQuery.taskCreatedBefore(bladeFlow.getEndDate());
+		}
+
+		List<String> roles = Arrays.asList(AuthUtil.getUserRole().split(","));
+		HashMap<Long, Integer> userRoleCountMap = new HashMap<>();
+//		List<Task> taskList = claimRoleWithoutTenantIdQuery.listPage(Func.toInt((page.getCurrent() - 1) * page.getSize()), Func.toInt(page.getSize()));
+		List<Task> taskList = claimRoleWithoutTenantIdQuery.list();
 //		taskList.forEach(task -> {
-//			Map<String, Object> tmp = task.getTaskLocalVariables();
-//			Map<String, Object> processVariables = task.getProcessVariables();
-//			for (String roleAlias : roleAliases) {
-//				if (processVariables.containsKey(roleAlias+"-"+AuthUtil.getUserId()))
-//					return;
-//			}
-////			Map<String, List<ExtensionElement>> extensionElements = task.getEx
-////			Map<String, Object> tmp2 = task.get
-//			SingleFlow flow = new SingleFlow();
-//			flow.setTaskId(task.getId());
-//			flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
-//			flow.setTaskName(task.getName());
-//			flow.setAssignee(task.getAssignee());
-//			flow.setCreateTime(task.getCreateTime());
-//			flow.setClaimTime(task.getClaimTime());
-//			flow.setExecutionId(task.getExecutionId());
-//			flow.setVariables(task.getProcessVariables());
-//			flow.setPriority(task.getPriority());
-//
-//			HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
-//			if (Func.isNotEmpty(historicProcessInstance)) {
-//				String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
-//				flow.setBusinessTable(businessKey[0]);
-//				flow.setBusinessId(businessKey[1]);
-//			}
-//
-//			ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
-//			flow.setCategory(processDefinition.getCategory());
-//			flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
-//			flow.setProcessDefinitionId(processDefinition.getId());
-//			flow.setProcessDefinitionName(processDefinition.getName());
-//			flow.setProcessDefinitionKey(processDefinition.getKey());
-//			flow.setProcessDefinitionVersion(processDefinition.getVersion());
-//			flow.setProcessInstanceId(task.getProcessInstanceId());
-//			flow.setStatus(FlowEngineConstant.STATUS_CLAIM);
-//
-//			BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-//			UserTask userTask = (UserTask)bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-//			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
-//			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
-//			if (Func.isNotEmpty(extCompId))
-//				flow.setCompositionId(extCompId.get(0).getElementText());
-//			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
-//			if (Func.isNotEmpty(extCompType))
-//				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
-//			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
-//			if (Func.isNotEmpty(extField))
-//				flow.setCompositionField(extField.get(0).getElementText());
-//			if (bladeFlow.getCategoryName().equals("标注流程")) {
-//				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
-//				if (labelTask.getId() != null) {
-//					flow.setTemplateId(labelTask.getTemplateId());
-//					flow.setPersonId(labelTask.getPersonId());
-//					flow.setPersonName(labelTask.getPersonName());
-//					flow.setSubTaskId(labelTask.getId());
-//					flowList.add(flow);
-//				}
-//			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
-//				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
-//				if (qualityInspectionTask.getId() != null) {
-//					flow.setTemplateId(qualityInspectionTask.getTemplateId());
-//					flow.setPersonId(qualityInspectionTask.getPersonId());
-//					flow.setPersonName(qualityInspectionTask.getPersonName());
-//					flow.setSubTaskId(qualityInspectionTask.getId());
-//					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
-//					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
-//					flow.setLabelProcessInstanceId(qualityInspectionTask.getLabelProcessInstanceId());
-//					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
-//					flowList.add(flow);
-//				}
-//			}
+		for(Task task: taskList) {
+			Map<String, Object> tmp = task.getTaskLocalVariables();
+			Map<String, Object> tmp1 = task.getProcessVariables();
+
+			Map<String, Object> processVariables = task.getProcessVariables();
+			if (processVariables.containsKey(task.getName()+"-"+AuthUtil.getUserId()+"-done")) {
+				continue;
+			}
+
+			SingleFlow flow = new SingleFlow();
+			flow.setTaskId(task.getId());
+			flow.setTaskDefinitionKey(task.getTaskDefinitionKey());
+			flow.setTaskName(task.getName());
+			flow.setAssignee(task.getAssignee());
+			flow.setCreateTime(task.getCreateTime());
+			flow.setClaimTime(task.getClaimTime());
+			flow.setExecutionId(task.getExecutionId());
+			flow.setVariables(task.getProcessVariables());
+			flow.setPriority(task.getPriority());
+
+			HistoricProcessInstance historicProcessInstance = getHistoricProcessInstance(task.getProcessInstanceId());
+			if (Func.isNotEmpty(historicProcessInstance)) {
+				String[] businessKey = Func.toStrArray(StringPool.COLON, historicProcessInstance.getBusinessKey());
+				flow.setBusinessTable(businessKey[0]);
+				flow.setBusinessId(businessKey[1]);
+			}
+
+			ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
+			flow.setCategory(processDefinition.getCategory());
+			flow.setCategoryName(FlowCache.getCategoryName(processDefinition.getCategory()));
+			flow.setProcessDefinitionId(processDefinition.getId());
+			flow.setProcessDefinitionName(processDefinition.getName());
+			flow.setProcessDefinitionKey(processDefinition.getKey());
+			flow.setProcessDefinitionVersion(processDefinition.getVersion());
+			flow.setProcessInstanceId(task.getProcessInstanceId());
+			flow.setStatus(FlowEngineConstant.STATUS_CLAIM);
+
+			BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+			UserTask userTask = (UserTask) bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
+			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
+			if (Func.isNotEmpty(extCompId))
+				flow.setCompositionId(extCompId.get(0).getElementText());
+			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
+			if (Func.isNotEmpty(extCompType))
+				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
+			List<ExtensionElement> extField = extensionElements.get(ProcessConstant.COMPOSITION_FIELD);
+			if (Func.isNotEmpty(extField))
+				flow.setCompositionField(extField.get(0).getElementText());
+			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
+			if (Func.isNotEmpty(inspectionType))
+				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
+			if (bladeFlow.getCategoryName().equals("标注流程")) {
+				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
+				if (labelTask != null && labelTask.getId() != null) {
+					flow.setTemplateId(labelTask.getTemplateId());
+					flow.setPersonId(labelTask.getPersonId());
+					flow.setPersonName(labelTask.getPersonName());
+					flow.setSubTaskId(labelTask.getId());
+					flowList.add(flow);
+				}
+			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
+				if (qualityInspectionTask != null && qualityInspectionTask.getId() != null) {
+					flow.setTemplateId(qualityInspectionTask.getTemplateId());
+					flow.setPersonId(qualityInspectionTask.getPersonId());
+					flow.setPersonName(qualityInspectionTask.getPersonName());
+					flow.setSubTaskId(qualityInspectionTask.getId());
+					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
+					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
+					flow.setLabelProcessInstanceId(qualityInspectionTask.getLabelProcessInstanceId());
+					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					flowList.add(flow);
+				}
+			}
+			if (flowList.size() > 19)
+				break;
 //		});
+		}
 
 		// 计算总数
-		long count = claimRoleWithoutTenantIdQuery.count();
-//		int count = flowList.size();
+//		long count = claimRoleWithoutTenantIdQuery.count();
+		int count = flowList.size();
+		page.setTotal(count);
 		// 设置总数u
-		List<String> taskGroupList = Func.toStrList(taskGroup);
-		R res = labelTaskClient.queryLabelTaskClaimCount(taskGroupList);
-		Integer total = (Integer)res.getData();
-		if(bladeFlow.getCategoryName().equals("标注流程")){
-			page.setTotal(total);
-		} else if(bladeFlow.getCategoryName().equals("质检流程")){
-			page.setTotal(count-total);
-		}
+//		List<String> taskGroupList = Func.toStrList(taskGroup);
+//		R res = labelTaskClient.queryLabelTaskClaimCount(taskGroupList);
+//		Integer total = (Integer)res.getData();
+//		if(bladeFlow.getCategoryName().equals("标注流程")){
+//			page.setTotal(total);
+//		} else if(bladeFlow.getCategoryName().equals("质检流程")){
+//			page.setTotal(count-total);
+//		}
 		// 设置数据
 		page.setRecords(flowList);
 //		int start = Func.toInt((page.getCurrent() - 1) * page.getSize());
@@ -256,6 +273,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	public SingleFlow selectOneClaimPage(String categoryName, Long roleId, Long compositionId) {
 //		String taskUser = TaskUtil.getTaskUser();
 		String taskGroup;
+		List<String> labelRes = new ArrayList<>();
+		List<String> inspectionRes = new ArrayList<>();
 		if (null != roleId) {
 			List<String> res = SysCache.getRoleAliases(roleId.toString());
 			if (Func.isNotEmpty(res)) {
@@ -264,8 +283,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				return null;
 			}
 		}else if (null != compositionId) {
-			List<String> labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, compositionId);
-			List<String> inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, compositionId);
+			labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, compositionId);
+			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, compositionId);
 			String roles[] = AuthUtil.getUserRole().split(",");
 			labelRes.retainAll(Arrays.asList(roles));
 			inspectionRes.retainAll(Arrays.asList(roles));
@@ -282,10 +301,16 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		TaskQuery taskQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
-		List<String> roleAliases = Func.toStrList(taskGroup);
-		for (String roleAlias : roleAliases) {
-			taskQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
-		}
+//ws0204
+//		List<String> roleAliases = Func.toStrList(taskGroup);
+//		for (String roleAlias : roleAliases) {
+//			taskQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
+//		}
+//		List<String> roleAliases = Func.toStrList(taskGroup);
+//		for (String roleAlias : roleAliases) {
+//			taskQuery.taskVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
+//		}
+
 //		if (taskQuery.listPage(0, 1).size() != 0) {
 //			Task task = taskQuery.listPage(0, 1).get(0);
 		List<Task> taskList = taskQuery.list();
@@ -300,6 +325,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				if (!compositionId.equals(extCompIdNum))
 					continue;
 				flow.setCompositionId(extCompId.get(0).getElementText());
+			}
+			Map<String, Object> processVariables = task.getProcessVariables();
+			if (processVariables.containsKey(task.getName()+"-"+AuthUtil.getUserId()+"-done")) {
+				continue;
 			}
 			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 			if (Func.isNotEmpty(extCompType))
@@ -362,7 +391,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		}
 		return new SingleFlow();
 	}
-
+;
 	@Override
 	public IPage<SingleFlow> selectTodoPage(IPage<SingleFlow> page, BladeFlow bladeFlow) {
 		String taskUser = TaskUtil.getTaskUser();
@@ -859,6 +888,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			taskService.addComment(taskId, processInstanceId, comment);
 		}
 		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
+		Map<String, Object> taskVariables = taskService.getVariables(taskId);
 		// 创建变量
 		Map<String, Object> variables = flow.getVariables();
 		if (variables == null) {
@@ -868,11 +898,13 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		if (flow.getCategoryName().equals("标注流程")) {
 			LabelTask labelTask = labelTaskClient.queryLabelTask(processInstanceId).getData();
 			R<org.springblade.task.entity.Task> taskRes = taskClient.getById(labelTask.getTaskId());
-			if (!taskRes.isSuccess()){
+			R<Composition> compositionRes = compositionClient.getById(Long.valueOf(flow.getCompositionId()));
+			if (!taskRes.isSuccess() || !compositionRes.isSuccess()){
 				log.error("获取任务信息失败！");
 				return false;
 			}
 			org.springblade.task.entity.Task task = taskRes.getData();
+			Composition currentComposition = compositionRes.getData();
 			R<Kv> res = expertClient.isInfoComplete(labelTask.getPersonId(), labelTask.getTemplateId());
 			if (!res.isSuccess()) {
 				log.error("获取专家信息是否完成失败！");
@@ -885,7 +917,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					R<Template> templateRes = templateClient.getTemplateById(task.getTemplateId());
 					if (templateRes.isSuccess()) {
 						Template template = templateRes.getData();
-						labelTaskClient.startRealSetProcess(template.getRealSetProcessDefinitions(), task);
+						R<Map<String, String>> startRes = labelTaskClient.startRealSetProcess(template.getRealSetProcessDefinitions(), task);
+						if (startRes.isSuccess() && startRes.getData() != null) {
+							Map<String, String> compositionLabelMap = startRes.getData();
+							statisticsClient.initializeRealSetLabelTask(labelTask, compositionLabelMap);
+						}
 					}
 				}
 			}
@@ -944,7 +980,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			if(null!=flow.getRoleId() && -1!=flow.getRoleId()) {
 				String roleAlias = SysCache.getRoleAlias(flow.getRoleId());
 				processVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
+				taskVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
+
+				processVariables.put(currentComposition.getName()+"-"+AuthUtil.getUserId()+"-done", true);
 			}
+			taskService.setVariables(taskId, taskVariables);
 			runtimeService.setVariables(processInstanceId, processVariables);
 			//			boolean isBiComplete = labelTaskClient.isBiComplete(taskId);
 		}

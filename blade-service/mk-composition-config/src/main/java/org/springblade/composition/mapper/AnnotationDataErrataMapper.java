@@ -34,18 +34,20 @@ public interface AnnotationDataErrataMapper extends BaseMapper<AnnotationDataErr
 	/**
 	 * 获取标注组合勘误列表
 	 * @param labelerId
+	 * @param compositionName
 	 * @param offset
 	 * @param pageSize
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
 
 	/**
 	 * 获取标注组合勘误列表
 	 * @param labelerId
+	 * @param compositionName
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName);
 }

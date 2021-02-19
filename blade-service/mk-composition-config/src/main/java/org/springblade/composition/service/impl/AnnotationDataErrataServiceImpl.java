@@ -26,6 +26,7 @@ import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 服务实现类
@@ -38,8 +39,10 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 
 	AnnotationDataErrataMapper annotationDataErrataMapper;
 
-	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Long labelerId, Integer offset, Integer pageSize) {
-		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(labelerId, offset, pageSize);
+	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Map<String, Object> annotationDataErrata, Integer offset, Integer pageSize) {
+		String labelerIdStr = (String)annotationDataErrata.get("labelerId");
+		String compositionName = (String)annotationDataErrata.get("compositionName");
+		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(Long.valueOf(Long.valueOf(labelerIdStr)), compositionName, offset, pageSize);
 		list.forEach(annotationCompositionErrataVO -> {
 			if (annotationCompositionErrataVO.getExpertName() == null)
 				annotationCompositionErrataVO.setExpertName(annotationCompositionErrataVO.getRealSetExpertName());
@@ -47,7 +50,9 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 		return list;
 	}
 
-	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Long labelerId) {
-		return annotationDataErrataMapper.getAnnotationCompositionErrataAll(labelerId);
+	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Map<String, Object> annotationDataErrata) {
+		String labelerIdStr = (String)annotationDataErrata.get("labelerId");
+		String compositionName = (String)annotationDataErrata.get("compositionName");
+		return annotationDataErrataMapper.getAnnotationCompositionErrataAll(Long.valueOf(Long.valueOf(labelerIdStr)), compositionName);
 	}
 }

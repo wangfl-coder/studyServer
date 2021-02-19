@@ -8,7 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springblade.flow.core.entity.FlowEntity;
+import org.springblade.core.mp.base.BaseEntity;
+
 
 import java.util.Date;
 
@@ -17,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "质检Task对象", description = "质检Task对象")
-public class QualityInspectionTask extends FlowEntity {
+public class QualityInspectionTask extends BaseEntity {
 
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;

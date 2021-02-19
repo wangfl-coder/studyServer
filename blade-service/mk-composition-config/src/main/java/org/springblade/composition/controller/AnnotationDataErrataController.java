@@ -121,13 +121,14 @@ public class AnnotationDataErrataController extends BladeController {
 	 */
 	@GetMapping("/composition-list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "sub_task_id", value = "子任务ID", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "labelerId", value = "标注员ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "compositionName", value = "组合ID", paramType = "query", dataType = "string")
 	})
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入annotationDataErrata")
 	public R<IPage<AnnotationCompositionErrataVO>> compositionList(@ApiIgnore @RequestParam Map<String, Object> annotationDataErrata, Query query) {
-		List<AnnotationCompositionErrataVO> recordList = annotationDataErrataService.getAnnotationCompositionErrataList(Long.valueOf((String)annotationDataErrata.get("labelerId")), (query.getCurrent()-1)*query.getSize(), query.getSize());
-		int total = annotationDataErrataService.getAnnotationCompositionErrataAll(Long.valueOf((String)annotationDataErrata.get("labelerId"))).size();
+		List<AnnotationCompositionErrataVO> recordList = annotationDataErrataService.getAnnotationCompositionErrataList(annotationDataErrata, (query.getCurrent()-1)*query.getSize(), query.getSize());
+		int total = annotationDataErrataService.getAnnotationCompositionErrataAll(annotationDataErrata).size();
 		IPage<AnnotationCompositionErrataVO> annotationCompositionErrataVO = new Page(query.getCurrent(), query.getSize(), total);
 		annotationCompositionErrataVO.setRecords(recordList);
 		return R.data(annotationCompositionErrataVO);

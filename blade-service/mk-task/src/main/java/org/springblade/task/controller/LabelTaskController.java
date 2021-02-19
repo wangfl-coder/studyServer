@@ -49,7 +49,7 @@ public class LabelTaskController extends BladeController implements CacheNames {
 		LabelTask detail = labelTaskService.getById(businessId);
 		User user = UserCache.getUser(detail.getCreateUser());
 //		User user = userClient.userInfoById(detail.getCreateUser()).getData();
-		detail.getFlow().setAssigneeName(user.getName());
+//		detail.getFlow().setAssigneeName(user.getName());
 		return R.data(detail);
 	}
 

@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
 import org.springblade.task.dto.ExpertTaskDTO;
 import org.springblade.task.entity.LabelTask;
@@ -17,6 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 //import sun.security.krb5.internal.LastReq;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -40,9 +43,9 @@ public class LabelTaskClient implements ILabelTaskClient {
 
 	@Override
 	@PostMapping(START_LABEL_REALSET_PROCESS)
-	public R<Boolean> startRealSetProcess(@RequestParam String realSetProcessDefinitions, @RequestBody Task task) {
-		boolean b = labelTaskService.startRealSetProcess(realSetProcessDefinitions, task);
-		return R.data(b);
+	public R<Map<String, String>> startRealSetProcess(@RequestParam String realSetProcessDefinitions, @RequestBody Task task) {
+		Map<String, String> resultMap = labelTaskService.startRealSetProcess(realSetProcessDefinitions, task);
+		return R.data(resultMap);
 	}
 
 	@Override
@@ -111,5 +114,10 @@ public class LabelTaskClient implements ILabelTaskClient {
 	@Override
 	public R queryLabelTaskClaimCount(List<String> param2) {
 		return R.data(labelTaskService.annotationClaimCount(param2));
+	}
+
+	@Override
+	public R<List<CompositionClaimListVO>> compositionClaimList(List<String> roleAliases) {
+		return R.data(labelTaskService.compositionClaimList(roleAliases));
 	}
 }
