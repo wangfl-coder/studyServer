@@ -16,8 +16,8 @@
  */
 package org.springblade.adata.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
@@ -25,6 +25,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 实体类
@@ -32,25 +36,23 @@ import org.springblade.core.mp.base.BaseEntity;
  * @author Chill
  */
 @Data
-@TableName("mk_real_set_expert")
-@EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "RealSetExpert对象", description = "RealSetExpert对象")
-public class RealSetExpert extends BaseEntity {
+@TableName("mk_adata_expert_extend")
+@ApiModel(value = "Expert扩展对象", description = "Expert扩展对象（比aminer多了微软学术和第三方个人主页）")
+public class ExpertExtend implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 任务id
+	 * 租户ID
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "任务id")
-	private Long taskId;
+	@ApiModelProperty(value = "租户ID")
+	private String tenantId;
 
 	/**
-	 * Aminer库中的原始学者ID
+	 * 主键id Aminer库中的原始学者ID
 	 */
-	@ApiModelProperty(value = "Aminer库中的原始学者ID")
-	private String expertId;
+	@ApiModelProperty(value = "主键id Aminer库中的原始学者ID")
+	private String id;
 
 	/**
 	 * 姓名
@@ -161,39 +163,39 @@ public class RealSetExpert extends BaseEntity {
 	private String language;
 
 	/**
-	 * 头像
-	 */
-	@ApiModelProperty(value = "头像")
-	private String avatar;
-
-	/**
-	 * 教育背景
-	 */
-	@ApiModelProperty(value = "教育背景")
-	private String edu;
-
-	/**
-	 * 工作经历
-	 */
-	@ApiModelProperty(value = "工作经历")
-	private String work;
-
-	/**
-	 * 英文简介
-	 */
-	@ApiModelProperty(value = "英文简介")
-	private String bio;
-
-	/**
-	 * 中文简介
-	 */
-	@ApiModelProperty(value = "中文简介")
-	private String bioZh;
-
-	/**
 	 * 备注
 	 */
 	@ApiModelProperty(value = "备注")
 	private String remark;
+
+	@ApiModelProperty("创建人")
+	private String createUser;
+
+	@ApiModelProperty("创建部门")
+	private String createDept;
+	@DateTimeFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@JsonFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@ApiModelProperty("创建时间")
+	private Date createTime;
+
+	@ApiModelProperty("更新人")
+	private String updateUser;
+	@DateTimeFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@JsonFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@ApiModelProperty("更新时间")
+	private Date updateTime;
+	@ApiModelProperty("业务状态")
+	private Integer status;
+	@TableLogic
+	@ApiModelProperty("是否已删除")
+	private Integer isDeleted;
 
 }

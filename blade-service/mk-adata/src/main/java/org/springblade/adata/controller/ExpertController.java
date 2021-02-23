@@ -24,12 +24,14 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertExtend;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.excel.ExpertImporter;
 import org.springblade.adata.magic.ExportMagicRequest;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
+import org.springblade.adata.service.IExpertExtendService;
 import org.springblade.adata.service.IExpertService;
 import org.springblade.adata.service.IRealSetExpertService;
 import org.springblade.adata.vo.ExpertVO;
@@ -80,6 +82,7 @@ import static org.springblade.core.cache.constant.CacheConstant.PARAM_CACHE;
 public class ExpertController extends BladeController {
 
 	private final IExpertService expertService;
+	private final IExpertExtendService expertExtendService;
 	private final IRealSetExpertService realSetExpertService;
 	private final IFlowEngineClient flowEngineClient;
 	private final ExpertMapper expertMapper;
@@ -246,13 +249,6 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 10)
 	@ApiOperation(value = "标注数据生效到aminer", notes = "标注数据生效到aminer")
 	public R exportExperts(Long taskId){
-		boolean avatar;
-		boolean work;
-		boolean edu;
-		boolean bio;
-		boolean bi;
-		boolean remark;
-		boolean result;
 		List<Expert> experts = expertMapper.queryExportExperts(taskId);
 
 //		ArrayList<Expert> experts = new ArrayList<>();
@@ -285,13 +281,14 @@ public class ExpertController extends BladeController {
 //		expert1.setUpdateUser(1341216104114147329L);
 //		experts.add(expert1);
 
-		for(Expert expert:experts){
+//		for(Expert expert:experts){
+		experts.parallelStream().forEach(expert -> {
 			if(expert.getExpertId()!=null){
-				avatar = ExportMagicRequest.getInstance().uploadAvatar(expert);
-				bi = ExportMagicRequest.getInstance().uploadBasicInfo(expert);
-				work = ExportMagicRequest.getInstance().uploadWork(expert);
-				edu = ExportMagicRequest.getInstance().uploadEdu(expert);
-				bio = ExportMagicRequest.getInstance().uploadBio(expert);
+				boolean avatar = ExportMagicRequest.getInstance().uploadAvatar(expert);
+				boolean bi = ExportMagicRequest.getInstance().uploadBasicInfo(expert);
+				boolean work = ExportMagicRequest.getInstance().uploadWork(expert);
+				boolean edu = ExportMagicRequest.getInstance().uploadEdu(expert);
+				boolean bio = ExportMagicRequest.getInstance().uploadBio(expert);
 				String userRealName;
 				if(expert.getRemark()!=null){
 					userRealName = expertService.queryNameById(expert.getUpdateUser()).getRealName();
@@ -319,13 +316,18 @@ public class ExpertController extends BladeController {
 						}
 					}
 				}
-				remark = ExportMagicRequest.getInstance().uploadRemark(expert,userRealName,userCommentList);
-				result = work && edu && bio && bi && avatar && remark ;
+				boolean remark = ExportMagicRequest.getInstance().uploadRemark(expert,userRealName,userCommentList);
+				ExpertExtend expertExtend = new ExpertExtend();
+				expertExtend.setId(expert.getExpertId());
+				expertExtend.setMag(expert.getMag());
+				expertExtend.setOtherHomepage(expert.getOtherHomepage());
+				boolean extend = expertExtendService.saveOrUpdateToAminer(expertExtend);
+				boolean result = work && edu && bio && bi && avatar && remark && extend ;
 				if(!result){
-					return R.fail("导出失败，失败专家id:"+expert.getExpertId());
+					log.error("导出失败，失败专家id:"+expert.getExpertId());
 				}
 			}
-		}
+		});
 		return R.status(true);
 	}
 

@@ -52,11 +52,10 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -154,13 +153,23 @@ public class AnnotationDataErrataController extends BladeController {
 		List<AnnotationDataErrata> oldAnnotationDataList = annotationDataErrataService.list(Wrappers.<AnnotationDataErrata>query().lambda()
 			.eq(AnnotationDataErrata::getSubTaskId, annotationDataErrataDTO.getSubTaskId())
 			.eq(AnnotationDataErrata::getCompositionId, annotationDataErrataDTO.getCompositionId())
-			.eq(AnnotationDataErrata::getCreateUser, bladeUser.getUserId())
 		);
 
 		// 删除原来的标注数据,同时更新修改时间
 		if (oldAnnotationDataList.size() != 0) {
+			Map<String, List<AnnotationDataErrata>> dataPerField = annotationDataErrataList.stream()
+				.collect(groupingBy(AnnotationDataErrata::getField));
+			Set<String> fields = dataPerField.keySet();
 			List<Long> oldAnnotationDataIds = new ArrayList<>();
-			oldAnnotationDataList.forEach(oldAnnotationData -> oldAnnotationDataIds.add(oldAnnotationData.getId()));
+			oldAnnotationDataList.forEach(oldAnnotationData -> {
+				if (!fields.contains(oldAnnotationData.getField())) {
+					AnnotationDataErrata annotationDataErrata = Objects.requireNonNull(BeanUtil.copy(oldAnnotationData, AnnotationDataErrata.class));
+					annotationDataErrata.setId(null);
+					annotationDataErrata.setSource(1);
+					annotationDataErrataList.add(annotationDataErrata);
+				}
+				oldAnnotationDataIds.add(oldAnnotationData.getId());
+			});
 			annotationDataErrataService.deleteLogic(oldAnnotationDataIds);
 		}
 		// 注意补充信息角色

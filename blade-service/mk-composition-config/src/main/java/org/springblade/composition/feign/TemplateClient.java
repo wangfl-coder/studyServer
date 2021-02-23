@@ -16,6 +16,7 @@
  */
 package org.springblade.composition.feign;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
@@ -50,7 +51,7 @@ public class TemplateClient implements ITemplateClient {
 	public R allCompositions(@RequestParam("id") Long templateId) {
 		List<Composition> compositionList = service.allCompositions(templateId);
 		if (compositionList == null) {
-			R.data(ResultCode.FAILURE.getCode(),null,"数据库中未找到");
+			R.data(ResultCode.FAILURE.getCode(), new JSONObject(),"数据库中未找到");
 		}
 		return R.data(compositionList);
 	}

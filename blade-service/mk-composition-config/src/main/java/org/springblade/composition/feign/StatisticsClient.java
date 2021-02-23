@@ -16,6 +16,7 @@
  */
 package org.springblade.composition.feign;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
@@ -116,17 +117,25 @@ public class StatisticsClient implements IStatisticsClient {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public R<Kv> queryBasicInfoStatus(Long labelTaskId, Long templateId, Long compositionId) {
-		Statistics statistics_query = new Statistics();
-		statistics_query.setSubTaskId(labelTaskId);
-		statistics_query.setCompositionId(compositionId);
-		statistics_query.setType(1);
-
+//		Statistics statistics_query = new Statistics();
+//		statistics_query.setSubTaskId(labelTaskId);
+//		statistics_query.setCompositionId(compositionId);
+//		statistics_query.setType(1);
+		LambdaQueryWrapper<Statistics> queryWrapper = Wrappers.lambdaQuery();
+		queryWrapper.eq(Statistics::getSubTaskId, labelTaskId)
+			.eq(Statistics::getCompositionId, compositionId)
+			.in(Statistics::getType, 0, 1);
 		int count = 0;
 		Kv kv = Kv.create();
-		List<Statistics> statisticsList = statisticsService.list(Condition.getQueryWrapper(statistics_query));
+		List<Statistics> statisticsList = statisticsService.list(queryWrapper);
 		if (statisticsList != null){
 			count = statisticsList.size();
 			kv.put("biCounter", statisticsList.size());	//标注了几次，初始化就是1
+			if (count == 4) {
+				kv.put("biNotfound", 0);
+				kv.put("biSame", 0);
+				return R.data(kv);
+			}
 		}
 		List<Composition> compositionList = templateService.allCompositions(templateId);
 		Composition composition = compositionService.getById(compositionId);
@@ -336,6 +345,8 @@ public class StatisticsClient implements IStatisticsClient {
 							annotationDataErrata.setExpertId(expert.getId());
 							annotationDataErrata.setField(entry.getKey());
 							annotationDataErrata.setValue(sameValue.get(entry.getKey()));
+							annotationDataErrata.setType(2); // 标注类型 个人信息
+							annotationDataErrata.setSource(3); // 来源多人对比
 							AnnotationData errData = annotationDataList.stream().filter(elem -> {
 								if (statistics.getSubTaskId().equals(elem.getSubTaskId())
 									&& statistics.getCompositionId().equals(elem.getCompositionId())

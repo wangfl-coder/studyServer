@@ -112,8 +112,8 @@ public class AnnotationDataErrata extends BaseEntity {
 	private Long labelerId;
 
 	/**
-	 * 来源 1.质检员 2.真题
+	 * 来源 1.质检员 2.真题 3.多人对比
 	 */
-	@ApiModelProperty(value = "来源 1.质检员 2.真题")
+	@ApiModelProperty(value = "来源 1.质检员 2.真题 3.多人对比")
 	private Integer source;
 }

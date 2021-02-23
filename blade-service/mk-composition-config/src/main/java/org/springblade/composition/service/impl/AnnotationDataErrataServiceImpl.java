@@ -42,7 +42,7 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Map<String, Object> annotationDataErrata, Integer offset, Integer pageSize) {
 		String labelerIdStr = (String)annotationDataErrata.get("labelerId");
 		String compositionName = (String)annotationDataErrata.get("compositionName");
-		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(Long.valueOf(Long.valueOf(labelerIdStr)), compositionName, offset, pageSize);
+		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(Long.valueOf(labelerIdStr), compositionName, offset, pageSize);
 		list.forEach(annotationCompositionErrataVO -> {
 			if (annotationCompositionErrataVO.getExpertName() == null)
 				annotationCompositionErrataVO.setExpertName(annotationCompositionErrataVO.getRealSetExpertName());

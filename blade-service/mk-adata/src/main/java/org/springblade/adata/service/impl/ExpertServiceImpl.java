@@ -27,15 +27,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertExtend;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.magic.MagicRequest;
 import org.springblade.adata.mapper.ExpertMapper;
+import org.springblade.adata.service.IExpertExtendService;
 import org.springblade.adata.service.IExpertService;
 import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.mp.base.BaseServiceImpl;
+import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
@@ -54,6 +57,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 服务实现类
@@ -66,6 +71,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 
 	private final ITemplateClient iTemplateClient;
 	private final IUserClient iUserClient;
+	private final IExpertExtendService expertExtendService;
 
 	@Override
 	public String fetchDetail(String id) {
@@ -347,6 +353,11 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 
 		expert.setTaskId(taskId);
 
+		ExpertExtend extend = (ExpertExtend) expertExtendService.getById(expertId);
+		if (extend != null) {
+			expert.setMag(extend.getMag());
+			expert.setOtherHomepage(extend.getOtherHomepage());
+		}
 		saveOrUpdate(expert);
 		return true;
 	}
@@ -418,9 +429,12 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 
 		// 循环导入剩下的学者
 		int number = (total-1) / 20;
-		for (int i = 0; i < number ; i++) {
-			getExperts(ebId, taskId, (i + 1) * 20, 20);
-		}
+		List<Integer> numbers = Stream.iterate(1, n -> n + 1)
+			.limit(number)
+			.collect(Collectors.toList());
+		numbers.parallelStream().forEach(i -> {
+			getExperts(ebId, taskId, i * 20, 20);
+		});
 		return true;
 	}
 

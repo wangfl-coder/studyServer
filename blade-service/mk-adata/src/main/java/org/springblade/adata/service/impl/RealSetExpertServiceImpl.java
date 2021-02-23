@@ -44,6 +44,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 服务实现类
@@ -376,7 +378,6 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 		body.put("schema", schema);
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
-
 		//解析json,拿到每个学者的id
 		JSONObject resObj = JSON.parseObject(res);
 		JSONArray dataArray = resObj.getJSONArray("data");
@@ -407,9 +408,12 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 
 		// 循环导入剩下的学者
 		int number = (total-1) / 20;
-		for (int i = 0; i < number ; i++) {
-			getExperts(ebId, taskId, (i + 1) * 20, 20);
-		}
+		List<Integer> numbers = Stream.iterate(1, n -> n + 1)
+			.limit(number)
+			.collect(Collectors.toList());
+		numbers.parallelStream().forEach(i -> {
+			getExperts(ebId, taskId, i * 20, 20);
+		});
 		return true;
 	}
 

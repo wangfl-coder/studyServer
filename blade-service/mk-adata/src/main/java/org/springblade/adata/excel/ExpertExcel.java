@@ -69,7 +69,7 @@ public class ExpertExcel implements Serializable {
 	private String homepage;
 
 	@ColumnWidth(20)
-	@ExcelProperty("第三方个人主页")
+	@ExcelProperty("其它来源主页")
 	private String otherHomepage;
 
 	@ColumnWidth(15)

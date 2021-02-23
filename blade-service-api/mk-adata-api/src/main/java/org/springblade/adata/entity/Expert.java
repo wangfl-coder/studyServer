@@ -16,6 +16,7 @@
  */
 package org.springblade.adata.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -122,9 +123,9 @@ public class Expert extends BaseEntity {
 	private String homepage;
 
 	/**
-	 * 第三方个人主页
+	 * 其它来源主页
 	 */
-	@ApiModelProperty(value = "第三方个人主页")
+	@ApiModelProperty(value = "其它来源主页")
 	private String otherHomepage;
 
 	/**
@@ -144,6 +145,12 @@ public class Expert extends BaseEntity {
 	 */
 	@ApiModelProperty(value = "dblp")
 	private String dblp;
+
+	/**
+	 * MAG 微软学术
+	 */
+	@ApiModelProperty(value = "MAG 微软学术")
+	private String mag;
 
 	/**
 	 * 性别
