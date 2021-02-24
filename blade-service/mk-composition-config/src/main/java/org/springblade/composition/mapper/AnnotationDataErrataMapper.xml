@@ -17,6 +17,12 @@
         <if test="compositionName!=null and compositionName != ''">
             and c.name like CONCAT(CONCAT('%', #{compositionName}), '%')
         </if>
+        <if test="startTime!=null">
+            and err.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and err.update_time &lt; #{endTime}
+        </if>
         GROUP BY sub_task_id, composition_id, expert_id, source
         ORDER BY update_time DESC
         LIMIT #{offset}, #{pageSize}
@@ -36,6 +42,12 @@
         WHERE err.`is_deleted` = 0  and labeler_id=#{labelerId} and annotation_data_id IS NOT NULL
         <if test="compositionName!=null and compositionName != ''">
             and c.name like CONCAT(CONCAT('%', #{compositionName}), '%')
+        </if>
+        <if test="startTime!=null">
+            and err.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and err.update_time &lt; #{endTime}
         </if>
         GROUP BY sub_task_id, composition_id, expert_id, source
         ORDER BY update_time DESC

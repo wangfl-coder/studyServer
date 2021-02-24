@@ -42,7 +42,14 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(Map<String, Object> annotationDataErrata, Integer offset, Integer pageSize) {
 		String labelerIdStr = (String)annotationDataErrata.get("labelerId");
 		String compositionName = (String)annotationDataErrata.get("compositionName");
-		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(Long.valueOf(labelerIdStr), compositionName, offset, pageSize);
+		String startTime = (String)annotationDataErrata.get("startTime");
+		String endTime = (String)annotationDataErrata.get("endTime");
+		List<AnnotationCompositionErrataVO> list = annotationDataErrataMapper.getAnnotationCompositionErrataList(Long.valueOf(labelerIdStr),
+			compositionName,
+			startTime,
+			endTime,
+			offset,
+			pageSize);
 		list.forEach(annotationCompositionErrataVO -> {
 			if (annotationCompositionErrataVO.getExpertName() == null)
 				annotationCompositionErrataVO.setExpertName(annotationCompositionErrataVO.getRealSetExpertName());
@@ -53,6 +60,8 @@ public class AnnotationDataErrataServiceImpl extends BaseServiceImpl<AnnotationD
 	public List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(Map<String, Object> annotationDataErrata) {
 		String labelerIdStr = (String)annotationDataErrata.get("labelerId");
 		String compositionName = (String)annotationDataErrata.get("compositionName");
-		return annotationDataErrataMapper.getAnnotationCompositionErrataAll(Long.valueOf(Long.valueOf(labelerIdStr)), compositionName);
+		String startTime = (String)annotationDataErrata.get("startTime");
+		String endTime = (String)annotationDataErrata.get("endTime");
+		return annotationDataErrataMapper.getAnnotationCompositionErrataAll(Long.valueOf(Long.valueOf(labelerIdStr)), compositionName, startTime, endTime);
 	}
 }

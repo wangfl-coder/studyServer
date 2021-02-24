@@ -124,7 +124,7 @@ public class StatisticsClient implements IStatisticsClient {
 		LambdaQueryWrapper<Statistics> queryWrapper = Wrappers.lambdaQuery();
 		queryWrapper.eq(Statistics::getSubTaskId, labelTaskId)
 			.eq(Statistics::getCompositionId, compositionId)
-			.in(Statistics::getType, 0, 1);
+			.in(Statistics::getType, 1, 3); //普通和质检加起来总数
 		int count = 0;
 		Kv kv = Kv.create();
 		List<Statistics> statisticsList = statisticsService.list(queryWrapper);
@@ -328,7 +328,7 @@ public class StatisticsClient implements IStatisticsClient {
 						AnnotationData annoData = annotationDataList.stream().filter(elem -> {
 							if (statistics.getSubTaskId().equals(elem.getSubTaskId())
 								&& statistics.getCompositionId().equals(elem.getCompositionId())
-								&& statistics.getUserId().equals(elem.getCreateUser())
+								&& elem.getCreateUser().equals(statistics.getUserId())
 								&& entry.getKey().equals(elem.getField())
 								&& Objects.equals(sameValue.get(entry.getKey()), elem.getValue())
 							) {
@@ -350,7 +350,7 @@ public class StatisticsClient implements IStatisticsClient {
 							AnnotationData errData = annotationDataList.stream().filter(elem -> {
 								if (statistics.getSubTaskId().equals(elem.getSubTaskId())
 									&& statistics.getCompositionId().equals(elem.getCompositionId())
-									&& statistics.getUserId().equals(elem.getCreateUser())
+									&& elem.getCreateUser().equals(statistics.getUserId())
 									&& entry.getKey().equals(elem.getField())
 								) {
 									return true;

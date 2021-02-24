@@ -40,7 +40,7 @@ public interface AnnotationDataErrataMapper extends BaseMapper<AnnotationDataErr
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataList(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName, @Param("startTime")String startTime, @Param("endTime")String endTime, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
 
 	/**
 	 * 获取标注组合勘误列表
@@ -49,5 +49,5 @@ public interface AnnotationDataErrataMapper extends BaseMapper<AnnotationDataErr
 	 *
 	 * @return
 	 */
-	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName);
+	List<AnnotationCompositionErrataVO> getAnnotationCompositionErrataAll(@Param("labelerId")Long labelerId, @Param("compositionName")String compositionName, @Param("startTime")String startTime, @Param("endTime")String endTime);
 }

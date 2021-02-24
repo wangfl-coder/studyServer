@@ -121,7 +121,9 @@ public class AnnotationDataErrataController extends BladeController {
 	@GetMapping("/composition-list")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "labelerId", value = "标注员ID", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "compositionName", value = "组合ID", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "compositionName", value = "组合ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", dataType = "string")
 	})
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入annotationDataErrata")
@@ -202,6 +204,7 @@ public class AnnotationDataErrataController extends BladeController {
 			new_stat.setCompositionId(annotationDataErrataDTO.getCompositionId());
 			new_stat.setSubTaskId(subTaskId);
 			new_stat.setTemplateId(annotationDataErrataDTO.getTemplateId());
+			new_stat.setType(3);
 			statisticsService.saveOrUpdate(new_stat);
 		}
 
