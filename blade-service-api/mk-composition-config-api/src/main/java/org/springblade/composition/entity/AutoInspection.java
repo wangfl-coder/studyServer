@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 /**
  * 实体类
@@ -40,23 +41,9 @@ import org.springblade.core.mp.base.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 @TableName("mk_auto_inspection")
 @ApiModel(value = "AutoInspection对象", description = "AutoInspection对象")
-public class AutoInspection extends BaseEntity {
+public class AutoInspection extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * 主键
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "主键")
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
-	private Long id;
-
-	/**
-	 * 租户ID
-	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
 
 	/**
 	 * 子任务id

@@ -100,7 +100,7 @@ public class FlowEngineClient implements IFlowEngineClient {
 
 	@Override
 	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
-	public R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO) {
+	public R<String> deployModelByTemplate(String tenantIds, TemplateDTO templateDTO) {
 		String processDefinitionId;
 		if (using.equals("v2")) {
 			processDefinitionId = flowEngineService.deployModelByTemplateV2(modelIdV2, categoryV2, null, templateDTO);

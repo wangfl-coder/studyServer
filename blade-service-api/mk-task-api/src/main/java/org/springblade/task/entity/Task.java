@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "Task对象", description = "Task对象")
-public class Task extends BaseEntity {
+public class Task extends TenantEntity {
 
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "智库id")

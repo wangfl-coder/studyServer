@@ -17,10 +17,12 @@
 package org.springblade.composition.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
+import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.dto.TemplateCompositionDTO;
 import org.springblade.composition.entity.Composition;
@@ -34,12 +36,14 @@ import org.springblade.composition.vo.TemplateVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 
 
 import org.springblade.core.tool.api.ResultCode;
+import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.task.entity.Task;
@@ -145,12 +149,26 @@ public class TemplateController extends BladeController {
 	 */
 	@GetMapping("/list")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "status", value = "状态(1:启用,2:停用)", paramType = "query", dataType = "int")
+		@ApiImplicitParam(name = "name", value = "组合名", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "status", value = "状态(1:启用,2:停用)", paramType = "query", dataType = "int"),
+		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string")
 	})
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "分页", notes = "传入template")
-	public R<IPage<Template>> list(@ApiIgnore @RequestParam Map<String, Object> template, Query query) {
-		IPage<Template> pages = templateService.page(Condition.getPage(query), Condition.getQueryWrapper(template, Template.class).orderByDesc("update_Time"));
+	public R<IPage<Template>> list(@ApiIgnore @RequestParam Map<String, Object> template, Query query, BladeUser bladeUser) {
+		QueryWrapper<Template> queryWrapper = Condition.getQueryWrapper(template, Template.class);
+		String name = (String)template.get("name");
+		if (name != null) {
+			queryWrapper.like("template_name", "%"+name+"%").orderByDesc("update_time");
+		} else{
+			queryWrapper.orderByDesc("update_time");
+		}
+		if (bladeUser.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank((String)template.get("tenantId"))) {
+			queryWrapper.lambda().eq(Template::getTenantId, template.get("tenantId"));
+		} else {
+			queryWrapper.lambda().eq(Template::getTenantId, bladeUser.getTenantId());
+		}
+		IPage<Template> pages = templateService.page(Condition.getPage(query), queryWrapper.orderByDesc("update_Time"));
 		return R.data(pages);
 	}
 
@@ -173,7 +191,7 @@ public class TemplateController extends BladeController {
 	@ApiOperationSupport(order = 6)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "新增或修改模板，同时构建组合", notes = "传入templateDTO")
-	public R submit(@Valid @RequestBody TemplateDTO templateDTO) {
+	public R submit(@Valid @RequestBody TemplateDTO templateDTO, @ApiParam(value = "租户ID ,号分隔 只在000000有用") @RequestParam(required = false, defaultValue = "") String tenantIds) {
 		// 不等于null，就是更新操作。需要首先判断是否有任务已经使用此模板
 		if (templateDTO.getId() != null){
 			Task task = taskClient.getByTemplate(templateDTO.getId()).getData();
@@ -191,7 +209,12 @@ public class TemplateController extends BladeController {
 		});
 		boolean generateProcess = true;	// 是否根据模版创建流程, 是就根据前端传来的组合数自定义流程, 否就用前端传来的流程定义Id
 		if (generateProcess) {
-			R result = iFlowEngineClient.deployModelByTemplate(templateDTO);
+			R result;
+			if (AuthUtil.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank(tenantIds)) {
+				result = iFlowEngineClient.deployModelByTemplate(tenantIds, templateDTO);
+			} else {
+				result = iFlowEngineClient.deployModelByTemplate(AuthUtil.getTenantId(), templateDTO);
+			}
 			if (!result.isSuccess()) {
 				return R.fail("部署模版流程失败");
 			}

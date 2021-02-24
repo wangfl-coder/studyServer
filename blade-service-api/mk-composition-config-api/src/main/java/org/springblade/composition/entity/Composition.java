@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 @Data
 @AllArgsConstructor
@@ -16,10 +17,8 @@ import org.springblade.core.mp.base.BaseEntity;
 @TableName(value = "mk_composition")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "Composition对象", description = "Composition对象")
-public class Composition extends BaseEntity {
+public class Composition extends TenantEntity {
 
-	@ApiModelProperty("租户id")
-	private String tenantId;
 	@ApiModelProperty("组合名字")
 	private String name;
 	@ApiModelProperty("组合字段")

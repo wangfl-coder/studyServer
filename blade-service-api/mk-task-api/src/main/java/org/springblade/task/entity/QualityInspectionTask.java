@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 
 import java.util.Date;
@@ -18,7 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "质检Task对象", description = "质检Task对象")
-public class QualityInspectionTask extends BaseEntity {
+public class QualityInspectionTask extends TenantEntity {
 
 	@ApiModelProperty(value = "流程定义id")
 	private String processDefinitionId;

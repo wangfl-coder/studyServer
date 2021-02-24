@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 import java.io.Serializable;
 
@@ -36,24 +37,9 @@ import java.io.Serializable;
 @TableName("mk_template")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "Template对象", description = "Template对象")
-public class Template extends BaseEntity {
+public class Template extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * 主键
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "主键")
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
-	private Long id;
-
-	/**
-	 * 租户ID
-	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
-
 
 	/**
 	 * 模板名

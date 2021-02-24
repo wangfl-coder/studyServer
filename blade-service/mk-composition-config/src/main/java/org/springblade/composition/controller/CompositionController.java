@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.TemplateComposition;
@@ -15,11 +16,15 @@ import org.springblade.composition.service.ITemplateCompositionService;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.utils.Func;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -46,22 +51,25 @@ public class CompositionController extends BladeController {
 	@GetMapping("/list")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "name", value = "组合名", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "status", value = "组合状态(1:启用的组合,2:停用的组合)", paramType = "query", dataType = "int")
+		@ApiImplicitParam(name = "status", value = "组合状态(1:启用的组合,2:停用的组合)", paramType = "query", dataType = "int"),
+		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询全部组合")
-	public R<IPage<Composition>> list(@RequestParam(value = "name",required = false) String name,@RequestParam(value = "status",required = false) Integer status,Query query) {
-		QueryWrapper<Composition> compositionQueryWrapper;
-		compositionQueryWrapper = new QueryWrapper<>();
-		compositionQueryWrapper.ne("annotation_type",3);
-		if(status != null) {
-			compositionQueryWrapper.eq("status", status);
-		}
-		if(name != null) {
-			compositionQueryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
+	public R<IPage<Composition>> list(@ApiIgnore @RequestParam Map<String, Object> composition, Query query, BladeUser bladeUser) {
+		QueryWrapper<Composition> queryWrapper = Condition.getQueryWrapper(composition, Composition.class);
+		queryWrapper.ne("annotation_type",3);
+		String name = (String)composition.get("name");
+		if (name != null) {
+			queryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");
 		} else{
-			compositionQueryWrapper.orderByDesc("update_time");
+			queryWrapper.orderByDesc("update_time");
 		}
-		IPage<Composition> pages = ICompositionService.page(Condition.getPage(query), compositionQueryWrapper);
+		if (bladeUser.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank((String)composition.get("tenantId"))) {
+			queryWrapper.lambda().eq(Composition::getTenantId, composition.get("tenantId"));
+		} else {
+			queryWrapper.lambda().eq(Composition::getTenantId, bladeUser.getTenantId());
+		}
+		IPage<Composition> pages = ICompositionService.page(Condition.getPage(query), queryWrapper);
 		return R.data(pages);
 	}
 

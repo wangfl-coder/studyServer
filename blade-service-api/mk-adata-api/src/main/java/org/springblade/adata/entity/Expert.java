@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -39,7 +40,7 @@ import java.util.Date;
 @TableName("mk_adata_expert")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "Expert对象", description = "Expert对象")
-public class Expert extends BaseEntity {
+public class Expert extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
 

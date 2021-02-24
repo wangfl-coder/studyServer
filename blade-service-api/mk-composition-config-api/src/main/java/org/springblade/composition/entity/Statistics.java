@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 /**
  * 实体类
@@ -35,16 +36,9 @@ import org.springblade.core.mp.base.BaseEntity;
 @Data
 @TableName("mk_statistics")
 @ApiModel(value = "Statistics", description = "Statistics对象")
-public class Statistics extends BaseEntity {
+public class Statistics extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
-
-
-	/**
-	 * 租户ID
-	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
 
 	/**
 	 * 子任务id

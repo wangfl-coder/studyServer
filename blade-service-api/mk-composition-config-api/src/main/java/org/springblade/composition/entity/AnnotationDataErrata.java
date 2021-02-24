@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 /**
  * 实体类
@@ -34,23 +35,9 @@ import org.springblade.core.mp.base.BaseEntity;
 @Data
 @TableName("mk_annotation_data_errata")
 @ApiModel(value = "annotationDataErrata勘误对象", description = "annotationDataErrata勘误对象")
-public class AnnotationDataErrata extends BaseEntity {
+public class AnnotationDataErrata extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * 主键
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "主键")
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
-	private Long id;
-
-	/**
-	 * 租户ID
-	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
 
 	/**
 	 * 子任务id

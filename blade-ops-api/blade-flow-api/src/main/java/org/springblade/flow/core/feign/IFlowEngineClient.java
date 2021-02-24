@@ -51,7 +51,7 @@ public interface IFlowEngineClient {
 	 * @return R
 	 */
 	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
-	R<String> deployModelByTemplate(@RequestBody TemplateDTO templateDTO);
+	R<String> deployModelByTemplate(@RequestParam String tenantIds, @RequestBody TemplateDTO templateDTO);
 
 	/**
 	 * 获取流转历史列表

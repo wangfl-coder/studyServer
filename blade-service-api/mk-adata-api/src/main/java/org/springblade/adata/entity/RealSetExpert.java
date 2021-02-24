@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.mp.base.BaseEntity;
+import org.springblade.core.tenant.mp.TenantEntity;
 
 /**
  * 实体类
@@ -35,7 +36,7 @@ import org.springblade.core.mp.base.BaseEntity;
 @TableName("mk_real_set_expert")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "RealSetExpert对象", description = "RealSetExpert对象")
-public class RealSetExpert extends BaseEntity {
+public class RealSetExpert extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
 
