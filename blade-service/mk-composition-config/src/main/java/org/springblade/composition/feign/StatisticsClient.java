@@ -236,8 +236,9 @@ public class StatisticsClient implements IStatisticsClient {
 											BeanUtil.setProperty(expert, "titlesDesc", "");
 											sameValue.put(entry.getKey(), list.get(i).getValue());
 										}
-									}else {
+									} else if ("-1".equals(list.get(i).getValue()) && "-1".equals(list.get(j).getValue())) {
 										List<AnnotationData> titlesDescList = dataPerField.get("titlesDesc");
+
 										String left = titlesDescList.get(i).getValue();
 										String right = titlesDescList.get(j).getValue();
 										if (left.equals(right)) {
