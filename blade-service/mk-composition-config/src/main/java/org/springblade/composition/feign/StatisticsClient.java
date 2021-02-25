@@ -309,6 +309,19 @@ public class StatisticsClient implements IStatisticsClient {
 						kv.put("biNotfound", 0); //在count3 notfound3会跳过质检，这时不能跳过
 				}
 			}
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 1 && (int)kv.get("biSame") == 0) {
+				//在count为3，same count为0时，此时有两种情况，在biNotfound为1时，未找到的字段另外两个有不同和相同情况，两者不同去质检，相同不去
+				boolean twoSame = true;	//在count3 same0会去质检，这时寻找notfound字段另外两个有没有都一样的，有就跳过质检
+				for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
+					if (entry.getValue() == 1) {
+						Set<String> keySet = sameValue.keySet();
+						if (!keySet.contains(entry.getKey()))
+							twoSame = false;
+					}
+				}
+				if (twoSame)
+					kv.put("biSame", 1); //在count3 same0会去质检，这时可以跳过
+			}
 		} else {
 			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 3) {
 				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去

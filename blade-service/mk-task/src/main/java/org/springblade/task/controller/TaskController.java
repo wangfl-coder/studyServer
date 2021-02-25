@@ -8,17 +8,20 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.entity.Template;
 import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
@@ -201,11 +204,24 @@ public class TaskController extends BladeController {
 	@GetMapping("/list")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "taskType", value = "任务类型", paramType = "query", dataType = "integer")
+		@ApiImplicitParam(name = "taskType", value = "任务类型", paramType = "query", dataType = "integer"),
+		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询全部任务")
-	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query) {
-		IPage<Task> pages = taskService.page(Condition.getPage(query), Condition.getQueryWrapper(task, Task.class).orderByDesc("update_time"));
+	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query, BladeUser bladeUser) {
+		QueryWrapper<Task> queryWrapper = Condition.getQueryWrapper(task, Task.class);
+		String name = (String)task.get("taskName");
+		if (name != null) {
+			queryWrapper.like("task_name", "%"+name+"%").orderByDesc("update_time");
+		} else{
+			queryWrapper.orderByDesc("update_time");
+		}
+		if (bladeUser.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank((String)task.get("tenantId"))) {
+			queryWrapper.lambda().eq(Task::getTenantId, task.get("tenantId"));
+		} else {
+			queryWrapper.lambda().eq(Task::getTenantId, bladeUser.getTenantId());
+		}
+		IPage<Task> pages = taskService.page(Condition.getPage(query), queryWrapper.orderByDesc("update_time"));
 		ArrayList<Integer> compositionList = new ArrayList<>();
 		ArrayList<Integer> compositionCountList = new ArrayList<>();
 		for(Task task1:pages.getRecords()){

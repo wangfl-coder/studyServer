@@ -158,7 +158,7 @@ public class AnnotationDataErrataController extends BladeController {
 		);
 
 		// 删除原来的标注数据,同时更新修改时间
-		if (oldAnnotationDataList.size() != 0) {
+		if (annotationDataErrataList != null && oldAnnotationDataList.size() != 0) {
 			Map<String, List<AnnotationDataErrata>> dataPerField = annotationDataErrataList.stream()
 				.collect(groupingBy(AnnotationDataErrata::getField));
 			Set<String> fields = dataPerField.keySet();

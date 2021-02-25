@@ -8,4 +8,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ICompositionServiceImpl extends BaseServiceImpl<CompositionMapper, Composition> implements ICompositionService {
+
+	public Composition getByIdIgnoreTenant(Long id) {
+		return baseMapper.getByIdIgnoreTenant(id);
+	}
 }

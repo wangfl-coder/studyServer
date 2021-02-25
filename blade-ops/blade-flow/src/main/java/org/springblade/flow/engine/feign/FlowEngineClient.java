@@ -102,9 +102,10 @@ public class FlowEngineClient implements IFlowEngineClient {
 	@PostMapping(DEPLOY_MODEL_BY_TEMPLATE)
 	public R<String> deployModelByTemplate(String tenantIds, TemplateDTO templateDTO) {
 		String processDefinitionId;
+		List<String> tenantIdList = Func.toStrList(tenantIds);
 		if (using.equals("v2")) {
-			processDefinitionId = flowEngineService.deployModelByTemplateV2(modelIdV2, categoryV2, null, templateDTO);
-			Map<String, String> realSetProcessDefinitionMap = flowEngineService.deployRealSetModelByTemplate(modelIdRealSet, categoryRealSet, null, templateDTO);
+			processDefinitionId = flowEngineService.deployModelByTemplateV2(modelIdV2, categoryV2, tenantIdList, templateDTO);
+			Map<String, String> realSetProcessDefinitionMap = flowEngineService.deployRealSetModelByTemplate(modelIdRealSet, categoryRealSet, tenantIdList, templateDTO);
 			realSetProcessDefinitionMap.put("label_process_definition_id", processDefinitionId);
 			ObjectMapper mapper = new ObjectMapper();
 			String jsonStr = "";
@@ -116,7 +117,7 @@ public class FlowEngineClient implements IFlowEngineClient {
 			}
 			return R.data(jsonStr);
 		} else {
-			processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, null, templateDTO);
+			processDefinitionId = flowEngineService.deployModelByTemplate(modelId, category, tenantIdList, templateDTO);
 			return R.data(processDefinitionId);
 		}
 	}

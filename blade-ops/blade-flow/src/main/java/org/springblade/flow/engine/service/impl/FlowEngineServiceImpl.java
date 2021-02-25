@@ -406,10 +406,11 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		}
 		String finalProcessName = processName;
 		if (Func.isNotEmpty(tenantIdList)) {
-			tenantIdList.forEach(tenantId -> {
+//			tenantIdList.forEach(tenantId -> {
+			for (String tenantId: tenantIdList) {
 				Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
-				deployTemplate(deployment, category);
-			});
+				return deployTemplate(deployment, category);
+			}
 		} else {
 			Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
 			return deployTemplate(deployment, category);
@@ -661,10 +662,11 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		}
 		String finalProcessName = processName;
 		if (Func.isNotEmpty(tenantIdList)) {
-			tenantIdList.forEach(tenantId -> {
+//			tenantIdList.forEach(tenantId -> {
+			for (String tenantId: tenantIdList) {
 				Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
-				deployTemplate(deployment, category);
-			});
+				return deployTemplate(deployment, category);
+			};
 		} else {
 			Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
 			return deployTemplate(deployment, category);
@@ -721,10 +723,12 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				String finalProcessName = processName;
 				String processDefinitionId = "";
 				if (Func.isNotEmpty(tenantIdList)) {
-					tenantIdList.forEach(tenantId -> {
+					//			tenantIdList.forEach(tenantId -> {
+					for (String tenantId: tenantIdList) {
 						Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).tenantId(tenantId).deploy();
-						String tenantProcessDefinitionId = deployTemplate(deployment, category);
-					});
+						processDefinitionId = deployTemplate(deployment, category);
+						break;
+					}
 				} else {
 					Deployment deployment = repositoryService.createDeployment().addBytes(finalProcessName, bytes).name(model.getName()).key(model.getModelKey()).deploy();
 					processDefinitionId = deployTemplate(deployment, category);

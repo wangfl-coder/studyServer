@@ -202,7 +202,12 @@ public class TemplateController extends BladeController {
 
 		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
 		templateCompositions.forEach(templateCompositionDTO -> {
-			Composition composition = compositionService.getById(templateCompositionDTO.getCompositionId());
+			Composition composition;
+			if (templateCompositionDTO.getCompositionId() != -1) {
+				composition = compositionService.getById(templateCompositionDTO.getCompositionId());
+			} else {
+				composition = compositionService.getByIdIgnoreTenant(templateCompositionDTO.getCompositionId());
+			}
 			templateCompositionDTO.setCompositionName(composition.getName());
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
 			templateCompositionDTO.setCompositionField(composition.getField());
@@ -222,6 +227,11 @@ public class TemplateController extends BladeController {
 			templateDTO.setProcessDefinitionId(jsonObject.getString("label_process_definition_id"));
 			jsonObject.remove("label_process_definition_id");
 			templateDTO.setRealSetProcessDefinitions(jsonObject.toString());
+			if (AuthUtil.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank(tenantIds)) {
+				templateDTO.setTenantId(tenantIds);
+			} else {
+				templateDTO.setTenantId(AuthUtil.getTenantId());
+			}
 		}
 		Template template = Objects.requireNonNull(BeanUtil.copy(templateDTO, Template.class));
 		boolean tmp = templateService.saveOrUpdate(template);
@@ -231,6 +241,11 @@ public class TemplateController extends BladeController {
 		List<TemplateComposition> templateCompositionList = templateCompositions.stream().map(templateCompositionDTO -> {
 			TemplateComposition templateComposition = BeanUtil.copy(templateCompositionDTO, TemplateComposition.class);
 			templateComposition.setTemplateId(template.getId());
+			if (AuthUtil.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) && StringUtil.isNotBlank(tenantIds)) {
+				templateComposition.setTenantId(tenantIds);
+			} else {
+				templateComposition.setTenantId(AuthUtil.getTenantId());
+			}
 			return templateComposition;
 		}).collect(Collectors.toList());
 		return R.status(templateService.compose(templateCompositionList));
