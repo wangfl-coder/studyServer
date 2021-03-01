@@ -102,5 +102,10 @@ public class Statistics extends TenantEntity {
 	@ApiModelProperty(value = "一个任务中组合提交（完成）数量")
 	private Integer compositionSubmitCount;
 
-
+	/**
+	 * 是否正确 大于0为错误 数字代表为什么错 1.质检员 2.真题 3.多人对比
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "大于0为错误 数字代表为什么错 1.质检员 2.真题 3.多人对比")
+	private Integer isWrong;
 }

@@ -52,6 +52,13 @@ public class BladeUserDetailsServiceImpl implements UserDetailsService {
 	private final IUserClient userClient;
 	private final ISysClient sysClient;
 
+	private static final String REFRESHTOKEN_GRANT_TYPE = "refresh_token";
+	private static final String PASSWORD_GRANT_TYPE = "password";
+	private static final String CAPTCHA_GRANT_TYPE = "captcha";
+	private static final String VERIFICATION_CODE_GRANT_TYPE = "verification_code";
+	private static final String EMAIL = "email";
+	private static final String SMS = "sms";
+
 	@Override
 	@SneakyThrows
 	public BladeUserDetails loadUserByUsername(String username) {
@@ -75,17 +82,45 @@ public class BladeUserDetailsServiceImpl implements UserDetailsService {
 		}
 
 		// 获取用户类型
-		String userType = Func.toStr(request.getHeader(TokenUtil.USER_TYPE_HEADER_KEY), TokenUtil.DEFAULT_USER_TYPE);
+		String headerUserType = request.getHeader(TokenUtil.USER_TYPE_HEADER_KEY);
+		String paramUserType = request.getParameter(TokenUtil.USER_TYPE_PARAM_KEY);
+		if (StringUtil.isAllBlank(headerUserType, paramUserType)) {
+//			throw new UserDeniedAuthorizationException(TokenUtil.USER_TYPE_NOT_FOUND);
+			headerUserType = TokenUtil.DEFAULT_USER_TYPE;
+		}
+		String userType = StringUtils.isBlank(headerUserType) ? paramUserType : headerUserType;
 
 		// 远程调用返回数据
-		R<UserInfo> result;
-		// 根据不同用户类型调用对应的接口返回数据，用户可自行拓展
-		if (userType.equals(UserEnum.WEB.getName())) {
-			result = userClient.userInfo(tenantId, username, UserEnum.WEB.getName());
-		} else if (userType.equals(UserEnum.APP.getName())) {
-			result = userClient.userInfo(tenantId, username, UserEnum.APP.getName());
-		} else {
-			result = userClient.userInfo(tenantId, username, UserEnum.OTHER.getName());
+//		R<UserInfo> result;
+//		// 根据不同用户类型调用对应的接口返回数据，用户可自行拓展
+//		if (userType.equals(UserEnum.WEB.getName())) {
+//			result = userClient.userInfo(tenantId, username, UserEnum.WEB.getName());
+//		} else if (userType.equals(UserEnum.APP.getName())) {
+//			result = userClient.userInfo(tenantId, username, UserEnum.APP.getName());
+//		} else {
+//			result = userClient.userInfo(tenantId, username, UserEnum.OTHER.getName());
+//		}
+		R<UserInfo> result = null;
+		String grant_type = request.getParameter("grant_type");
+		String auth_type = request.getParameter("auth_type");
+		if (REFRESHTOKEN_GRANT_TYPE.equals(grant_type)) {
+			result = userClient.getUserInfoByAccount(tenantId, username, UserEnum.WEB.getName());
+		}else {
+			if (userType.equals(UserEnum.WEB.getName())) {
+				if (VERIFICATION_CODE_GRANT_TYPE.equals(grant_type)) {
+					if (SMS.equals(auth_type)) {
+						result = userClient.getUserInfoByMobile(tenantId, username, UserEnum.WEB.getName());
+					}else if (EMAIL.equals(auth_type)) {
+						result = userClient.getUserInfoByEmail(tenantId, username, UserEnum.WEB.getName());
+					}
+				}else { // password and captcha
+					result = userClient.getUserInfoByAccount(tenantId, username, UserEnum.WEB.getName());
+				}
+			} else if (userType.equals(UserEnum.APP.getName())) {
+				result = userClient.userInfo(tenantId, username, UserEnum.APP.getName());
+			} else {
+				result = userClient.userInfo(tenantId, username, UserEnum.OTHER.getName());
+			}
 		}
 
 		// 判断返回信息
@@ -98,10 +133,34 @@ public class BladeUserDetailsServiceImpl implements UserDetailsService {
 			if (Func.isEmpty(userInfo.getRoles())) {
 				throw new UserDeniedAuthorizationException(TokenUtil.USER_HAS_NO_ROLE);
 			}
-			return new BladeUserDetails(user.getId(),
-				user.getTenantId(), StringPool.EMPTY, user.getName(), user.getRealName(), user.getDeptId(), user.getPostId(), user.getRoleId(), Func.join(result.getData().getRoles()), Func.toStr(user.getAvatar(), TokenUtil.DEFAULT_AVATAR),
-				username, AuthConstant.ENCRYPT + user.getPassword(), userInfo.getDetail(), true, true, true, true,
-				AuthorityUtils.commaSeparatedStringToAuthorityList(Func.join(result.getData().getRoles())));
+//			return new BladeUserDetails(user.getId(),
+//				user.getTenantId(), StringPool.EMPTY, user.getName(), user.getRealName(), user.getDeptId(), user.getPostId(), user.getRoleId(), Func.join(result.getData().getRoles()), Func.toStr(user.getAvatar(), TokenUtil.DEFAULT_AVATAR),
+//				username, AuthConstant.ENCRYPT + user.getPassword(), userInfo.getDetail(), true, true, true, true,
+//				AuthorityUtils.commaSeparatedStringToAuthorityList(Func.join(result.getData().getRoles())));
+			BladeUserDetails userDetails = null;
+			if (VERIFICATION_CODE_GRANT_TYPE.equals(grant_type)) {
+				// we won't check password when grant_type is verification_code
+				userDetails = new BladeUserDetails(user.getAccount(), "{noop}password", true, true, true, true,
+					AuthorityUtils.commaSeparatedStringToAuthorityList(Func.join(result.getData().getRoles())));
+			} else {
+				userDetails = new BladeUserDetails(user.getAccount(), AuthConstant.ENCRYPT + user.getPassword(), true, true, true, true,
+					AuthorityUtils.commaSeparatedStringToAuthorityList(Func.join(result.getData().getRoles())));
+			}
+			userDetails.setUserId(user.getId());
+			userDetails.setTenantId(user.getTenantId());
+			userDetails.setDeptId(user.getDeptId());
+			userDetails.setRoleId(user.getRoleId());
+			userDetails.setOauthId(userInfo.getOauthId());
+			userDetails.setAccount(user.getAccount());
+			userDetails.setMobile(user.getMobile());
+			userDetails.setIdentifier(user.getIdentifier());
+			userDetails.setName(user.getName());
+			userDetails.setRealName(user.getRealName());
+			userDetails.setRoleName(Func.join(userInfo.getRoles()));
+			userDetails.setAvatar(user.getAvatar());
+			userDetails.setSex(user.getSex());
+
+			return userDetails;
 		} else {
 			throw new UsernameNotFoundException(result.getMsg());
 		}

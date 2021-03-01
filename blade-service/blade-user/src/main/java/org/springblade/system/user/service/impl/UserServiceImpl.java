@@ -150,6 +150,21 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
 	}
 
 	@Override
+	public User getUserByAccount(String tenantId, String account) {
+		return baseMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getTenantId, tenantId).eq(User::getAccount, account).eq(User::getIsDeleted, BladeConstant.DB_NOT_DELETED));
+	}
+
+	@Override
+	public User getUserByEmail(String tenantId, String email) {
+		return baseMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getTenantId, tenantId).eq(User::getEmail, email).eq(User::getIsDeleted, BladeConstant.DB_NOT_DELETED));
+	}
+
+	@Override
+	public User getUserByMobile(String tenantId, String mobile) {
+		return baseMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getTenantId, tenantId).eq(User::getMobile, mobile).eq(User::getIsDeleted, BladeConstant.DB_NOT_DELETED));
+	}
+
+	@Override
 	public UserInfo userInfo(Long userId) {
 		User user = baseMapper.selectById(userId);
 		return buildUserInfo(user);
@@ -164,6 +179,41 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapper, User> implement
 	@Override
 	public UserInfo userInfo(String tenantId, String account, UserEnum userEnum) {
 		User user = baseMapper.getUser(tenantId, account);
+		return buildUserInfo(user, userEnum);
+	}
+
+	@Override
+	public UserInfo getUserInfoByAccount(String tenantId, String account, UserEnum userEnum) {
+		User user = getUserByAccount(tenantId, account);
+		return buildUserInfo(user, userEnum);
+	}
+
+	@Override
+	public UserInfo getUserInfoByMobile(String tenantId, String mobile, UserEnum userEnum) {
+		User user = getUserByMobile(tenantId, mobile);
+		if (Func.isEmpty(user)) {
+			User newUser = new User();
+			newUser.setTenantId(tenantId);
+			R<String> roleIdRes = sysClient.getRoleIds(tenantId, "手机注册用户");
+			if (!roleIdRes.isSuccess()) {
+				return null;
+			}
+			String roleId = roleIdRes.getData();
+			newUser.setRoleId(roleId);
+			newUser.setAccount(mobile);
+			newUser.setMobile(mobile);
+			newUser.setName(mobile);
+			newUser.setRealName(mobile);
+			newUser.setPassword(StringUtil.random(13));
+			this.submit(newUser);
+			return buildUserInfo(newUser, userEnum);
+		}
+		return buildUserInfo(user, userEnum);
+	}
+
+	@Override
+	public UserInfo getUserInfoByEmail(String tenantId, String email, UserEnum userEnum) {
+		User user = getUserByEmail(tenantId, email);
 		return buildUserInfo(user, userEnum);
 	}
 

@@ -55,6 +55,26 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	List<TaskCompositionDTO> taskCompositionCount(@Param("env")String env,@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("status") Integer status, @Param("type") Integer type);
 
 	/**
+	 * 查询一个标注大任务在起止时间完成各种组合的数量或者还可以做的数量
+	 * @param startTime
+	 * @param endTime
+	 * @param taskId
+	 * @param type
+	 * @return
+	 */
+	List<TaskCompositionDTO> taskCompositionCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("status") Integer status, @Param("type") Integer type);
+
+	/**
+	 * 查询一个标注大任务在起止时间完成各种组合的错误数量
+	 * @param startTime
+	 * @param endTime
+	 * @param taskId
+	 * @param type
+	 * @return
+	 */
+	List<TaskCompositionDTO> taskCompositionWrongCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+
+	/**
 	 * 查询用户在一段时间内质检的数量和速度
 	 * @param startTime
 	 * @param endTime
@@ -69,4 +89,12 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @return
 	 */
 	Expert getExpertByLabelTaskId(Long id);
+
+	/**
+	 * 查询用户在起止时间内完成的各种组合的错误数量
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	List<UserCompositionDTO> userCompositionWrongCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
 }

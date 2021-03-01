@@ -206,8 +206,12 @@ public class RealSetAnnotationDataController extends BladeController {
 					statistics_history.setSubTaskId(subTaskId);
 					statistics_history.setTemplateId(annotationDataVO.getTemplateId());
 					statistics_history.setType(2);
+					if (isCompositionTrue == 2) {
+						statistics_history.setIsWrong(2);
+					}
 					wrote = true;
 					statisticsService.saveOrUpdate(statistics_history);
+					break;
 				}
 			};
 //			if (!wrote) {    //	被标过但不是当前的人

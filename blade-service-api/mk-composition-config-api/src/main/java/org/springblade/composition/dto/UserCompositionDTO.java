@@ -19,6 +19,7 @@ package org.springblade.composition.dto;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.composition.entity.Template;
@@ -46,8 +47,7 @@ public class UserCompositionDTO implements Serializable {
 
 	private String compositionName;
 
-	@JsonSerialize(using = ToStringSerializer.class)
-	private Long number;
+	private Integer number;
 
 	private Integer averageSpeed;
 }

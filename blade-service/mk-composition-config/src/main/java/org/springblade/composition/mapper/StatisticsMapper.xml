@@ -29,6 +29,34 @@
         group by s.update_user,s.composition_id
     </select>
 
+    <select id="userCompositionWrongCount" resultType="org.springblade.composition.dto.UserCompositionDTO">
+        select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_user u
+        left join mk_statistics s on u.id=s.update_user
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        and s.is_wrong > 0
+        <if test="startTime!=null">
+            and s.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and s.update_time &lt; #{endTime}
+        </if>
+        <if test="userId!=null">
+            and u.id=#{userId}
+        </if>
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
+
+        and s.is_deleted=0
+        group by s.update_user,s.composition_id
+    </select>
+
     <select id="taskCompositionCount" resultType="org.springblade.composition.dto.TaskCompositionDTO">
         select t.NAME_ as compositionName,count(*) as number
         from
@@ -67,6 +95,62 @@
         </if>
         group by NAME_;
     </select>
+
+    <select id="taskCompositionCount2" resultType="org.springblade.composition.dto.TaskCompositionDTO">
+        select c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_user u
+        left join mk_statistics s on u.id=s.update_user
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        <if test="taskId!=null">
+            where l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
+        <if test="status==1">
+            and s.status = 2
+        </if>
+        <if test="status==2">
+            and s.status = 1
+        </if>
+        <if test="startTime!=null">
+            and s.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and s.update_time &lt; #{endTime}
+        </if>
+
+
+        and s.is_deleted=0
+        group by s.composition_id
+    </select>
+
+    <select id="taskCompositionWrongCount2" resultType="org.springblade.composition.dto.TaskCompositionDTO">
+        select c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_user u
+        left join mk_statistics s on u.id=s.update_user
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        and s.is_wrong > 0
+        <if test="startTime!=null">
+            and s.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and s.update_time &lt; #{endTime}
+        </if>
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
+
+        and s.is_deleted=0
+        group by s.composition_id
+    </select>
+
     <select id="userInspectionCount" resultType="org.springblade.composition.dto.UserInspectionDTO">
         select u.id as userId,u.name as userName,count(*) as number,round(avg(t.time)/1000,0) as averageSpeed from mk_task_quality_inspection t
         left join blade_user u on t.update_user=u.id

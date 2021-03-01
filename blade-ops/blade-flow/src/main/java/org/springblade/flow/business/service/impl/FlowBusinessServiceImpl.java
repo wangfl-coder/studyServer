@@ -488,7 +488,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			if (Func.isNotEmpty(inspectionType))
 				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
 
-			if (bladeFlow.getCategoryName().equals("标注流程")){
+			if ("标注流程".equals(bladeFlow.getCategoryName())){
 				LabelTask labelTask = labelTaskClient.queryLabelTask(historicTaskInstance.getProcessInstanceId()).getData();
 				if (labelTask.getId() != null) {
 					flow.setTemplateId(labelTask.getTemplateId());
@@ -497,7 +497,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setSubTaskId(labelTask.getId());
 					flowList.add(flow);
 				}
-			} else if (bladeFlow.getCategoryName().equals("质检流程")){
+			} else if ("质检流程".equals(bladeFlow.getCategoryName())){
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(historicTaskInstance.getProcessInstanceId()).getData();
 				if (qualityInspectionTask.getId() != null) {
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -516,9 +516,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		long count = doneQuery.count();
 		// 设置总数
 		Integer total = (Integer)labelTaskClient.queryLabelTaskDoneCount(taskUser).getData();
-		if(bladeFlow.getCategoryName().equals("标注流程")){
+		if("标注流程".equals(bladeFlow.getCategoryName())){
 			page.setTotal(total);
-		} else if(bladeFlow.getCategoryName().equals("质检流程")){
+		} else if("质检流程".equals(bladeFlow.getCategoryName())){
 			page.setTotal(count-total);
 		}
 		page.setRecords(flowList);

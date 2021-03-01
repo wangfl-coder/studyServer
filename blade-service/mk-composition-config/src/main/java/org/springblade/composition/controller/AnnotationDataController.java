@@ -176,6 +176,7 @@ public class AnnotationDataController extends BladeController {
 					statistics_history.setType(1);
 					wrote = true;
 					statisticsService.saveOrUpdate(statistics_history);
+					break;
 				}
 			};
 			if (!wrote) {    //	被标过但不是当前的人

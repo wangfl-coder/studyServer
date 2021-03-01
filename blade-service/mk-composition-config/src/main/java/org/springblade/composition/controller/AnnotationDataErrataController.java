@@ -43,6 +43,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
@@ -171,8 +172,40 @@ public class AnnotationDataErrataController extends BladeController {
 					annotationDataErrataList.add(annotationDataErrata);
 				}
 				oldAnnotationDataIds.add(oldAnnotationData.getId());
+				boolean temp2 = statisticsService.update(
+					Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
+						.eq(Statistics::getSubTaskId, oldAnnotationData.getSubTaskId())
+						.eq(Statistics::getCompositionId, oldAnnotationData.getCompositionId())
+						.eq(Statistics::getUserId, oldAnnotationData.getLabelerId())
+				);
 			});
 			annotationDataErrataService.deleteLogic(oldAnnotationDataIds);
+		}else if (annotationDataErrataList != null && oldAnnotationDataList.size() == 0) {
+			//获得之前标注的数据
+			List<AnnotationData> oldAnnotationList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+				.eq(AnnotationData::getSubTaskId, annotationDataErrataDTO.getSubTaskId())
+				.eq(AnnotationData::getCompositionId, annotationDataErrataDTO.getCompositionId())
+			);
+			annotationDataErrataList.forEach(annotationDataErrata -> {
+				if (Func.isNotBlank(annotationDataErrata.getValue())) {
+					boolean temp2 = statisticsService.update(
+						Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
+							.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
+							.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
+					);
+				}else {	//质检没填，填了的算错
+					oldAnnotationList.forEach(oldAnnotation -> {
+						if (Func.isNotBlank(oldAnnotation.getValue())) {
+							boolean temp2 = statisticsService.update(
+								Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
+									.eq(Statistics::getSubTaskId, oldAnnotation.getSubTaskId())
+									.eq(Statistics::getCompositionId, oldAnnotation.getCompositionId())
+									.eq(Statistics::getUserId, oldAnnotation.getUpdateUser())
+							);
+						}
+					});
+				}
+			});
 		}
 		// 注意补充信息角色
 		Expert expert = new Expert();

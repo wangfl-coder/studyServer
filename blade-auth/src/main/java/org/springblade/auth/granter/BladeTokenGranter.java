@@ -43,6 +43,8 @@ public class BladeTokenGranter {
 		List<TokenGranter> granters = new ArrayList<>(Collections.singletonList(endpoints.getTokenGranter()));
 		// 增加验证码模式
 		granters.add(new CaptchaTokenGranter(authenticationManager, endpoints.getTokenServices(), endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), bladeRedis));
+		// verification code
+		granters.add(new VerificationCodeGranter(authenticationManager, endpoints.getTokenServices(), endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), bladeRedis));
 		// 增加第三方登陆模式
 		granters.add(new SocialTokenGranter(endpoints.getTokenServices(), endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), userClient, socialProperties));
 		// 组合tokenGranter集合

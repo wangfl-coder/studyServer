@@ -72,6 +72,33 @@ public interface IUserService extends BaseService<User> {
 	IPage<User> selectUserPage(IPage<User> page, User user, Long deptId, String tenantId);
 
 	/**
+	 * getUserByAccount
+	 *
+	 * @param tenantId
+	 * @param account
+	 * @return
+	 */
+	User getUserByAccount(String tenantId, String account);
+
+	/**
+	 * getUserByEmail
+	 *
+	 * @param tenantId
+	 * @param email
+	 * @return
+	 */
+	User getUserByEmail(String tenantId, String email);
+
+	/**
+	 * getUserByMobile
+	 *
+	 * @param tenantId
+	 * @param mobile
+	 * @return
+	 */
+	User getUserByMobile(String tenantId, String mobile);
+
+	/**
 	 * 用户信息
 	 *
 	 * @param userId
@@ -97,6 +124,36 @@ public interface IUserService extends BaseService<User> {
 	 * @return
 	 */
 	UserInfo userInfo(String tenantId, String account, UserEnum userEnum);
+
+	/**
+	 * user info
+	 *
+	 * @param tenantId
+	 * @param account
+	 * @param userEnum
+	 * @return
+	 */
+	UserInfo getUserInfoByAccount(String tenantId, String account, UserEnum userEnum);
+
+	/**
+	 * user info
+	 *
+	 * @param tenantId
+	 * @param mobile
+	 * @param userEnum
+	 * @return
+	 */
+	UserInfo getUserInfoByMobile(String tenantId, String mobile, UserEnum userEnum);
+
+	/**
+	 * user info
+	 *
+	 * @param tenantId
+	 * @param email
+	 * @param userEnum
+	 * @return
+	 */
+	UserInfo getUserInfoByEmail(String tenantId, String email, UserEnum userEnum);
 
 	/**
 	 * 用户信息

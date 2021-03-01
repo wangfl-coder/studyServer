@@ -43,6 +43,9 @@ public interface IUserClient {
 	String USER_INFO_BY_TYPE = API_PREFIX + "/user-info-by-type";
 	String USER_INFO_BY_ID = API_PREFIX + "/user-info-by-id";
 	String USER_INFO_BY_ACCOUNT = API_PREFIX + "/user-info-by-account";
+	String GET_USER_INFO_BY_ACCOUNT = API_PREFIX + "/get-user-info-by-account";
+	String GET_USER_INFO_BY_MOBILE = API_PREFIX + "/get-user-info-by-mobile";
+	String GET_USER_INFO_BY_EMAIL = API_PREFIX + "/get-user-info-by-email";
 	String USER_AUTH_INFO = API_PREFIX + "/user-auth-info";
 	String SAVE_USER = API_PREFIX + "/save-user";
 	String REMOVE_USER = API_PREFIX + "/remove-user";
@@ -87,6 +90,39 @@ public interface IUserClient {
 	 */
 	@GetMapping(USER_INFO_BY_TYPE)
 	R<UserInfo> userInfo(@RequestParam("tenantId") String tenantId, @RequestParam("account") String account, @RequestParam("userType") String userType);
+
+	/**
+	 * Get user info
+	 *
+	 * @param tenantId Tenant Id
+	 * @param account  account
+	 * @param userType 用户平台
+	 * @return
+	 */
+	@GetMapping(GET_USER_INFO_BY_ACCOUNT)
+	R<UserInfo> getUserInfoByAccount(@RequestParam("tenantId") String tenantId, @RequestParam("account") String account, @RequestParam("userType") String userType);
+
+	/**
+	 * Get user info
+	 *
+	 * @param tenantId Tenant Id
+	 * @param mobile   mobile
+	 * @param userType 用户平台
+	 * @return
+	 */
+	@GetMapping(GET_USER_INFO_BY_MOBILE)
+	R<UserInfo> getUserInfoByMobile(@RequestParam("tenantId") String tenantId, @RequestParam("mobile") String mobile, @RequestParam("userType") String userType);
+
+	/**
+	 * Get user info
+	 *
+	 * @param tenantId Tenant Id
+	 * @param email    email
+	 * @param userType 用户平台
+	 * @return
+	 */
+	@GetMapping(GET_USER_INFO_BY_EMAIL)
+	R<UserInfo> getUserInfoByEmail(@RequestParam("tenantId") String tenantId, @RequestParam("email") String email, @RequestParam("userType") String userType);
 
 	/**
 	 * 获取第三方平台信息

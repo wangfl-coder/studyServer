@@ -103,23 +103,34 @@ public class SocialTokenGranter extends AbstractTokenGranter {
 
 		// 远程调用，获取认证信息
 		R<UserInfo> result = userClient.userAuthInfo(userOauth);
-		BladeUserDetails bladeUserDetails;
+		BladeUserDetails userDetails;
 		if (result.isSuccess()) {
 			User user = result.getData().getUser();
 			Kv detail = result.getData().getDetail();
 			if (user == null) {
 				throw new InvalidGrantException("social grant failure, user is null");
 			}
-			bladeUserDetails = new BladeUserDetails(user.getId(),
-				tenantId, result.getData().getOauthId(), user.getName(), user.getRealName(), user.getDeptId(), user.getPostId(), user.getRoleId(), Func.join(result.getData().getRoles()), Func.toStr(userOauth.getAvatar(), TokenUtil.DEFAULT_AVATAR),
-				userOauth.getUsername(), AuthConstant.ENCRYPT + user.getPassword(), detail, true, true, true, true,
+			userDetails = new BladeUserDetails(user.getAccount(), AuthConstant.ENCRYPT + user.getPassword(), true, true, true, true,
 				AuthorityUtils.commaSeparatedStringToAuthorityList(Func.join(result.getData().getRoles())));
+			userDetails.setUserId(user.getId());
+			userDetails.setTenantId(user.getTenantId());
+			userDetails.setDeptId(user.getDeptId());
+			userDetails.setRoleId(user.getRoleId());
+			userDetails.setOauthId(result.getData().getOauthId());
+			userDetails.setAccount(user.getAccount());
+			userDetails.setMobile(user.getMobile());
+			userDetails.setIdentifier(user.getIdentifier());
+			userDetails.setName(user.getName());
+			userDetails.setRealName(user.getRealName());
+			userDetails.setRoleName(Func.join(result.getData().getRoles()));
+			userDetails.setAvatar(user.getAvatar());
+			userDetails.setSex(user.getSex());
 		} else {
 			throw new InvalidGrantException("social grant failure, feign client return error");
 		}
 
 		// 组装认证数据，关闭密码校验
-		Authentication userAuth = new UsernamePasswordAuthenticationToken(bladeUserDetails, null, bladeUserDetails.getAuthorities());
+		Authentication userAuth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		((AbstractAuthenticationToken) userAuth).setDetails(parameters);
 		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
 

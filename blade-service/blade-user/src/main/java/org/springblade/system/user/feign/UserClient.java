@@ -68,6 +68,24 @@ public class UserClient implements IUserClient {
 	}
 
 	@Override
+	@GetMapping(GET_USER_INFO_BY_ACCOUNT)
+	public R<UserInfo> getUserInfoByAccount(String tenantId, String account, String userType) {
+		return R.data(service.getUserInfoByAccount(tenantId, account, UserEnum.of(userType)));
+	}
+
+	@Override
+	@GetMapping(GET_USER_INFO_BY_MOBILE)
+	public R<UserInfo> getUserInfoByMobile(String tenantId, String mobile, String userType) {
+		return R.data(service.getUserInfoByMobile(tenantId, mobile, UserEnum.of(userType)));
+	}
+
+	@Override
+	@GetMapping(GET_USER_INFO_BY_EMAIL)
+	public R<UserInfo> getUserInfoByEmail(String tenantId, String email, String userType) {
+		return R.data(service.getUserInfoByEmail(tenantId, email, UserEnum.of(userType)));
+	}
+
+	@Override
 	@PostMapping(USER_AUTH_INFO)
 	public R<UserInfo> userAuthInfo(@RequestBody UserOauth userOauth) {
 		return R.data(service.userInfo(userOauth));

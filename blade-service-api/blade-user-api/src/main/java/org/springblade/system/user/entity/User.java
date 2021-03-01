@@ -52,6 +52,10 @@ public class User extends TenantEntity {
 	 */
 	private String password;
 	/**
+	 * identifier
+	 */
+	private String identifier;
+	/**
 	 * 昵称
 	 */
 	private String name;
@@ -69,6 +73,10 @@ public class User extends TenantEntity {
 	private String email;
 	/**
 	 * 手机
+	 */
+	private String mobile;
+	/**
+	 * 电话
 	 */
 	private String phone;
 	/**

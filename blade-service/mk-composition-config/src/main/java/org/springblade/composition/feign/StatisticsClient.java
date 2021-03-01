@@ -84,6 +84,16 @@ public class StatisticsClient implements IStatisticsClient {
 					statistics.setTemplateId(templateId);
 					statistics.setType(1);
 					statisticsService.save(statistics);
+
+					//现在每条基本信息标注任务一开始有两个人做
+					if (composition.getAnnotationType() == 2) {
+						Statistics statistics2 = new Statistics();
+						statistics2.setSubTaskId(labelTask.getId());
+						statistics2.setCompositionId(composition.getId());
+						statistics2.setTemplateId(templateId);
+						statistics2.setType(1);
+						statisticsService.save(statistics2);
+					}
 				});
 			});
 		}
@@ -124,6 +134,7 @@ public class StatisticsClient implements IStatisticsClient {
 		LambdaQueryWrapper<Statistics> queryWrapper = Wrappers.lambdaQuery();
 		queryWrapper.eq(Statistics::getSubTaskId, labelTaskId)
 			.eq(Statistics::getCompositionId, compositionId)
+			.eq(Statistics::getStatus, 2)	//被标注过的
 			.in(Statistics::getType, 1, 3); //普通和质检加起来总数
 		int count = 0;
 		Kv kv = Kv.create();
@@ -238,14 +249,21 @@ public class StatisticsClient implements IStatisticsClient {
 										}
 									} else if ("-1".equals(list.get(i).getValue()) && "-1".equals(list.get(j).getValue())) {
 										List<AnnotationData> titlesDescList = dataPerField.get("titlesDesc");
-
-										String left = titlesDescList.get(i).getValue();
-										String right = titlesDescList.get(j).getValue();
-										if (left.equals(right)) {
+										int finalI = i;
+										AnnotationData left = titlesDescList.stream()
+											.filter(elem -> elem.getUpdateUser().equals(list.get(finalI).getUpdateUser()))
+											.findAny()
+											.orElse(null);
+										int finalJ = j;
+										AnnotationData right = titlesDescList.stream()
+											.filter(elem -> elem.getUpdateUser().equals(list.get(finalJ).getUpdateUser()))
+											.findAny()
+											.orElse(null);
+										if (left != null && right != null && left.equals(right)) {
 											sameNum++;
 											if (sameNum >= 1) {
 												BeanUtil.setProperty(expert, "titles", -1);
-												BeanUtil.setProperty(expert, "titlesDesc", titlesDescList.get(i).getValue());
+												BeanUtil.setProperty(expert, "titlesDesc", left.getValue());
 												sameValue.put(entry.getKey(), list.get(i).getValue());
 											}
 										}
@@ -375,6 +393,12 @@ public class StatisticsClient implements IStatisticsClient {
 								annotationDataErrata.setAnnotationDataId(errData.getId());
 							}
 							annotationDataErrataService.saveOrUpdate(annotationDataErrata);
+							boolean temp2 = statisticsService.update(
+								Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 3)
+									.eq(Statistics::getSubTaskId, statistics.getSubTaskId())
+									.eq(Statistics::getCompositionId, statistics.getCompositionId())
+									.eq(Statistics::getUserId, statistics.getUserId())
+							);
 						}
 					});
 

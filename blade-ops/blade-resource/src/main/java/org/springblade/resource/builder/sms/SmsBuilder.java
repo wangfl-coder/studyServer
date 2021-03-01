@@ -18,6 +18,7 @@ package org.springblade.resource.builder.sms;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.apache.commons.lang3.StringUtils;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.redis.cache.BladeRedis;
@@ -33,6 +34,7 @@ import org.springblade.core.tool.utils.WebUtil;
 import org.springblade.resource.entity.Sms;
 import org.springblade.resource.service.ISmsService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -87,6 +89,17 @@ public class SmsBuilder {
 	 */
 	public SmsTemplate template(String code) {
 		String tenantId = AuthUtil.getTenantId();
+		if (Func.isBlank(tenantId)) {
+			HttpServletRequest request = WebUtil.getRequest();
+			// 获取租户ID
+			String headerTenant = request.getHeader("Tenant-Id");
+			String paramTenant = request.getParameter("tenant_id");
+			if (StringUtil.isAllBlank(headerTenant, paramTenant)) {
+//				throw new UserDeniedAuthorizationException(TokenUtil.TENANT_NOT_FOUND);
+				headerTenant = "000000";
+			}
+			tenantId = StringUtils.isBlank(headerTenant) ? paramTenant : headerTenant;
+		}
 		Sms sms = getSms(tenantId, code);
 		Sms smsCached = smsPool.get(tenantId);
 		SmsTemplate template = templatePool.get(tenantId);
