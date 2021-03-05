@@ -90,6 +90,8 @@ g/dtd/mybatis-3-mapper.dtd">
         left join mk_composition c on s.composition_id=c.id
         left join mk_task_label l on l.id=s.sub_task_id
         where s.status = 2
+        and l.type=1
+        and s.type=1
         <if test="taskId!=null">
             and l.task_id=#{taskId}
         </if>
@@ -120,5 +122,19 @@ g/dtd/mybatis-3-mapper.dtd">
 
     </select>
 
+    <select id="compositionCount2" resultType="int">
+        select count(*) from
+        mk_statistics s
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        <if test="taskId!=null">
+            where l.task_id=#{taskId}
+        </if>
+        and l.type= 1
+        and s.type= 1
+
+        and s.is_deleted=0
+
+    </select>
 
 </mapper>

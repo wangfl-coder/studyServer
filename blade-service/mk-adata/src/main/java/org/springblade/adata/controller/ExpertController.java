@@ -45,6 +45,7 @@ import org.springblade.core.excel.util.ExcelUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.oss.model.BladeFile;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.constant.BladeConstant;
@@ -210,7 +211,8 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 1)
 	@ApiOperation(value = "导入", notes = "传入学者id,任务id")
 	public R importDetail(String id, Long taskId) {
-		return R.status(expertService.importDetail(id, taskId));
+		String tenantId = AuthUtil.getTenantId();
+		return R.status(expertService.importDetail(tenantId, id, taskId));
 	}
 
 	/**

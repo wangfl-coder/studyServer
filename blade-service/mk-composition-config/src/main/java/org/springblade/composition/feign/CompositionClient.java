@@ -24,9 +24,7 @@ import org.springblade.composition.service.ITemplateService;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
@@ -53,5 +51,15 @@ public class CompositionClient implements ICompositionClient {
 	public R<Composition> getById(@RequestParam("id") Long compositionId) {
 		Composition composition = service.getById(compositionId);
 		return R.data(composition);
+	}
+
+	/**
+	 * 保存组合
+	 */
+	@Override
+	@PostMapping(SUBMIT_COMPOSITION)
+	public R<Boolean> submit(@RequestBody Composition composition) {
+		boolean res = service.saveOrUpdate(composition);
+		return R.data(res);
 	}
 }

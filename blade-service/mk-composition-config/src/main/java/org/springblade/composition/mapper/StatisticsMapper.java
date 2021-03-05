@@ -59,10 +59,11 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param startTime
 	 * @param endTime
 	 * @param taskId
-	 * @param type
+	 * @param taskType
+	 * @param statisticsType
 	 * @return
 	 */
-	List<TaskCompositionDTO> taskCompositionCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("status") Integer status, @Param("type") Integer type);
+	List<TaskCompositionDTO> taskCompositionCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("status") Integer status, @Param("taskType") Integer taskType, @Param("statisticsType") Integer statisticsType);
 
 	/**
 	 * 查询一个标注大任务在起止时间完成各种组合的错误数量

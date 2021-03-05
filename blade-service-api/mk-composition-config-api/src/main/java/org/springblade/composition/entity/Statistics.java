@@ -108,4 +108,10 @@ public class Statistics extends TenantEntity {
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "大于0为错误 数字代表为什么错 1.质检员 2.真题 3.多人对比")
 	private Integer isWrong;
+
+	/**
+	 * 积分
+	 */
+	@ApiModelProperty(value = "积分")
+	private Integer points;
 }

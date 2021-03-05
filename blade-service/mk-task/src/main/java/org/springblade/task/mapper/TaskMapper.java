@@ -37,10 +37,16 @@ public interface TaskMapper extends BaseMapper<Task> {
 	List<Integer> compositionCompleteCount(@Param("taskId") Long taskId);
 
 	/**
-	 * 查询当前时刻组合的数量
+	 * 查询当前时刻组合的数量 wangshan：伦哥写的这个为当前时刻可接任务的组合的总数
 	 * @Param taskId 任务id
 	 * @return
 	 */
 	Integer compositionCount(@Param("env")String env,@Param("taskId") Long taskId);
 
+	/**
+	 * 查询当前时刻组合的数量
+	 * @Param taskId 任务id
+	 * @return
+	 */
+	Integer compositionCount2(@Param("taskId") Long taskId);
 }

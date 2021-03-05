@@ -2,24 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.or
 g/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.composition.mapper.CompositionMapper">
-    <!-- 通用查询映射结果 -->
-    <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">
-        <result column="id" property="id"/>
-        <result column="tenant_id" property="tenantId"/>
-        <result column="create_user" property="createUser"/>
-        <result column="create_dept" property="createDept"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_user" property="updateUser"/>
-        <result column="update_time" property="updateTime"/>
-        <result column="status" property="status"/>
-        <result column="description" property="description"/>
-        <result column="is_deleted" property="isDeleted"/>
-        <result column="name" property="name"/>
-        <result column="field" property="field"/>
-        <result column="annotation_type" property="annotationType"/>
-    </resultMap>
-
-    <select id="getByIdIgnoreTenant" resultMap="compositionResultMap">
-        select * from `mk_composition` where id=#{param1} and is_deleted=0
-    </select>
+<!--    &lt;!&ndash; 通用查询映射结果 &ndash;&gt;-->
+<!--    <resultMap id="compositionResultMap" type="org.springblade.composition.entity.Composition">-->
+<!--        <result column="id" property="id"/>-->
+<!--        <result column="tenant_id" property="tenantId"/>-->
+<!--        <result column="create_user" property="createUser"/>-->
+<!--        <result column="create_dept" property="createDept"/>-->
+<!--        <result column="create_time" property="createTime"/>-->
+<!--        <result column="update_user" property="updateUser"/>-->
+<!--        <result column="update_time" property="updateTime"/>-->
+<!--        <result column="status" property="status"/>-->
+<!--        <result column="description" property="description"/>-->
+<!--        <result column="is_deleted" property="isDeleted"/>-->
+<!--        <result column="name" property="name"/>-->
+<!--        <result column="field" property="field"/>-->
+<!--        <result column="annotation_type" property="annotationType"/>-->
+<!--    </resultMap>-->
 </mapper>

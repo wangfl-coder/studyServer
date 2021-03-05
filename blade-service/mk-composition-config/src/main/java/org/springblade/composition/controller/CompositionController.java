@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
@@ -52,12 +53,17 @@ public class CompositionController extends BladeController {
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "name", value = "组合名", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "status", value = "组合状态(1:启用的组合,2:停用的组合)", paramType = "query", dataType = "int"),
-		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string")
+		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "all", value = "获取全部组合(不传或传0:除补充信息的组合,1:包含补充信息的组合)", paramType = "query", dataType = "int")
 	})
 	@ApiOperation(value = "分页查询全部组合")
 	public R<IPage<Composition>> list(@ApiIgnore @RequestParam Map<String, Object> composition, Query query, BladeUser bladeUser) {
+		String all = (String)composition.get("all");
+		composition.remove("all");
 		QueryWrapper<Composition> queryWrapper = Condition.getQueryWrapper(composition, Composition.class);
-		queryWrapper.ne("annotation_type",3);
+		if (all == null || "0".equals(all)) {
+			queryWrapper.ne("annotation_type", 3);
+		}
 		String name = (String)composition.get("name");
 		if (name != null) {
 			queryWrapper.like("name", "%"+name+"%").orderByDesc("update_time");

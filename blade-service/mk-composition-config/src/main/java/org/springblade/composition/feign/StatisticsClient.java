@@ -83,6 +83,7 @@ public class StatisticsClient implements IStatisticsClient {
 					statistics.setCompositionId(composition.getId());
 					statistics.setTemplateId(templateId);
 					statistics.setType(1);
+					statistics.setStatus(1);
 					statisticsService.save(statistics);
 
 					//现在每条基本信息标注任务一开始有两个人做
@@ -92,6 +93,7 @@ public class StatisticsClient implements IStatisticsClient {
 						statistics2.setCompositionId(composition.getId());
 						statistics2.setTemplateId(templateId);
 						statistics2.setType(1);
+						statistics2.setStatus(1);
 						statisticsService.save(statistics2);
 					}
 				});
@@ -125,7 +127,7 @@ public class StatisticsClient implements IStatisticsClient {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+//	@Transactional(rollbackFor = Exception.class)
 	public R<Kv> queryBasicInfoStatus(Long labelTaskId, Long templateId, Long compositionId) {
 //		Statistics statistics_query = new Statistics();
 //		statistics_query.setSubTaskId(labelTaskId);
@@ -404,6 +406,17 @@ public class StatisticsClient implements IStatisticsClient {
 
 				}
 			});
+		}
+
+		if ((int)kv.get("biCounter") == 3 && (int)kv.get("biSame") == 0) {
+			//准备去质检，建个统计
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(labelTaskId);
+			statistics.setCompositionId(compositionId);
+			statistics.setTemplateId(templateId);
+			statistics.setType(3);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
 		}
 
 		return R.data(kv);

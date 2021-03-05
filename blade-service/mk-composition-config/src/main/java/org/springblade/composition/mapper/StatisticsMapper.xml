@@ -98,15 +98,17 @@
 
     <select id="taskCompositionCount2" resultType="org.springblade.composition.dto.TaskCompositionDTO">
         select c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
-        from blade_user u
-        left join mk_statistics s on u.id=s.update_user
+        from mk_statistics s
         left join mk_composition c on s.composition_id=c.id
         left join mk_task_label l on l.id=s.sub_task_id
         <if test="taskId!=null">
             where l.task_id=#{taskId}
         </if>
-        <if test="type!=null">
-            and l.type=#{type}
+        <if test="taskType!=null">
+            and l.type=#{taskType}
+        </if>
+        <if test="statisticsType!=null">
+            and s.type=#{statisticsType}
         </if>
         <if test="status==1">
             and s.status = 2
@@ -128,8 +130,7 @@
 
     <select id="taskCompositionWrongCount2" resultType="org.springblade.composition.dto.TaskCompositionDTO">
         select c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
-        from blade_user u
-        left join mk_statistics s on u.id=s.update_user
+        from mk_statistics s
         left join mk_composition c on s.composition_id=c.id
         left join mk_task_label l on l.id=s.sub_task_id
         where s.status = 2

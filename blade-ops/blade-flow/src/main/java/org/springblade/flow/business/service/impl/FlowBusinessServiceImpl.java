@@ -751,7 +751,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				log.error("获取专家信息是否完成失败！");
 				return false;
 			}
-			if (null != flow.getCompositionType() && 1 == flow.getCompositionType()) {
+			Boolean hasHomepage = (Boolean)processVariables.get("hasHomepage");
+			if (null != flow.getCompositionType() && 1 == flow.getCompositionType() && hasHomepage) {
 				Random random = Holder.RANDOM;
 				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
 				if (insertRealSet && res.getData().getBool(ProcessConstant.HOMEPAGE_FOUND_KEY)) {
@@ -812,12 +813,12 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			variables.put(ProcessConstant.BASICINFO_COMPLETE_KEY, kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY));
 			variables.put(ProcessConstant.HOMEPAGE_FOUND_KEY, kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY));
 			variables.put("isHpComplete", false);
-			if (!kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY)){
-				flowMapper.updateStatistic(env,labelTask.getId(),2);
-			}
-			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
-				flowMapper.updateStatistic(env,labelTask.getId(), 3);
-			}
+//			if (!kv.getBool(ProcessConstant.HOMEPAGE_FOUND_KEY)){
+//				flowMapper.updateStatistic(env,labelTask.getId(),2);
+//			}
+//			if (kv.getBool(ProcessConstant.BASICINFO_COMPLETE_KEY)){
+//				flowMapper.updateStatistic(env,labelTask.getId(), 3);
+//			}
 			if(null!=flow.getRoleId() && -1!=flow.getRoleId()) {
 				String roleAlias = SysCache.getRoleAlias(flow.getRoleId());
 				processVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);

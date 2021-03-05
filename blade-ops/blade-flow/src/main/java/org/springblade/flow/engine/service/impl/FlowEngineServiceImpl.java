@@ -636,23 +636,37 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		// 补充信息任务设置角色
 		flowElementList.stream().forEach(flowElement -> {
 			if (flowElement.getId().equals("complementInfoTask")) {
-				UserTask userTask =  (UserTask)flowElement;
+				templateCompositions.forEach(templateComposition -> {
+					if (3 == templateComposition.getCompositionType()) {	//补充信息标注
+						UserTask userTask =  (UserTask)flowElement;
+						List<String> candidateGroups = new ArrayList<>();
+						candidateGroups.add(templateDTO.getMoreMessageRoleName());
+						userTask.setCandidateGroups(candidateGroups);
+						List<CustomProperty> customPropertyList = new ArrayList<>();
+						CustomProperty compositionIdProperty = new CustomProperty();
+						compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
+						compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+						customPropertyList.add(compositionIdProperty);
+						userTask.setCustomProperties(customPropertyList);
+					}
+				});
+			}
+		});
+		templateCompositions.forEach(templateComposition -> {
+			if (3 == templateComposition.getCompositionType()) {	//补充信息标注
+				UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
 				List<String> candidateGroups = new ArrayList<>();
 				candidateGroups.add(templateDTO.getMoreMessageRoleName());
 				userTask.setCandidateGroups(candidateGroups);
 				List<CustomProperty> customPropertyList = new ArrayList<>();
 				CustomProperty compositionIdProperty = new CustomProperty();
 				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
-				compositionIdProperty.setSimpleValue("-1");
+				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
 				customPropertyList.add(compositionIdProperty);
 				userTask.setCustomProperties(customPropertyList);
+				filteredElementMap.put("complementInfoTask", userTask);
 			}
 		});
-		UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
-		List<String> candidateGroups = new ArrayList<>();
-		candidateGroups.add(templateDTO.getMoreMessageRoleName());
-		userTask.setCandidateGroups(candidateGroups);
-		filteredElementMap.put("complementInfoTask", userTask);
 
 		process.setFlowElementMap(filteredElementMap);
 		byte[] bytes = getBpmnXML(bpmnModel);

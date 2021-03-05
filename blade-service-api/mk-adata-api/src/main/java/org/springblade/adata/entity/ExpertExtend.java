@@ -43,12 +43,6 @@ public class ExpertExtend implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 租户ID
-	 */
-	@ApiModelProperty(value = "租户ID")
-	private String tenantId;
-
-	/**
 	 * 主键id Aminer库中的原始学者ID
 	 */
 	@ApiModelProperty(value = "主键id Aminer库中的原始学者ID")

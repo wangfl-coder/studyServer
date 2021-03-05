@@ -37,10 +37,11 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @param startTime
 	 * @param endTime
 	 * @param taskId
-	 * @param type
+	 * @param taskType
+	 * @param statisticsType
 	 * @return
 	 */
-	List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer type);
+	List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType);
 
 	/**
 	 * 通过标注子任务id获取专家
@@ -48,4 +49,15 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @return
 	 */
 	Expert getExpertByLabelTaskId(Long id);
+
+	/**
+	 * 更新标注任务统计
+	 * @param type
+	 * @param subTaskId
+	 * @param templateId
+	 * @param compositionId
+	 * @param deltaTime
+	 * @return
+	 */
+	boolean updateAnnotationStatistics(int type, Long subTaskId, Long templateId, Long compositionId, Integer deltaTime);
 }

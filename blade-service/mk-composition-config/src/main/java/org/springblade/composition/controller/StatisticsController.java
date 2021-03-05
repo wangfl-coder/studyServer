@@ -48,6 +48,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.vo.ExpertLabelTaskVO;
@@ -117,14 +118,14 @@ public class StatisticsController extends BladeController {
 	@GetMapping("/task_composition")
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "查询大任务在一段时间内标注的各种组合的数量，或者还可以领取的组合数量", notes = "传入起止时间,大任务id,查询已完成还是待领取")
-	public R<List<TaskCompositionVO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer status, @ApiParam(value="1.标注,2.真题标注") Integer type ) {
-		List<TaskCompositionDTO> list = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,null,type);
-		List<TaskCompositionDTO> todoList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,2,type);
-		List<TaskCompositionDTO> doneList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,1,type);
-		List<TaskCompositionDTO> wrongList = statisticsMapper.taskCompositionWrongCount2(startTime,endTime,taskId,type);
+	public R<List<TaskCompositionVO>> statisticsTaskComposition(String startTime, String endTime, String taskId, @ApiParam(value="1:查询已完成的,2:查询可以领取的") Integer status, @ApiParam(value="1.标注,2.真题标注") Integer taskType, @ApiParam(value="1.标注,2.真题标注,3.质检") Integer statisticsType ) {
+		List<TaskCompositionDTO> totalList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,null,taskType,statisticsType);
+		List<TaskCompositionDTO> todoList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,2,taskType,statisticsType);
+		List<TaskCompositionDTO> doneList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,1,taskType,statisticsType);
+		List<TaskCompositionDTO> wrongList = statisticsMapper.taskCompositionWrongCount2(startTime,endTime,taskId,taskType);
 		List<TaskCompositionVO> resList = new ArrayList<>();
-		doneList.forEach(done -> {
-			TaskCompositionVO taskCompositionVO = Objects.requireNonNull(BeanUtil.copy(done, TaskCompositionVO.class));
+		totalList.forEach(total -> {
+			TaskCompositionVO taskCompositionVO = Objects.requireNonNull(BeanUtil.copy(total, TaskCompositionVO.class));
 			resList.add(taskCompositionVO);
 		});
 		Map<Long, List<TaskCompositionDTO>> todoPerCompositionId = todoList.stream()
@@ -160,6 +161,10 @@ public class StatisticsController extends BladeController {
 			}else {
 				res.setWrong(0);
 			}
+
+			if (taskType != null && statisticsType != null && taskType == 1 && statisticsType == 3) {
+				res.setWrong(-1);
+			}
 		};
 		return R.data(resList);
 	}
@@ -174,4 +179,27 @@ public class StatisticsController extends BladeController {
 		return R.data(statisticsMapper.userInspectionCount(startTime,endTime,userId));
 	}
 
+//	@GetMapping(value = "/detail")
+//	@ApiOperation(value = "详情")
+//	public R<Statistics> detail(@RequestParam("businessId") Long businessId) {
+//		LabelTask detail = labelTaskService.getById(businessId);
+//		User user = UserCache.getUser(detail.getCreateUser());
+////		User user = userClient.userInfoById(detail.getCreateUser()).getData();
+////		detail.getFlow().setAssigneeName(user.getName());
+//		return R.data(Statistics);
+//	}
+
+	@GetMapping("/list")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "subTaskId", value = "子任务id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "templateId", value = "模版id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "compositionId", value = "组合id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "userId", value = "用户id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "status", value = "子任务状态", paramType = "query", dataType = "integer")
+	})
+	@ApiOperation(value = "分页查询列表", notes = "传入param")
+	public R<IPage<Statistics>> list(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {
+		IPage<Statistics> pages = statisticsService.page(Condition.getPage(query), Condition.getQueryWrapper(param, Statistics.class).orderByDesc("update_time"));
+		return R.data(pages);
+	}
 }

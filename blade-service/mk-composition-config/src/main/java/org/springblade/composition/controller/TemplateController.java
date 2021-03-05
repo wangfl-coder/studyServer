@@ -202,12 +202,8 @@ public class TemplateController extends BladeController {
 
 		List<TemplateCompositionDTO> templateCompositions = templateDTO.getTemplateCompositions();
 		templateCompositions.forEach(templateCompositionDTO -> {
-			Composition composition;
-			if (templateCompositionDTO.getCompositionId() != -1) {
-				composition = compositionService.getById(templateCompositionDTO.getCompositionId());
-			} else {
-				composition = compositionService.getByIdIgnoreTenant(templateCompositionDTO.getCompositionId());
-			}
+			Composition composition = compositionService.getById(templateCompositionDTO.getCompositionId());
+			templateCompositionDTO.setCompositionId(composition.getId());
 			templateCompositionDTO.setCompositionName(composition.getName());
 			templateCompositionDTO.setCompositionType(composition.getAnnotationType());
 			templateCompositionDTO.setCompositionField(composition.getField());

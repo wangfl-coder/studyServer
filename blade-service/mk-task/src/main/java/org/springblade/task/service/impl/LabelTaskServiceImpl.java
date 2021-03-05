@@ -9,7 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.Template;
+import org.springblade.composition.feign.IStatisticsClient;
+import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -47,7 +51,9 @@ import java.util.*;
 public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, LabelTask> implements LabelTaskService {
 
 	private final IFlowClient flowClient;
+	private final ITemplateClient templateClient;
 	private final IRealSetExpertClient realSetExpertClient;
+	private final IStatisticsClient statisticsClient;
 	private final QualityInspectionTaskService qualityInspectionTaskService;
 
 	@Value("${spring.profiles.active}")
@@ -61,8 +67,27 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 								List<Expert> experts) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 		//List<Expert> experts = persons.getData();
-		experts.forEach(expert -> {
+		boolean noHomepage = false;
+		R<List<Composition>> compositionsRes = templateClient.allCompositions(task.getTemplateId());
+		if (compositionsRes.isSuccess()) {
+			List<Composition> compositionList = compositionsRes.getData();
+			Composition composition = compositionList.stream()
+				.filter(elem -> elem.getAnnotationType() == 1)
+				.findAny()
+				.orElse(null);
+			if (composition == null) {
+				noHomepage = true;
+			}
+		}
+		boolean finalNoHomepage = noHomepage;
+		R<Template> templateRes = templateClient.getTemplateById(task.getTemplateId());
+		if (!templateRes.isSuccess())
+			throw new ServiceException("获取模版信息失败");
+		Template template = templateRes.getData();
+		String tenantId = AuthUtil.getTenantId();
+		experts.parallelStream().forEach(expert -> {
 			LabelTask labelTask = new LabelTask();
+			labelTask.setTenantId(tenantId);
 			labelTask.setProcessDefinitionId(processDefinitionId);
 			// 保存任务
 			labelTask.setCreateTime(DateUtil.now());
@@ -80,6 +105,15 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setPersonName(expert.getName());
 				labelTask.setType(1);	//标注
 				updateById(labelTask);
+
+				Random random = Holder.RANDOM;
+				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
+				if (insertRealSet && finalNoHomepage) {		//需要添加真集又不需要标主页，直接加到流水线中
+					Map<String, String> compositionLabelMap = startRealSetProcess(template.getRealSetProcessDefinitions(), task);
+					if (compositionLabelMap != null) {
+						statisticsClient.initializeRealSetLabelTask(labelTask, compositionLabelMap);
+					}
+				}
 			} else {
 				throw new ServiceException("开启流程失败");
 			}

@@ -150,7 +150,7 @@ public class AnnotationDataErrataController extends BladeController {
 		if (annotationDataErrataDTO.getAnnotationDataErrataList() != null) {
 			annotationDataErrataDTO.getAnnotationDataErrataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
 		}
-		Long subTaskId  = annotationDataErrataDTO.getSubTaskId();
+
 		List<AnnotationDataErrata> annotationDataErrataList = annotationDataErrataDTO.getAnnotationDataErrataList();
 		//获得之前标注的数据
 		List<AnnotationDataErrata> oldAnnotationDataList = annotationDataErrataService.list(Wrappers.<AnnotationDataErrata>query().lambda()
@@ -219,27 +219,12 @@ public class AnnotationDataErrataController extends BladeController {
 		expertClient.saveExpert(expert);
 
 		//更新统计表，记录标注用时
-		Statistics statistics_query = new Statistics();
-		statistics_query.setSubTaskId(subTaskId);
-		statistics_query.setCompositionId(annotationDataErrataDTO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
-
-		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-		if (statistics != null){
-			statistics.setTime(statistics.getTime() + annotationDataErrataDTO.getTime());
-			statistics.setStatus(2);
-			statisticsService.saveOrUpdate(statistics);
-		} else {
-			Statistics new_stat = new Statistics();
-			new_stat.setTime(annotationDataErrataDTO.getTime());
-			new_stat.setStatus(2);
-			new_stat.setUserId(AuthUtil.getUserId());
-			new_stat.setCompositionId(annotationDataErrataDTO.getCompositionId());
-			new_stat.setSubTaskId(subTaskId);
-			new_stat.setTemplateId(annotationDataErrataDTO.getTemplateId());
-			new_stat.setType(3);
-			statisticsService.saveOrUpdate(new_stat);
-		}
+		statisticsService.updateAnnotationStatistics(
+			3,
+			annotationDataErrataDTO.getSubTaskId(),
+			annotationDataErrataDTO.getTemplateId(),
+			annotationDataErrataDTO.getCompositionId(),
+			annotationDataErrataDTO.getTime());
 
 		if(annotationDataErrataList != null){
 			return R.status(annotationDataErrataService.saveBatch(annotationDataErrataList));

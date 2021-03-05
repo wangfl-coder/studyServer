@@ -89,6 +89,6 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 
 	@Override
 	public Integer compositionCount(Long taskId) {
-		return taskMapper.compositionCount(env,taskId);
+		return taskMapper.compositionCount2(taskId);
 	}
 }

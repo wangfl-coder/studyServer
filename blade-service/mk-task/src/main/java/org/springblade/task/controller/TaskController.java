@@ -25,6 +25,8 @@ import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.Holder;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
@@ -44,10 +46,7 @@ import org.springblade.task.wrapper.TaskWrapper;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -108,7 +107,7 @@ public class TaskController extends BladeController {
 		}else if(qualityInspectionDTO.getInspectionType()==2){
 			labelTasks = labelTaskService.queryUniqueCompleteTask(task.getAnnotationTaskId());
 		}
-		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()){
+		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()) {
 			boolean save = taskService.save(task);
 			try {
 				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getCount(), task.getInspectionType(), task, labelTasks);
