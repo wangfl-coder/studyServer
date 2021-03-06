@@ -39,6 +39,7 @@ public interface IStatisticsClient {
 
 	String API_PREFIX = "/client";
 	String STATISTICS_INITIALIZE_LABELTASK = API_PREFIX + "/statistics/initialize-labeltask";
+	String STATISTICS_INITIALIZE_SINGLE_LABELTASK = API_PREFIX + "/statistics/initialize-single-labeltask";
 	String STATISTICS_INITIALIZE_REALSET_LABELTASK = API_PREFIX + "/statistics/initialize-realset-labeltask";
 	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
 
@@ -47,6 +48,12 @@ public interface IStatisticsClient {
 	 */
 	@GetMapping(STATISTICS_INITIALIZE_LABELTASK)
 	R initializeLabelTask(@RequestParam Long taskId);
+
+	/**
+	 * 初始化任务统计
+	 */
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_LABELTASK)
+	R initializeSingleLabelTask(@RequestBody LabelTask labelTask);
 
 	/**
 	 * 初始化一条任务的统计

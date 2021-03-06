@@ -20,6 +20,10 @@ public interface LabelTaskService extends BaseService<LabelTask> {
 						 Task task,
 						 List<Expert> experts);
 
+	LabelTask startFixProcess(String ProcessDefinitionId,
+						 Task task,
+						 Expert expert);
+
 	Map<String, String> startRealSetProcess(String realSetProcessDefinitions,
 										Task task);
 

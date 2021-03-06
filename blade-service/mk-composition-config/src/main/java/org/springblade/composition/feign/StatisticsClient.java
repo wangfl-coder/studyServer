@@ -36,10 +36,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
@@ -99,6 +96,26 @@ public class StatisticsClient implements IStatisticsClient {
 				});
 			});
 		}
+		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_LABELTASK)
+	@Transactional(rollbackFor = Exception.class)
+	public R initializeSingleLabelTask(LabelTask labelTask) {
+		// 默认至少有一个要标注的人
+		Long templateId = labelTask.getTemplateId();
+		List<Composition> compositionList = templateService.allCompositions(templateId);
+
+		compositionList.forEach(composition ->{
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(labelTask.getId());
+			statistics.setCompositionId(composition.getId());
+			statistics.setTemplateId(templateId);
+			statistics.setType(1);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
+		});
 		return R.success("初始化Statistics表成功");
 	}
 

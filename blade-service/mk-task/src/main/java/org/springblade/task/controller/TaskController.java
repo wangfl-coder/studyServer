@@ -164,6 +164,43 @@ public class TaskController extends BladeController {
 		return R.status(result);
 	}
 
+	@PostMapping(value = "/fix")
+	@ApiOperation(value = "添加标注任务")
+	public R fix(Long taskId) {
+//			long taskId=L;
+			String defId="AnnotationV2:12:35c81237-7c0f-11eb-96ae-5e380f867c41";
+			Task task = taskService.getById(taskId);
+			R<List<Expert>> expertsResult = expertClient.getExpertIds(taskId);
+			if (expertsResult.isSuccess()) {
+				List<Expert> experts = expertsResult.getData();
+//				if(expertBaseTaskDTO.getRealSetRate() != null) {
+//					// 设置任务的真题比例，[0,100)
+//					task.setRealSetRate(expertBaseTaskDTO.getRealSetRate());
+//				}
+				for (Expert expert: experts) {
+					QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+					labelTaskQueryWrapper.eq("person_id",expert.getId());
+					Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+					if (count == 0) {
+						LabelTask labelTask = labelTaskService.startFixProcess(
+							defId,
+							task,
+							expert);
+						//				task.setCount(experts.size());
+						//				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
+						//				taskService.saveOrUpdate(task);
+						statisticsClient.initializeSingleLabelTask(labelTask);
+					}
+				}
+
+			} else {
+				return R.fail("读取专家列表失败");
+			}
+
+
+		return R.status(true);
+	}
+
 	@RequestMapping(value = "/detail/{id}" , method = RequestMethod.GET)
 	@ApiOperation(value = "根据id查询任务")
 	public R<TaskVO> detail(@PathVariable Long id){
