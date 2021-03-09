@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.composition.mapper.StatisticsMapper">
 
-    <select id="userCompositionCount" resultType="org.springblade.composition.dto.UserCompositionDTO">
+    <select id="userCompositionCount" resultType="org.springblade.composition.dto.UserComposition">
         select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
         from blade_user u
         left join mk_statistics s on u.id=s.update_user
@@ -29,7 +29,7 @@
         group by s.update_user,s.composition_id
     </select>
 
-    <select id="userCompositionWrongCount" resultType="org.springblade.composition.dto.UserCompositionDTO">
+    <select id="userCompositionWrongCount" resultType="org.springblade.composition.dto.UserComposition">
         select u.id as userId, u.name as userName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
         from blade_user u
         left join mk_statistics s on u.id=s.update_user
@@ -173,5 +173,60 @@
         inner join mk_task_label t
         on e.id=t.person_id
         where t.id=#{param1}
+    </select>
+
+    <select id="tenantCompositionCount" resultType="org.springblade.composition.dto.TenantComposition">
+        select t.tenant_id as tenantId, t.tenant_name as tenantName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_tenant t
+        left join mk_statistics s on t.tenant_id=s.tenant_id
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        <if test="startTime!=null">
+            and s.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and s.update_time &lt; #{endTime}
+        </if>
+        <if test="tenantId!=null">
+            and t.id=#{tenantId}
+        </if>
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
+
+        and s.is_deleted=0
+        group by t.tenant_id,t.tenant_name,s.composition_id
+    </select>
+
+    <select id="tenantCompositionWrongCount" resultType="org.springblade.composition.dto.TenantComposition">
+        select t.tenant_id as tenantId, t.tenant_name as tenantName, c.id as compositionId, c.name as compositionName, count(*) as number, round(avg(s.time)/1000,0) as averageSpeed
+        from blade_tenant t
+        left join mk_statistics s on t.tenant_id=s.tenant_id
+        left join mk_composition c on s.composition_id=c.id
+        left join mk_task_label l on l.id=s.sub_task_id
+        where s.status = 2
+        and s.is_wrong > 0
+        <if test="startTime!=null">
+            and s.update_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and s.update_time &lt; #{endTime}
+        </if>
+        <if test="tenantId!=null">
+            and t.id=#{tenantId}
+        </if>
+        <if test="taskId!=null">
+            and l.task_id=#{taskId}
+        </if>
+        <if test="type!=null">
+            and l.type=#{type}
+        </if>
+
+        and s.is_deleted=0
+        group by t.tenant_id,t.tenant_name,s.composition_id
     </select>
 </mapper>

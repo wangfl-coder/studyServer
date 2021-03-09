@@ -634,10 +634,12 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 		});
 
 		// 补充信息任务设置角色
+		AtomicBoolean hasComplementInfo = new AtomicBoolean(false);
 		flowElementList.stream().forEach(flowElement -> {
 			if (flowElement.getId().equals("complementInfoTask")) {
 				templateCompositions.forEach(templateComposition -> {
 					if (3 == templateComposition.getCompositionType()) {	//补充信息标注
+						hasComplementInfo.set(true);
 						UserTask userTask =  (UserTask)flowElement;
 						List<String> candidateGroups = new ArrayList<>();
 						candidateGroups.add(templateDTO.getMoreMessageRoleName());
@@ -667,6 +669,15 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				filteredElementMap.put("complementInfoTask", userTask);
 			}
 		});
+		ValuedDataObject complementDataObject = null;
+		for (ValuedDataObject dataObject: dataObjects ) {
+			if (dataObject.getName().equals("hasComplementInfo"))
+				complementDataObject = dataObject;
+		}
+		if (hasComplementInfo.get())
+			complementDataObject.setValue(true);
+		else
+			complementDataObject.setValue(false);
 
 		process.setFlowElementMap(filteredElementMap);
 		byte[] bytes = getBpmnXML(bpmnModel);

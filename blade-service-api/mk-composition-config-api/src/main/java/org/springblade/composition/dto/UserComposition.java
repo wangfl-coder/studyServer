@@ -28,13 +28,13 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 数据传输对象实体类
+ * 对象实体类
  *
  * @author Chill
  */
 @Data
-@ApiModel(value = "UserCompositionDTO对象", description = "UserCompositionDTO对象")
-public class UserCompositionDTO implements Serializable {
+@ApiModel(value = "UserComposition对象", description = "UserComposition对象")
+public class UserComposition implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@JsonSerialize(using = ToStringSerializer.class)

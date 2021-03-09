@@ -16,14 +16,15 @@
  */
 package org.springblade.composition.mapper;
 
+import com.baomidou.mybatisplus.annotation.SqlParser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.TaskCompositionDTO;
-import org.springblade.composition.dto.UserCompositionDTO;
+import org.springblade.composition.dto.TenantComposition;
+import org.springblade.composition.dto.UserComposition;
 import org.springblade.composition.dto.UserInspectionDTO;
 import org.springblade.composition.entity.Statistics;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param endTime
 	 * @return
 	 */
-	List<UserCompositionDTO> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
+	List<UserComposition> userCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
 
 	/**
 	 * 查询一个标注大任务在起止时间完成各种组合的数量或者还可以做的数量
@@ -97,5 +98,23 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param endTime
 	 * @return
 	 */
-	List<UserCompositionDTO> userCompositionWrongCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
+	List<UserComposition> userCompositionWrongCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("userId")String userId, @Param("taskId")String taskId, @Param("type") Integer type);
+
+	/**
+	 * 查询租户在起止时间内完成的各种组合的数量
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	@SqlParser(filter=true)
+	List<TenantComposition> tenantCompositionCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("tenantId")String tenantId, @Param("taskId")String taskId, @Param("type") Integer type);
+
+	/**
+	 * 查询租户在起止时间内完成的各种组合的错误数量
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	@SqlParser(filter=true)
+	List<TenantComposition> tenantCompositionWrongCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("tenantId")String tenantId, @Param("taskId")String taskId, @Param("type") Integer type);
 }

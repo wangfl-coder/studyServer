@@ -133,7 +133,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			.includeProcessVariables().active().orderByTaskCreateTime().desc();
 		// 定制流程等待签收的任务
 		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskCreateTime().desc().orderByTaskCreateTime().desc();
+			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 		// 通用流程等待签收的任务
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
@@ -308,7 +308,6 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		} else {
 			historyList = historyQuery.list();
 		}
-
 
 		historyList.forEach(historicProcessInstance -> {
 			SingleFlow flow = new SingleFlow();
@@ -1052,8 +1051,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flowList.add(flow);
 				}
 			}
-			if (flowList.size() > 19)
-				break;
+//			if (flowList.size() > 19)
+//				break;
 //		});
 		}
 	}
@@ -1072,7 +1071,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			UserTask userTask = (UserTask)bpmnModel.getFlowElement(task.getTaskDefinitionKey());
 			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
-			if (Func.isNotEmpty(extCompId)) {
+			if (!Func.hasEmpty(compositionId, extCompId)) {
 				Long extCompIdNum = Long.valueOf(extCompId.get(0).getElementText());
 				if (!compositionId.equals(extCompIdNum))
 					continue;

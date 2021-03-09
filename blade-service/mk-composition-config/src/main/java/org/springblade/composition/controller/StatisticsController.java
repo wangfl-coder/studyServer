@@ -16,47 +16,32 @@
  */
 package org.springblade.composition.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
-import org.springblade.adata.entity.Expert;
-import org.springblade.adata.feign.IExpertClient;
 import org.springblade.composition.dto.TaskCompositionDTO;
-import org.springblade.composition.dto.UserCompositionDTO;
+import org.springblade.composition.dto.TenantComposition;
+import org.springblade.composition.dto.UserComposition;
 import org.springblade.composition.dto.UserInspectionDTO;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.mapper.StatisticsMapper;
-import org.springblade.composition.service.IAnnotationDataService;
 import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.service.ITemplateService;
-import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.composition.vo.TaskCompositionVO;
-import org.springblade.composition.vo.TaskProgressVO;
+import org.springblade.composition.vo.TenantCompositionVO;
 import org.springblade.composition.vo.UserCompositionVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
-import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
-import org.springblade.core.tool.utils.Func;
-import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
-import org.springblade.task.vo.ExpertLabelTaskVO;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -87,18 +72,18 @@ public class StatisticsController extends BladeController {
 	@ApiOperationSupport(order = 2)
 	@ApiOperation(value = "查询用户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
 	public R<List<UserCompositionVO>> statisticsUserComposition(String startTime, String endTime, String userId, String taskId, @ApiParam(value="1.标注,2.真题标注") Integer type) {
-		List<UserCompositionDTO> doneList = statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId,type);
-		List<UserCompositionDTO> wrongList = statisticsMapper.userCompositionWrongCount(startTime,endTime,userId,taskId,type);
+		List<UserComposition> doneList = statisticsMapper.userCompositionCount(startTime,endTime,userId,taskId,type);
+		List<UserComposition> wrongList = statisticsMapper.userCompositionWrongCount(startTime,endTime,userId,taskId,type);
 		List<UserCompositionVO> resList = new ArrayList<>();
 		doneList.forEach(done -> {
 			UserCompositionVO userCompositionVO = Objects.requireNonNull(BeanUtil.copy(done, UserCompositionVO.class));
 			resList.add(userCompositionVO);
 		});
-		Map<Long, List<UserCompositionDTO>> dataPerUserId = wrongList.stream()
-			.collect(groupingBy(UserCompositionDTO::getUserId));
+		Map<Long, List<UserComposition>> dataPerUserId = wrongList.stream()
+			.collect(groupingBy(UserComposition::getUserId));
 		for (UserCompositionVO res : resList) {
 			if (dataPerUserId.containsKey(res.getUserId())) {
-				List<UserCompositionDTO> tmpList = dataPerUserId.get(res.getUserId());
+				List<UserComposition> tmpList = dataPerUserId.get(res.getUserId());
 				tmpList.forEach(tmp -> {
 					if (res.getCompositionId().equals(tmp.getCompositionId()))
 						res.setWrong(tmp.getNumber());
@@ -168,6 +153,70 @@ public class StatisticsController extends BladeController {
 		};
 		return R.data(resList);
 	}
+
+	/**
+	 * 查询租户在一段时间内标注的各种组合的数量
+	 */
+	@GetMapping("/tenant_composition")
+	@ApiOperationSupport(order = 2)
+	@ApiOperation(value = "查询租户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
+	public R<List<TenantCompositionVO>> statisticsTenantComposition(String startTime, String endTime, String tenantId, String taskId, @ApiParam(value="1.标注,2.真题标注") Integer type) {
+		List<TenantComposition> doneList = statisticsMapper.tenantCompositionCount(startTime,endTime,tenantId,taskId,type);
+		List<TenantComposition> wrongList = statisticsMapper.tenantCompositionWrongCount(startTime,endTime,tenantId,taskId,type);
+		List<TenantCompositionVO> resList = new ArrayList<>();
+		doneList.forEach(done -> {
+			TenantCompositionVO tenantCompositionVO = Objects.requireNonNull(BeanUtil.copy(done, TenantCompositionVO.class));
+			resList.add(tenantCompositionVO);
+		});
+		Map<String, List<TenantComposition>> dataPerUserId = wrongList.stream()
+			.collect(groupingBy(TenantComposition::getTenantId));
+		for (TenantCompositionVO res : resList) {
+			if (dataPerUserId.containsKey(res.getTenantId())) {
+				List<TenantComposition> tmpList = dataPerUserId.get(res.getTenantId());
+				tmpList.forEach(tmp -> {
+					if (res.getCompositionId().equals(tmp.getCompositionId()))
+						res.setWrong(tmp.getNumber());
+				});
+				if (res.getWrong() == null)
+					res.setWrong(0);
+			}else {
+				res.setWrong(0);
+			}
+		};
+		return R.data(resList);
+	}
+
+//	/**
+//	 * 查询租户在一段时间内标注的各种任务的数量
+//	 */
+//	@GetMapping("/tenant_task")
+//	@ApiOperationSupport(order = 2)
+//	@ApiOperation(value = "查询租户在一段时间内标注的各种组合的数量", notes = "传入起止时间")
+//	public R<List<TenantCompositionVO>> statisticsTenantTask(String startTime, String endTime, String tenantId, String taskId, @ApiParam(value="1.标注,2.真题标注") Integer type) {
+//		List<TenantComposition> doneList = statisticsMapper.tenantTaskCount(startTime,endTime,tenantId,taskId,type);
+//		List<TenantComposition> wrongList = statisticsMapper.tenantTaskWrongCount(startTime,endTime,tenantId,taskId,type);
+//		List<TenantCompositionVO> resList = new ArrayList<>();
+//		doneList.forEach(done -> {
+//			TenantCompositionVO tenantCompositionVO = Objects.requireNonNull(BeanUtil.copy(done, TenantCompositionVO.class));
+//			resList.add(tenantCompositionVO);
+//		});
+//		Map<String, List<TenantComposition>> dataPerUserId = wrongList.stream()
+//			.collect(groupingBy(TenantComposition::getTenantId));
+//		for (TenantCompositionVO res : resList) {
+//			if (dataPerUserId.containsKey(res.getTenantId())) {
+//				List<TenantComposition> tmpList = dataPerUserId.get(res.getTenantId());
+//				tmpList.forEach(tmp -> {
+//					if (res.getCompositionId().equals(tmp.getCompositionId()))
+//						res.setWrong(tmp.getNumber());
+//				});
+//				if (res.getWrong() == null)
+//					res.setWrong(0);
+//			}else {
+//				res.setWrong(0);
+//			}
+//		};
+//		return R.data(resList);
+//	}
 
 	/**
 	 * 查询用户在一段时间内质检的数量和速度

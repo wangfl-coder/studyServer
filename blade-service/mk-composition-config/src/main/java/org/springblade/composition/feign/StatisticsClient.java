@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -75,15 +76,17 @@ public class StatisticsClient implements IStatisticsClient {
 			List<Composition> compositionList = templateService.allCompositions(templateId);
 			labelTaskList.forEach(labelTask -> {
 				compositionList.forEach(composition ->{
-					Statistics statistics = new Statistics();
-					statistics.setSubTaskId(labelTask.getId());
-					statistics.setCompositionId(composition.getId());
-					statistics.setTemplateId(templateId);
-					statistics.setType(1);
-					statistics.setStatus(1);
-					statisticsService.save(statistics);
+					if (composition.getAnnotationType() != 3) {		//除补充信息外全部初始化1条
+						Statistics statistics = new Statistics();
+						statistics.setSubTaskId(labelTask.getId());
+						statistics.setCompositionId(composition.getId());
+						statistics.setTemplateId(templateId);
+						statistics.setType(1);
+						statistics.setStatus(1);
+						statisticsService.save(statistics);
+					}
 
-					//现在每条基本信息标注任务一开始有两个人做
+					//现在每条基本信息标注任务一开始有两个人做，额外初始化1条
 					if (composition.getAnnotationType() == 2) {
 						Statistics statistics2 = new Statistics();
 						statistics2.setSubTaskId(labelTask.getId());
@@ -330,6 +333,10 @@ public class StatisticsClient implements IStatisticsClient {
 				//在count为3，same count为1时，因为有两个空所以要去质检
 				kv.put("biSame", 0);
 			}
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 2 && (int)kv.get("biSame") == 3) {
+				//两个头像为空，一个有会导致在count为3，same count为3，notfound为2，因为有两个空所以要去质检
+				kv.put("biSame", 0);
+			}
 			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 3 && (int)kv.get("biSame") == 0) {
 				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去
 				if (allNotFoundNum < dataPerField.size()) {
@@ -372,8 +379,13 @@ public class StatisticsClient implements IStatisticsClient {
 			}
 		}
 
+		Map<String, Integer> sameCountFiltered = sameCount.entrySet()
+			.stream()
+			.filter(map -> sameValue.get(map.getKey()) != null)
+			.collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
+
 		if (3 == (int)kv.get("biCounter")) {	// 3人中2人一致的情况，将剩下的计入错误日志
-			sameCount.entrySet().forEach(entry -> {
+			sameCountFiltered.entrySet().forEach(entry -> {
 				if (1 == entry.getValue()) {
 					statisticsList.forEach(statistics -> {
 						AnnotationData annoData = annotationDataList.stream().filter(elem -> {

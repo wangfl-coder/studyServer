@@ -109,6 +109,9 @@ public class BladeUserDetailsServiceImpl implements UserDetailsService {
 			if (userType.equals(UserEnum.WEB.getName())) {
 				if (VERIFICATION_CODE_GRANT_TYPE.equals(grant_type)) {
 					if (SMS.equals(auth_type)) {
+						if (TokenUtil.DEFAULT_TENANT_ID.equals(tenantId)) {
+							throw new UserDeniedAuthorizationException(TokenUtil.TENANT_NOT_FOUND);
+						}
 						result = userClient.getUserInfoByMobile(tenantId, username, UserEnum.WEB.getName());
 					}else if (EMAIL.equals(auth_type)) {
 						result = userClient.getUserInfoByEmail(tenantId, username, UserEnum.WEB.getName());

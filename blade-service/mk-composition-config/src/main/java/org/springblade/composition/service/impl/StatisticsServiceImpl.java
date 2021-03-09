@@ -23,6 +23,8 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.TaskCompositionDTO;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.mapper.StatisticsMapper;
+import org.springblade.composition.service.ILogBalanceService;
+import org.springblade.composition.service.ILogPointsService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.mp.base.BaseServiceImpl;
@@ -42,6 +44,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Statistics> implements IStatisticsService {
 	private final StatisticsMapper statisticsMapper;
+	private final ILogBalanceService logBalanceService;
+	private final ILogPointsService logPointsService;
+
 	@Value("${spring.profiles.active}")
 	public String env;
 	@Override
@@ -89,6 +94,8 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 					statistics_history.setType(type);
 					wrote = true;
 					saveOrUpdate(statistics_history);
+//					logBalanceService.save();
+//					logPointsService.save();
 					break;
 				}
 			};

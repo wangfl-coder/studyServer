@@ -18,16 +18,17 @@ package org.springblade.composition.vo;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import org.springblade.composition.dto.TenantComposition;
 import org.springblade.composition.dto.UserComposition;
 
 /**
- * 数据传输对象实体类
+ * 视图对象实体类
  *
  * @author Chill
  */
 @Data
-@ApiModel(value = "UserCompositionVO对象", description = "UserCompositionVO对象")
-public class UserCompositionVO extends UserComposition {
+@ApiModel(value = "TenantCompositionVO对象", description = "TenantCompositionVO对象")
+public class TenantCompositionVO extends TenantComposition {
 
 	private Integer wrong;
 }
