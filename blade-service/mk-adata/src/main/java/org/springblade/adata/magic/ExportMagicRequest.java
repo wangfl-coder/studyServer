@@ -6,8 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springblade.adata.entity.Expert;
-import org.springblade.adata.service.IExpertService;
-import org.springblade.adata.vo.UserRemarkVO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +40,7 @@ public class ExportMagicRequest {
 		HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
 
 		RequestBody body = RequestBody.create(JSONMediaType, json); // new
-		Request request = new Request.Builder().url(urlBuilder.build()).post(body).addHeader("Authorization", Authorization).build();
+		Request request = new Request.Builder().url(urlBuilder.build()).post(body).addHeader("Authorization", Authorization).addHeader("debug", "1").build();
 
 		log.info(json);
 		try (Response response = client.newCall(request).execute()) {
@@ -51,7 +49,7 @@ public class ExportMagicRequest {
 		}
 	}
 
-	public String magic(String json) {
+	public String request(String json) {
 		try {
 			String res = request(json, API_MAGIC);
 			JSONObject res_obj = JSON.parseObject(res);
@@ -73,6 +71,7 @@ public class ExportMagicRequest {
 
 	public boolean uploadAvatar(Expert expert){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person.UpdateAvatars");
 		body.add(f1);
@@ -90,13 +89,21 @@ public class ExportMagicRequest {
 		f2.put("avatars",avatars);
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
-		return res != null;
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
+		System.out.println(res);
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public boolean uploadBasicInfo(Expert expert){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person_annotation.UpsertPersonAnnotation");
 		body.add(f1);
@@ -308,13 +315,21 @@ public class ExportMagicRequest {
 		f2.put("fields",fields);
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
-		return res != null;
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
+		System.out.println(res);
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public boolean uploadWork(Expert expert){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person_annotation.UpsertPersonAnnotation");
 		body.add(f1);
@@ -335,13 +350,21 @@ public class ExportMagicRequest {
 		f2.put("fields",fields);
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
-		return res != null;
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
+		System.out.println(res);
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public boolean uploadEdu(Expert expert){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person_annotation.UpsertPersonAnnotation");
 		body.add(f1);
@@ -362,14 +385,21 @@ public class ExportMagicRequest {
 		f2.put("fields",fields);
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
 		System.out.println(res);
-		return res != null;
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public boolean uploadBio(Expert expert){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person_annotation.UpsertPersonAnnotation");
 		body.add(f1);
@@ -400,13 +430,21 @@ public class ExportMagicRequest {
 		f2.put("fields",fields);
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
-		return res != null;
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
+		System.out.println(res);
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public boolean uploadRemark(Expert expert,String userRealName,List<Map<String, Object>> userCommentList){
 		List<Map<String, Object>> body = new ArrayList<>();
+		JSONArray body2 = new JSONArray();
 		HashMap<String, Object> f1 = new HashMap<>();
 		f1.put("action","person.SetNotesToPerson");
 		body.add(f1);
@@ -424,9 +462,16 @@ public class ExportMagicRequest {
 		f2.put("op","1");
 		f1.put("parameters",f2);
 		body.add(f1);
-		String bodyParam = JSON.toJSONString(body);
-		String res = magic(bodyParam);
-		return res != null;
+		body2.add(f1);
+//		String bodyParam = JSON.toJSONString(body);
+		String bodyParam = body2.toString();
+		String res = request(bodyParam);
+		System.out.println(res);
+		JSONObject res_obj = JSON.parseObject(res);
+		JSONArray array = res_obj.getJSONArray("data");
+		JSONObject data = array.getJSONObject(0);
+		return data.getBoolean("succeed");
+//		return res != null;
 	}
 
 	public String login() {

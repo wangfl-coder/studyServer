@@ -23,6 +23,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import liquibase.pro.packaged.C;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.springblade.adata.entity.Expert;
@@ -275,10 +277,14 @@ public class WorkController {
 				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
 				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
 				if (processVariables == null) {
-					processVariables = runtimeService.getVariables(processInstanceId);
-					processVariablesMap.put(processInstanceId, processVariables);
+					try {
+						processVariables = runtimeService.getVariables(processInstanceId);
+						processVariablesMap.put(processInstanceId, processVariables);
+					}catch(FlowableObjectNotFoundException e){
+						e.printStackTrace();
+					}
 				}
-				if (processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
+				if (processVariables != null && processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
 					continue;
 				}else {
 					resList.add(compositionClaimListVO);

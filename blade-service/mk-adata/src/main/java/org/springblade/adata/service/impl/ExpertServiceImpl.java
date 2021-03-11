@@ -427,7 +427,9 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		}
 		String tenantId = AuthUtil.getTenantId();
 		// 首先导入智库下20个学者，并且得到这个智库下一共有多少学者
-		int total = getExperts(tenantId, ebId, taskId, 0, 20);
+//		for (int i=0;i<200;i++) {
+			int total = getExperts(tenantId, ebId, taskId, 0, 20);
+//		}
 
 		// 循环导入剩下的学者
 		int number = (total-1) / 20;

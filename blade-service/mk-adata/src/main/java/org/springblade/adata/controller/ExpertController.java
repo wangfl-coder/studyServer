@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
+import jodd.util.ThreadUtil;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springblade.core.cache.constant.CacheConstant.PARAM_CACHE;
 
@@ -284,13 +286,51 @@ public class ExpertController extends BladeController {
 //		experts.add(expert1);
 
 //		for(Expert expert:experts){
+		ExportMagicRequest request = new ExportMagicRequest();
+		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger errcnt = new AtomicInteger(0);
 		experts.parallelStream().forEach(expert -> {
+
+//		for(Expert expert: experts) {
+			count.getAndIncrement();
+			log.info("upload expert: "+count);
+			log.info("error count: "+errcnt);
 			if(expert.getExpertId()!=null){
-				boolean avatar = ExportMagicRequest.getInstance().uploadAvatar(expert);
-				boolean bi = ExportMagicRequest.getInstance().uploadBasicInfo(expert);
-				boolean work = ExportMagicRequest.getInstance().uploadWork(expert);
-				boolean edu = ExportMagicRequest.getInstance().uploadEdu(expert);
-				boolean bio = ExportMagicRequest.getInstance().uploadBio(expert);
+				boolean avatar = request.uploadAvatar(expert);
+				while(!avatar) {
+					errcnt.getAndIncrement();
+					log.error("导出头像失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					avatar = request.uploadAvatar(expert);
+				}
+				boolean bi = request.uploadBasicInfo(expert);
+				while(!bi) {
+					errcnt.getAndIncrement();
+					log.error("导出基本信息失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					bi = request.uploadAvatar(expert);
+				}
+				boolean work = request.uploadWork(expert);
+				while(!work) {
+					errcnt.getAndIncrement();
+					log.error("导出工作经历失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					work = request.uploadAvatar(expert);
+				}
+				boolean edu = request.uploadEdu(expert);
+				while(!edu) {
+					errcnt.getAndIncrement();
+					log.error("导出教育经历失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					edu = request.uploadAvatar(expert);
+				}
+				boolean bio = request.uploadBio(expert);
+				while(!bio) {
+					errcnt.getAndIncrement();
+					log.error("导出个人简介失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					bio = request.uploadAvatar(expert);
+				}
 				String userRealName;
 				if(expert.getRemark()!=null){
 					userRealName = expertService.queryNameById(expert.getUpdateUser()).getRealName();
@@ -318,7 +358,13 @@ public class ExpertController extends BladeController {
 						}
 					}
 				}
-				boolean remark = ExportMagicRequest.getInstance().uploadRemark(expert,userRealName,userCommentList);
+				boolean remark = request.uploadRemark(expert,userRealName,userCommentList);
+				while(!remark) {
+					errcnt.getAndIncrement();
+					log.error("导出评论失败，失败专家id:"+expert.getExpertId());
+					ThreadUtil.sleep(2000);
+					remark = request.uploadRemark(expert,userRealName,userCommentList);
+				}
 				ExpertExtend expertExtend = new ExpertExtend();
 				expertExtend.setId(expert.getExpertId());
 				expertExtend.setMag(expert.getMag());

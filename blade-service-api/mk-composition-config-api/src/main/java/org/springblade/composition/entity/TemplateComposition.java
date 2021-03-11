@@ -73,11 +73,11 @@ public class TemplateComposition extends TenantEntity {
 	@ApiModelProperty(value = "质检角色名")
 	private String inspectionRoleName;
 
-	/**
-	 * 积分
-	 */
-	@ApiModelProperty(value = "积分")
-	private Integer points;
+//	/**
+//	 * 积分
+//	 */
+//	@ApiModelProperty(value = "积分")
+//	private Integer points;
 
 	/**
 	 * 重复标注次数
