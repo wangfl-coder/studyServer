@@ -42,6 +42,7 @@ public interface IStatisticsClient {
 	String STATISTICS_INITIALIZE_SINGLE_LABELTASK = API_PREFIX + "/statistics/initialize-single-labeltask";
 	String STATISTICS_INITIALIZE_REALSET_LABELTASK = API_PREFIX + "/statistics/initialize-realset-labeltask";
 	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
+	String MARK_AS_COMPLETE = API_PREFIX + "/statistics/mark-as-complete";
 
 	/**
 	 * 初始化任务统计
@@ -66,4 +67,7 @@ public interface IStatisticsClient {
 	 */
 	@GetMapping(QUERY_BASICINFO_STATUS)
 	R<Kv> queryBasicInfoStatus(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
+
+	@GetMapping(MARK_AS_COMPLETE)
+	R markAsComplete(@RequestParam Integer type, @RequestParam Long subTaskId, @RequestParam Long compositionId);
 }

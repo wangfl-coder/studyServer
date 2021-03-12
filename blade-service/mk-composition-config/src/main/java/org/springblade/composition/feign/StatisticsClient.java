@@ -17,6 +17,7 @@
 package org.springblade.composition.feign;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
@@ -27,6 +28,7 @@ import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.service.*;
 import org.springblade.core.mp.support.Condition;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
@@ -147,7 +149,19 @@ public class StatisticsClient implements IStatisticsClient {
 	}
 
 	@Override
-//	@Transactional(rollbackFor = Exception.class)
+	@GetMapping(MARK_AS_COMPLETE)
+	public R markAsComplete(Integer type, Long subTaskId, Long compositionId) {
+		boolean res = statisticsService.update(Wrappers.<Statistics>update().lambda().set(Statistics::getStatus, 2)
+			.eq(Statistics::getType, type)
+			.eq(Statistics::getSubTaskId, subTaskId)
+			.eq(Statistics::getCompositionId, compositionId)
+			.eq(Statistics::getUserId, AuthUtil.getUserId())
+		);
+		return R.status(res);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public R<Kv> queryBasicInfoStatus(Long labelTaskId, Long templateId, Long compositionId) {
 //		Statistics statistics_query = new Statistics();
 //		statistics_query.setSubTaskId(labelTaskId);
@@ -341,6 +355,7 @@ public class StatisticsClient implements IStatisticsClient {
 				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去
 				if (allNotFoundNum < dataPerField.size()) {
 					boolean threeDiff = false;	//在count3 notfound3会跳过质检，这时寻找有没有3个都不一样的，有就要去质检
+					boolean threeSame = true;
 					for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
 						if (entry.getValue() == 0) {
 							Integer notFoundNum = notFoundCount.get(entry.getKey());
@@ -348,23 +363,43 @@ public class StatisticsClient implements IStatisticsClient {
 								if (notFoundNum == 0)
 									threeDiff = true;
 							}
+							if (null != notFoundNum && notFoundNum != 3 ) {
+								threeSame = false;
+							}
+						}
+						if (entry.getValue() == 3) {
+							Integer notFoundNum = notFoundCount.get(entry.getKey());
+							if (null != notFoundNum && notFoundNum != 0)
+								threeSame = false;
 						}
 					}
 					if (threeDiff)
 						kv.put("biNotfound", 0); //在count3 notfound3会跳过质检，这时不能跳过
+					if (threeSame)
+						kv.put("biSame", 1);
 				}
 			}
 			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 1 && (int)kv.get("biSame") == 0) {
-				//在count为3，same count为0时，此时有两种情况，在biNotfound为1时，未找到的字段另外两个有不同和相同情况，两者不同去质检，相同不去
+				//在count为3，same count为0时，此时有两种情况，在biNotfound为1时，未找到的字段另外两个有不同和都相同情况，两者不同去质检，都相同不去
 				boolean twoSame = true;	//在count3 same0会去质检，这时寻找notfound字段另外两个有没有都一样的，有就跳过质检
+				boolean allDiff = true;
 				for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
 					if (entry.getValue() == 1) {
+						allDiff = false;
 						Set<String> keySet = sameValue.keySet();
 						if (!keySet.contains(entry.getKey()))
 							twoSame = false;
 					}
 				}
-				if (twoSame)
+				for (Map.Entry<String,Integer> entry : notFoundCount.entrySet()) {
+					if (entry.getValue() == 1) {
+						Integer cnt = sameCount.get(entry.getKey());
+						if (cnt!=null && cnt.intValue() == 0){
+							allDiff = true;
+						}
+					}
+				}
+				if (twoSame && !allDiff)
 					kv.put("biSame", 1); //在count3 same0会去质检，这时可以跳过
 			}
 		} else {

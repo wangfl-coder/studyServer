@@ -828,11 +828,16 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			taskService.setVariables(taskId, taskVariables);
 			runtimeService.setVariables(processInstanceId, processVariables);
 			//			boolean isBiComplete = labelTaskClient.isBiComplete(taskId);
+			log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));
+			log.error("ProcessConstant.HOMEPAGE_FOUND_KEY:"+variables.get(ProcessConstant.HOMEPAGE_FOUND_KEY));
+			// 完成任务
+			taskService.complete(taskId, variables);
+//			statisticsClient.markAsComplete(1, labelTask.getId(), currentComposition.getId());
+		} else {  //质检任务
+			taskService.complete(taskId, variables);
 		}
-		log.error("ProcessConstant.BASICINFO_COMPLETE_KEY:"+variables.get(ProcessConstant.BASICINFO_COMPLETE_KEY));
-		log.error("ProcessConstant.HOMEPAGE_FOUND_KEY:"+variables.get(ProcessConstant.HOMEPAGE_FOUND_KEY));
-		// 完成任务
-		taskService.complete(taskId, variables);
+
+
 		if(variables.get("priority")!=null){
 			int priority = (int) variables.get("priority");
 			setTaskPriorityByProcessInstanceId(processInstanceId, priority);

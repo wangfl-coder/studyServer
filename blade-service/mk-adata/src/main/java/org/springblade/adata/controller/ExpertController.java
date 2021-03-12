@@ -289,9 +289,9 @@ public class ExpertController extends BladeController {
 		ExportMagicRequest request = new ExportMagicRequest();
 		AtomicInteger count = new AtomicInteger(0);
 		AtomicInteger errcnt = new AtomicInteger(0);
-		experts.parallelStream().forEach(expert -> {
+//		experts.parallelStream().forEach(expert -> {
 
-//		for(Expert expert: experts) {
+		for(Expert expert: experts) {
 			count.getAndIncrement();
 			log.info("upload expert: "+count);
 			log.info("error count: "+errcnt);
@@ -375,7 +375,7 @@ public class ExpertController extends BladeController {
 					log.error("导出失败，失败专家id:"+expert.getExpertId());
 				}
 			}
-		});
+		}//);
 		return R.status(true);
 	}
 
