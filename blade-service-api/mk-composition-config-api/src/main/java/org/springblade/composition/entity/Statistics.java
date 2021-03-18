@@ -40,12 +40,12 @@ public class Statistics extends TenantEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 更新部门
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "更新部门")
-	private Long updateDept;
+//	/**
+//	 * 更新部门
+//	 */
+//	@JsonSerialize(using = ToStringSerializer.class)
+//	@ApiModelProperty(value = "更新部门")
+//	private Long updateDept;
 
 	/**
 	 * 子任务id

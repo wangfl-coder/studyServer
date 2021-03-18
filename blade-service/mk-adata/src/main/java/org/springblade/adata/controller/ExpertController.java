@@ -308,28 +308,28 @@ public class ExpertController extends BladeController {
 					errcnt.getAndIncrement();
 					log.error("导出基本信息失败，失败专家id:"+expert.getExpertId());
 					ThreadUtil.sleep(2000);
-					bi = request.uploadAvatar(expert);
+					bi = request.uploadBasicInfo(expert);
 				}
 				boolean work = request.uploadWork(expert);
 				while(!work) {
 					errcnt.getAndIncrement();
 					log.error("导出工作经历失败，失败专家id:"+expert.getExpertId());
 					ThreadUtil.sleep(2000);
-					work = request.uploadAvatar(expert);
+					work = request.uploadWork(expert);
 				}
 				boolean edu = request.uploadEdu(expert);
 				while(!edu) {
 					errcnt.getAndIncrement();
 					log.error("导出教育经历失败，失败专家id:"+expert.getExpertId());
 					ThreadUtil.sleep(2000);
-					edu = request.uploadAvatar(expert);
+					edu = request.uploadEdu(expert);
 				}
 				boolean bio = request.uploadBio(expert);
 				while(!bio) {
 					errcnt.getAndIncrement();
 					log.error("导出个人简介失败，失败专家id:"+expert.getExpertId());
 					ThreadUtil.sleep(2000);
-					bio = request.uploadAvatar(expert);
+					bio = request.uploadBio(expert);
 				}
 				String userRealName;
 				if(expert.getRemark()!=null){

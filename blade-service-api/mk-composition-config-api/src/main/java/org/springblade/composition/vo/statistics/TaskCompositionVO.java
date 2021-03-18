@@ -14,35 +14,24 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.dto;
+package org.springblade.composition.vo.statistics;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
-
-import java.io.Serializable;
+import org.springblade.composition.dto.statistics.TaskComposition;
 
 /**
- * 对象实体类
+ * 数据传输对象实体类
  *
  * @author Chill
  */
 @Data
-@ApiModel(value = "TenantComposition对象", description = "TenantComposition对象")
-public class TenantComposition implements Serializable {
-	private static final long serialVersionUID = 1L;
+@ApiModel(value = "TaskCompositionDTO对象", description = "TaskCompositionDTO对象")
+public class TaskCompositionVO extends TaskComposition {
 
-	private String tenantId;
+	private Integer todo;
 
-	private String tenantName;
+	private Integer done;
 
-	@JsonSerialize(using = ToStringSerializer.class)
-	private Long compositionId;
-
-	private String compositionName;
-
-	private Integer number;
-
-	private Integer averageSpeed;
+	private Integer wrong;
 }

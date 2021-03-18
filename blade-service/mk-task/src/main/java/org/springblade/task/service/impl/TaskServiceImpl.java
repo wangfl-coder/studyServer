@@ -39,10 +39,10 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	public TaskVO setCompletedCount(Task task) {
 		TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
 		if (1 == task.getTaskType()) {
-			int count = baseMapper.labelTaskCompleteCount(env, task.getId());
+			int count = baseMapper.labelTaskCompleteCount(task.getId());
 			taskVO.setCompleted(count);
 		}else if (2 == task.getTaskType()){
-			int count = baseMapper.qualityInspectionTaskCompleteCount(env, task.getId());
+			int count = baseMapper.qualityInspectionTaskCompleteCount(task.getId());
 			taskVO.setCompleted(count);
 		}
 		return taskVO;
@@ -53,10 +53,10 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 		List<TaskVO> records = tasks.stream().map(task -> {
 			TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
 			if (1 == task.getTaskType()) {
-				int count = baseMapper.labelTaskCompleteCount(env, task.getId());
+				int count = baseMapper.labelTaskCompleteCount(task.getId());
 				taskVO.setCompleted(count);
 			}else if (2 == task.getTaskType()){
-				int count = baseMapper.qualityInspectionTaskCompleteCount(env, task.getId());
+				int count = baseMapper.qualityInspectionTaskCompleteCount(task.getId());
 				taskVO.setCompleted(count);
 			}
 			return taskVO;

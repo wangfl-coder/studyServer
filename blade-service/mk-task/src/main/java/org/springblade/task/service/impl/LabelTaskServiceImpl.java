@@ -236,7 +236,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public int completeCount(Long taskId) {
-		return baseMapper.completeCount(env, taskId);
+		return baseMapper.completeCount(taskId);
 	}
 
 	@Override
@@ -251,7 +251,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	 */
 	@Override
 	public List<LabelTask> queryCompleteTask(Long taskId) {
-		return baseMapper.queryCompleteTask(env, taskId);
+		return baseMapper.queryCompleteTask(taskId);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	 */
 	@Override
 	public List<LabelTask> queryUniqueCompleteTask(Long taskId) {
-		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(env, taskId);
+		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(taskId);
 		List<LabelTask> uniqueCompleteTasks = new ArrayList<>();
 		for(LabelTask labelTask:labelTasks){
 			QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
@@ -340,32 +340,32 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public long annotationDoneCount(String param2) {
-		return baseMapper.annotationDoneCount(env,param2);
+		return baseMapper.annotationDoneCount(param2);
 	}
 
 	@Override
 	public long annotationTodoCount(String param2) {
-		return baseMapper.annotationTodoCount(env,param2);
+		return baseMapper.annotationTodoCount(param2);
 	}
 
 	@Override
 	public int annotationClaimCount(List<String> roleAlias) {
-		return baseMapper.annotationClaimCount2(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.annotationClaimCount2(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
-		return baseMapper.roleClaimCount(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.roleClaimCount(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<CompositionClaimCountVO> compositionClaimCount(List<String> roleAlias) {
-		return baseMapper.compositionClaimCount(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.compositionClaimCount(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<CompositionClaimListVO> compositionClaimList(List<String> roleAliases) {
-		return baseMapper.compositionClaimList(env, roleAliases, AuthUtil.getUserId());
+		return baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
 	}
 
 	private Kv createProcessVariables(Task task, LabelTask labelTask) {

@@ -35,6 +35,7 @@ import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -268,6 +269,29 @@ public class StatisticsClient implements IStatisticsClient {
 			int sameNum = 0;
 			if (entry.getKey().equals("avatar")) {
 				continue;
+			} else if (entry.getKey().equals("phone")
+				|| entry.getKey().equals("fax")
+				|| entry.getKey().equals("email")
+				|| entry.getKey().equals("affiliation")
+				|| entry.getKey().equals("affiliationZh")) {	//可能有多个值的字段，转成数组两两比较
+				List<AnnotationData> list = entry.getValue();
+				for (int i = 0; i < list.size(); i++) {
+					for (int j = i + 1; j < list.size(); j++) {
+						if (Func.isNoneBlank(list.get(i).getValue(), list.get(j).getValue())) {
+							List<String> left = Arrays.asList(StringUtil.splitTrim(list.get(i).getValue(), "%_%"));
+							List<String> right = Arrays.asList(StringUtil.splitTrim(list.get(j).getValue(), "%_%"));
+							Collections.sort(left);
+							Collections.sort(right);
+							if (left.equals(right)) {
+								sameNum++;
+								sameValue.put(entry.getKey(), list.get(i).getValue());
+							}
+						}
+					}
+				}
+				if (sameNum > 0) {
+					sameCount.put(entry.getKey(), sameNum);
+				}
 			} else if (entry.getKey().equals("titles") || entry.getKey().equals("titlesDesc")) {
 				if (entry.getKey().equals("titles")) {
 					//职称字段先两两对比，在-1时需要对比职称其它字段中的内容
@@ -470,6 +494,17 @@ public class StatisticsClient implements IStatisticsClient {
 
 				}
 			});
+		}
+
+		if ((int)kv.get("biCounter") == 2 && (int)kv.get("biSame") == 0) {
+			//准备给第三人，建个统计
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(labelTaskId);
+			statistics.setCompositionId(compositionId);
+			statistics.setTemplateId(templateId);
+			statistics.setType(1);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
 		}
 
 		if ((int)kv.get("biCounter") == 3 && (int)kv.get("biSame") == 0) {

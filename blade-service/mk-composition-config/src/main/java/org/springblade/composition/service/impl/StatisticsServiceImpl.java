@@ -16,17 +16,14 @@
  */
 package org.springblade.composition.service.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
-import org.springblade.composition.dto.TaskCompositionDTO;
+import org.springblade.composition.dto.statistics.TaskComposition;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.mapper.StatisticsMapper;
 import org.springblade.composition.service.ILogBalanceService;
 import org.springblade.composition.service.ILogPointsService;
 import org.springblade.composition.service.IStatisticsService;
-import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -50,7 +47,7 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	@Value("${spring.profiles.active}")
 	public String env;
 	@Override
-	public List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType){
+	public List<TaskComposition> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType){
 
 //		return statisticsMapper.taskCompositionCount(env,startTime, endTime,taskId,status,type);
 		return statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,null,taskType,statisticsType);

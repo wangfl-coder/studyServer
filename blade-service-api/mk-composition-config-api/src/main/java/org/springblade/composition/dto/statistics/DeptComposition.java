@@ -14,18 +14,14 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.dto;
+package org.springblade.composition.dto.statistics;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
-import io.swagger.models.auth.In;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.springblade.composition.entity.Template;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 对象实体类
@@ -33,14 +29,15 @@ import java.util.List;
  * @author Chill
  */
 @Data
-@ApiModel(value = "UserComposition对象", description = "UserComposition对象")
-public class UserComposition implements Serializable {
+@ApiModel(value = "DeptComposition对象", description = "DeptComposition对象")
+public class DeptComposition implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@JsonSerialize(using = ToStringSerializer.class)
-	private Long userId;
+	private String tenantId;
 
-	private String userName;
+	private String deptId;
+
+	private String deptName;
 
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long compositionId;

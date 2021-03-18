@@ -51,42 +51,42 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @param labelTaskId 标注子任务id
 	 * @param type 2是基本信息类组合 3是补充信息组合
 	 */
-	void updateStatistic(@Param("env")String env,@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
+	void updateStatistic(@Param("labelTaskId")Long labelTaskId, @Param("type")Integer type);
 
 	/**
 	 * 根据模版Id和组合Id获取角色
 	 * @param templateId 模版Id
 	 * @param compositionId 组合Id
 	 */
-	Role getRoleByTemplateComposition(String env, Long templateId, Long compositionId);
+	Role getRoleByTemplateComposition(@Param("templateId")Long templateId, @Param("compositionId")Long compositionId);
 
 	/**
 	 * 根据组合Id获取角色别名
 	 * @param compositionId 组合Id
 	 */
-	List<String> getLabelRoleAliasByCompositionId(String env, Long compositionId);
+	List<String> getLabelRoleAliasByCompositionId(@Param("compositionId")Long compositionId);
 
 	/**
 	 * 根据组合Id获取角色别名
 	 * @param compositionId 组合Id
 	 */
-	List<String> getInspectionRoleAliasByCompositionId(String env, Long compositionId);
+	List<String> getInspectionRoleAliasByCompositionId(@Param("compositionId")Long compositionId);
 
 	/**
 	 * 根据流程实例Id获取角色别名
 	 * @param processInstanceId 流程实例Id
 	 */
-	List<String> getLabelRoleAliasByProcessInstanceId(String env, String processInstanceId);
+	List<String> getLabelRoleAliasByProcessInstanceId(@Param("processInstanceId")String processInstanceId);
 
 	/**
 	 * 根据流程实例Id获取角色别名
 	 * @param processInstanceId 流程实例Id
 	 */
-	List<String> getInspectionRoleAliasByProcessInstanceId(String env, String processInstanceId);
+	List<String> getInspectionRoleAliasByProcessInstanceId(@Param("processInstanceId")String processInstanceId);
 
 	/**
 	 * 根据流程实例Id获取用户在流程实例中的角色别名数
 	 * @param processInstanceId 流程实例Id
 	 */
-	int getRoleAliasCountByProcessInstanceId(String env, String processInstanceId, List<String> roles);
+	int getRoleAliasCountByProcessInstanceId(@Param("processInstanceId")String processInstanceId, @Param("roleAlias")List<String> roleAlias);
 }

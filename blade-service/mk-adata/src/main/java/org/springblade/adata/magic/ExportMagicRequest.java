@@ -180,7 +180,7 @@ public class ExportMagicRequest {
 		}
 		if (expert.getAffiliation() != null) {
 			affiliation.put("field", "profile.affiliation");
-			affiliation.put("value", expert.getAffiliation().replace(";","/"));
+			affiliation.put("value", expert.getAffiliation().replace("%_%","/"));
 			fields.add(affiliation);
 		}else{
 			affiliation.put("field", "profile.affiliation");
@@ -189,7 +189,7 @@ public class ExportMagicRequest {
 		}
 		if (expert.getAffiliationZh() != null) {
 			affiliationZh.put("field", "profile.affiliation_zh");
-			affiliationZh.put("value", expert.getAffiliationZh().replace(";","/"));
+			affiliationZh.put("value", expert.getAffiliationZh().replace("%_%","/"));
 			fields.add(affiliationZh);
 		}else{
 			affiliationZh.put("field", "profile.affiliation_zh");

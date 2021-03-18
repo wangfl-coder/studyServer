@@ -57,30 +57,18 @@ g/dtd/mybatis-3-mapper.dtd">
 
     <select id="labelTaskCompleteCount" resultType="int">
         SELECT COUNT(*) FROM
-        <if test="param1!= null and param1!= '' and param1 == 'dev'">
-            bladex_dev.mk_task_label t
-            left join bladex_flow_dev.ACT_HI_PROCINST flow
-        </if>
-        <if test="param1!= null and param1!= '' and param1 == 'prod'">
             bladex.mk_task_label t
             left join bladex_flow.ACT_HI_PROCINST flow
-        </if>
             ON t.process_instance_id = flow.PROC_INST_ID_
-            WHERE t.task_id = #{param2} AND t.type = 1 AND !isnull(flow.END_TIME_)
+            WHERE t.task_id = #{taskId} AND t.type = 1 AND !isnull(flow.END_TIME_)
     </select>
 
     <select id="qualityInspectionTaskCompleteCount" resultType="int">
         SELECT COUNT(*) FROM
-        <if test="param1!= null and param1!= '' and param1 == 'dev'">
-            bladex_dev.mk_task_quality_inspection t
-            left join bladex_flow_dev.ACT_HI_PROCINST flow
-        </if>
-        <if test="param1!= null and param1!= '' and param1 == 'prod'">
             bladex.mk_task_quality_inspection t
             left join bladex_flow.ACT_HI_PROCINST flow
-        </if>
             ON t.process_instance_id = flow.PROC_INST_ID_
-            WHERE t.inspection_task_id = #{param2} AND !isnull(flow.END_TIME_)
+            WHERE t.inspection_task_id = #{taskId} AND !isnull(flow.END_TIME_)
 
     </select>
 
@@ -102,19 +90,9 @@ g/dtd/mybatis-3-mapper.dtd">
 
     <select id="compositionCount" resultType="int">
         select count(*) from
-        <if test="env == 'dev'">
-            bladex_flow_dev.ACT_HI_TASKINST t
-        </if>
-        <if test="env == 'prod'">
             bladex_flow.ACT_HI_TASKINST t
-        </if>
         left join
-        <if test="env == 'dev'">
-            bladex_dev.mk_task_label l
-        </if>
-        <if test="env == 'prod'">
             bladex.mk_task_label l
-        </if>
         on t.PROC_INST_ID_=l.process_instance_id
         <if test="taskId!=null">
             where l.task_id=#{taskId}

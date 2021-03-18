@@ -14,27 +14,37 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.mapper;
+package org.springblade.composition.dto.statistics;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.springblade.composition.entity.Composition;
-import org.springblade.composition.entity.TemplateComposition;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
- * Mapper 接口
+ * 对象实体类
  *
- * @author KaiLun
+ * @author Chill
  */
-public interface TemplateCompositionMapper extends BaseMapper<TemplateComposition> {
+@Data
+@ApiModel(value = "DeptTask对象", description = "DeptTask对象")
+public class DeptTask implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 返回模版中所有的组合
-	 * @param templateId 模版Id
-	 * @return
-	 */
-	List<Composition> allCompositions(@Param("templateId")Long templateId);
+	private String tenantId;
 
+	private String deptId;
+
+	private String deptName;
+
+	@JsonSerialize(using = ToStringSerializer.class)
+	private Long taskId;
+
+	private String taskName;
+
+	private Integer number;
+
+	private Integer averageSpeed;
 }

@@ -94,7 +94,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 
 	@Override
 	public int completeCount(Long taskId) {
-		return baseMapper.completeCount(env, taskId);
+		return baseMapper.completeCount(taskId);
 	}
 
 	@Override

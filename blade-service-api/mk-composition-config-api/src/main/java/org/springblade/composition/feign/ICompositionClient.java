@@ -41,6 +41,7 @@ public interface ICompositionClient {
 	String API_PREFIX = "/client";
 	String GET_COMPOSITION_BY_ID = API_PREFIX + "/mk-composition-config/get-composition-by-id";
 	String SUBMIT_COMPOSITION = API_PREFIX + "/mk-composition-config/submit-composition";
+	String GET_COMPLEMENT_COMPOSITION_ID = API_PREFIX + "/mk-composition-config/get-complement-composition-id";
 
 
 	/**
@@ -54,4 +55,10 @@ public interface ICompositionClient {
 	 */
 	@PostMapping(SUBMIT_COMPOSITION)
 	R<Boolean> submit(@RequestBody Composition composition);
+
+	/**
+	 * 获取补充信息组合Id
+	 */
+	@GetMapping(GET_COMPLEMENT_COMPOSITION_ID)
+	R<Long> getComplementCompositionId(@RequestParam("tenantId") String tenantId);
 }

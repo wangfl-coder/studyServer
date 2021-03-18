@@ -19,11 +19,14 @@ package org.springblade.composition.feign;
 import lombok.AllArgsConstructor;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
+import org.springblade.composition.entity.TemplateComposition;
 import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.ITemplateService;
+import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
+import org.springblade.core.tool.utils.Func;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -61,5 +64,18 @@ public class CompositionClient implements ICompositionClient {
 	public R<Boolean> submit(@RequestBody Composition composition) {
 		boolean res = service.saveOrUpdate(composition);
 		return R.data(res);
+	}
+
+	/**
+	 * 获取补充信息组合Id
+	 */
+	@Override
+	@GetMapping(GET_COMPLEMENT_COMPOSITION_ID)
+	public R<Long> getComplementCompositionId(@RequestParam("tenantId") String tenantId) {
+		Composition composition = new Composition();
+		composition.setTenantId(tenantId);
+		composition.setName("补充信息");
+		Composition compositionRes = service.getOne(Condition.getQueryWrapper(composition));
+		return R.data(compositionRes.getId());
 	}
 }

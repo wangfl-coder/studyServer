@@ -22,7 +22,7 @@
     <select id="allCompositions" resultMap="compositionResultMap">
         select c.* from `mk_composition` c
         inner join `mk_template_composition` tc
-        on c.id=tc.composition_id where tc.template_id=#{param1} and tc.is_deleted=0
+        on c.id=tc.composition_id where tc.template_id=#{templateId} and tc.is_deleted=0
     </select>
 
 </mapper>

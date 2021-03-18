@@ -14,20 +14,20 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.vo;
+package org.springblade.composition.vo.statistics;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
-import org.springblade.composition.dto.UserComposition;
+import org.springblade.composition.dto.statistics.DeptTask;
 
 /**
- * 数据传输对象实体类
+ * 视图对象实体类
  *
  * @author Chill
  */
 @Data
-@ApiModel(value = "UserCompositionVO对象", description = "UserCompositionVO对象")
-public class UserCompositionVO extends UserComposition {
+@ApiModel(value = "DeptTaskVO对象", description = "DeptTaskVO对象")
+public class DeptTaskVO extends DeptTask {
 
 	private Integer wrong;
 }

@@ -112,8 +112,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				return null;
 			}
 		}else if (null != bladeFlow.getCompositionId()) {
-			labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
-			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, Long.valueOf(bladeFlow.getCompositionId()));
+			labelRes = flowMapper.getLabelRoleAliasByCompositionId(Long.valueOf(bladeFlow.getCompositionId()));
+			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(Long.valueOf(bladeFlow.getCompositionId()));
 			String roles[] = AuthUtil.getUserRole().split(",");
 			labelRes.retainAll(Arrays.asList(roles));
 			inspectionRes.retainAll(Arrays.asList(roles));
@@ -191,8 +191,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				return null;
 			}
 		}else if (null != compositionId) {
-			labelRes = flowMapper.getLabelRoleAliasByCompositionId(env, compositionId);
-			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(env, compositionId);
+			labelRes = flowMapper.getLabelRoleAliasByCompositionId(compositionId);
+			inspectionRes = flowMapper.getInspectionRoleAliasByCompositionId(compositionId);
 			String roles[] = AuthUtil.getUserRole().split(",");
 			labelRes.retainAll(Arrays.asList(roles));
 			inspectionRes.retainAll(Arrays.asList(roles));
@@ -207,7 +207,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		}
 
 		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
+			/*.includeProcessVariables()*/.active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
@@ -247,7 +247,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 
 		for(SingleFlow flow: flowList) {
 			if (null != flow.getCompositionId()) {
-				Role role = flowMapper.getRoleByTemplateComposition(env, flow.getTemplateId(), Long.valueOf(flow.getCompositionId()));
+				Role role = flowMapper.getRoleByTemplateComposition(flow.getTemplateId(), Long.valueOf(flow.getCompositionId()));
 				flow.setRoleId(role.getId());
 			}
 		}
@@ -257,10 +257,12 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //		page.setSize(count);
 		// 设置总数
 		Integer total = (Integer)labelTaskClient.queryLabelTaskTodoCount(taskUser).getData();
-		if(bladeFlow.getCategoryName().equals("标注流程")){
-			page.setTotal(total);
-		} else if(bladeFlow.getCategoryName().equals("质检流程")){
-			page.setTotal(count-total);
+		if (total!=null) {
+			if (bladeFlow.getCategoryName().equals("标注流程")) {
+				page.setTotal(total);
+			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+				page.setTotal(count - total);
+			}
 		}
 		// 设置数据
 		page.setRecords(flowList);
@@ -920,8 +922,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			UserTask userTask = (UserTask)bpmnModel.getFlowElement(task.getTaskDefinitionKey());
 			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
-			if (Func.isNotEmpty(extCompId))
-				flow.setCompositionId(extCompId.get(0).getElementText());
+			if (extCompId != null) {
+				Long extCompIdNum = Long.valueOf(extCompId.get(0).getElementText());
+				if (extCompIdNum.longValue() == -1 && !AuthUtil.getTenantId().equals("000000")) {	//为老模版建的老任务，老数据兼容
+					R<Long> res = compositionClient.getComplementCompositionId(AuthUtil.getTenantId());
+					if (res.isSuccess()){
+						flow.setCompositionId(res.getData().toString());
+					}
+				} else {
+					flow.setCompositionId(extCompIdNum.toString());
+				}
+			}
 			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 			if (Func.isNotEmpty(extCompType))
 				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -1078,11 +1089,19 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (!Func.hasEmpty(compositionId, extCompId)) {
 				Long extCompIdNum = Long.valueOf(extCompId.get(0).getElementText());
-				if (!compositionId.equals(extCompIdNum))
-					continue;
-				flow.setCompositionId(extCompId.get(0).getElementText());
+				boolean t1 = extCompIdNum!=null;
+				boolean t2 = extCompIdNum.longValue() == -1;
+				boolean t3 = !AuthUtil.getTenantId().equals("000000");
+				if (extCompIdNum!=null && extCompIdNum.longValue() == -1 && !AuthUtil.getTenantId().equals("000000")) {	//为老模版建的老任务，老数据兼容
+					flow.setCompositionId(compositionId.toString());
+				}else {
+					if (!compositionId.equals(extCompIdNum))
+						continue;
+					flow.setCompositionId(extCompId.get(0).getElementText());
+				}
 			}
-			Map<String, Object> processVariables = task.getProcessVariables();
+			Map<String, Object> processVariables = runtimeService.getVariables(task.getProcessInstanceId());
+//			Map<String, Object> processVariables = task.getProcessVariables();
 			if (processVariables.containsKey(task.getName()+"-"+AuthUtil.getUserId()+"-done")) {
 				continue;
 			}
@@ -1125,7 +1144,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setPersonName(labelTask.getPersonName());
 					flow.setSubTaskId(labelTask.getId());
 					if (null != flow.getCompositionId()) {
-						Role role = flowMapper.getRoleByTemplateComposition(env, flow.getTemplateId(), Long.valueOf(flow.getCompositionId()));
+						Role role = flowMapper.getRoleByTemplateComposition(flow.getTemplateId(), Long.valueOf(flow.getCompositionId()));
 						flow.setRoleId(role.getId());
 					}
 					return flow;
