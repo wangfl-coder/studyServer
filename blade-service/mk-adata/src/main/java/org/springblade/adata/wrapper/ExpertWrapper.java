@@ -17,6 +17,7 @@
 package org.springblade.adata.wrapper;
 
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertOrigin;
 import org.springblade.adata.vo.ExpertVO;
 import org.springblade.core.mp.support.BaseEntityWrapper;
 import org.springblade.core.tool.utils.BeanUtil;

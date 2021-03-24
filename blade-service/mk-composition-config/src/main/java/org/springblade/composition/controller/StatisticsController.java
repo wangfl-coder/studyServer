@@ -103,7 +103,7 @@ public class StatisticsController extends BladeController {
 		List<TaskComposition> totalList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,null,taskType,statisticsType);
 		List<TaskComposition> todoList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,2,taskType,statisticsType);
 		List<TaskComposition> doneList = statisticsMapper.taskCompositionCount2(startTime,endTime,taskId,1,taskType,statisticsType);
-		List<TaskComposition> wrongList = statisticsMapper.taskCompositionWrongCount2(startTime,endTime,taskId,taskType);
+		List<TaskComposition> wrongList = statisticsMapper.taskCompositionWrongCount2(startTime,endTime,taskId,taskType,statisticsType);
 		List<TaskCompositionVO> resList = new ArrayList<>();
 		totalList.forEach(total -> {
 			TaskCompositionVO taskCompositionVO = Objects.requireNonNull(BeanUtil.copy(total, TaskCompositionVO.class));

@@ -31,14 +31,17 @@ import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.dto.MergeExpertTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
+import org.springblade.task.enums.TaskStatusEnum;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.service.MergeExpertTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springblade.task.vo.TaskVO;
@@ -61,6 +64,7 @@ public class TaskController extends BladeController {
 	private LabelTaskService labelTaskService;
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
+	private MergeExpertTaskService mergeExpertTaskService;
 	private IStatisticsClient statisticsClient;
 	private IFlowClient flowClient;
 	private TaskMapper taskMapper;
@@ -123,6 +127,30 @@ public class TaskController extends BladeController {
 		}
 	}
 
+	@PostMapping(value = "/merge-expert/save")
+	@ApiOperation(value = "添加质检任务")
+	public R mergeExpertSave(@RequestBody MergeExpertTaskDTO mergeExpertTaskDTO) {
+		Boolean result;
+		Task task = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
+//		if (task.getStatus() != TaskStatusEnum.EXPORTED.getNum()) {
+//			return R.fail("这个标注任务并未生效，无法合并");
+//		}
+		Task mergeTask = Objects.requireNonNull(BeanUtil.copy(mergeExpertTaskDTO, Task.class));
+		List<LabelTask> labelTasks = labelTaskService.getByTaskId(mergeTask.getAnnotationTaskId());
+		if (labelTasks.size() > 0) {
+			boolean save = taskService.save(mergeTask);
+			try {
+				result = mergeExpertTaskService.startProcess(mergeExpertTaskDTO.getProcessDefinitionId(), labelTasks.size(), 0, mergeTask, labelTasks);
+				return R.status(result);
+			} catch (Exception e) {
+				taskService.removeById(mergeTask.getId());
+				return R.fail("创建质检小任务失败");
+			}
+		}else{
+			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
+		}
+	}
+
 	@PostMapping(value = "/save")
 	@ApiOperation(value = "添加标注任务")
 	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
@@ -152,6 +180,7 @@ public class TaskController extends BladeController {
 					experts);
 				task.setCount(experts.size());
 				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
+				task.setStatus(TaskStatusEnum.IMPORTED.getNum());
 				taskService.saveOrUpdate(task);
 			} else {
 				return R.fail("读取专家列表失败");

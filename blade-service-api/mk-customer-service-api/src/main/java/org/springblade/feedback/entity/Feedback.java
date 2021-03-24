@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
  * @since 2021-03-22
  */
 @Data
-@TableName("mk_customer_service")
+@TableName("mk_feedback")
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "Feedback对象", description = "Feedback对象")
 public class Feedback extends BaseEntity {

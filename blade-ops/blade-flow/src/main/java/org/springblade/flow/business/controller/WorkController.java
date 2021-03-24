@@ -31,9 +31,11 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.common.cache.CacheNames;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.redis.cache.BladeRedis;
 import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
@@ -55,6 +57,7 @@ import org.springblade.task.vo.CompositionClaimListVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -78,6 +81,7 @@ public class WorkController {
 	private final ITaskClient taskClient;
 	private final ILabelTaskClient labelTaskClient;
 	private final IExpertClient expertClient;
+	private final BladeRedis bladeRedis;
 
 
 	/**
@@ -122,6 +126,12 @@ public class WorkController {
 //		}else {
 //			return null;
 //		}
+		String redisCode = this.bladeRedis.get(CacheNames.FLOW_CLAIMONE_KEY + AuthUtil.getUserId());
+		if (redisCode != null) {
+			return R.fail("领取任务过快");
+		}
+		String uuid = StringUtil.randomUUID();
+		bladeRedis.setEx(CacheNames.FLOW_CLAIMONE_KEY + AuthUtil.getUserId(), uuid, Duration.ofSeconds(1));
 		SingleFlow flow = flowBusinessService.selectOneClaimPage(categoryName, roleId, compositionId);
 		if(flow.getTaskId()!=null){
 			// 判断是否出现真题,主页，补充信息，含有bio,bioZh,work,edu等基本信息字段的组合没有真题。其他情况通过掺入比例依概率产生真题。
@@ -243,7 +253,11 @@ public class WorkController {
 	@ApiOperation(value = "完成任务", notes = "传入流程信息")
 	public R completeTask(@ApiParam("任务信息") @RequestBody SingleFlow flow) {
 		if (!flow.getStatus().equals("finish")) {
-			return R.status(flowBusinessService.completeTask(flow));
+			try {
+				return R.status(flowBusinessService.completeTask(flow));
+			} catch (FlowableObjectNotFoundException e) {
+				return R.fail(e.getMessage());
+			}
 		}else {
 			return R.status(flowBusinessService.changeTaskComment(flow));
 		}

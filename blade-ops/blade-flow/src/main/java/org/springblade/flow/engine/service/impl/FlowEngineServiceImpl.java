@@ -431,7 +431,11 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			"biFlow*", "biPassFlow*",
 			"exclusiveGateway*",  "exclusiveCollectGateway*", "biBreakFlow*",
 			"labelBiTask*", "labelBiFlow*", "labelBiPassFlow*",
-			"inspectBiTask*", "inspectBiFlow*", "inspectBiPassFlow*"
+			"inspectBiTask*", "inspectBiFlow*", "inspectBiPassFlow*",
+
+			"siFlow*", "siPassFlow*", "bioLabelPassFlow", "bioRandomPassFlow", "bioRandomInspectFlow", "bioInspectPassFlow",
+			"labelBioTask", "inspectBioTask",
+			"bioInspectionGateway","bioInspectionCollectGateway"
 		};
 		Process process = bpmnModel.getProcesses().get(0);
 		List<FlowElement> flowElementList = (List<FlowElement>) process.getFlowElements();
@@ -474,22 +478,160 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			if (dataObject.getName().equals("hasBio"))
 				bioDataObject = dataObject;
 		}
-		boolean hasBio = setTaskRoleNameByComposition(flowElementList, filteredElementMap, "labelBioTask", "inspectBioTask", 5, templateCompositions);
-		if (hasBio)
+		AtomicBoolean atomicHasBio = new AtomicBoolean(false);
+		templateCompositions.forEach(templateComposition -> {
+			if (5 == templateComposition.getCompositionType()) {    //	主页标注/工作、教育经历标注/中英文简介标注
+				atomicHasBio.set(true);
+//				HashMap<String, String> dict = new HashMap<>();
+//				dict.put("id", templateComposition.getCompositionId().toString());
+
+				// siFlow*
+				SequenceFlow siFlow = new SequenceFlow();
+				siFlow.setId("siFlow"+counter.get());
+				siFlow.setSourceRef("distributeSamplingInspectionTaskGateway");
+				siFlow.setTargetRef("labelBioTask"+counter.get());
+				siFlow.setParentContainer(process);
+				List<SequenceFlow> labelBioTaskIncomingFlows = new ArrayList<>();
+				labelBioTaskIncomingFlows.add(siFlow);
+
+				// bioLabelPassFlow*
+				SequenceFlow bioLabelPassFlow = new SequenceFlow();
+				bioLabelPassFlow.setId("bioLabelPassFlow"+counter.get());
+				bioLabelPassFlow.setSourceRef("labelBioTask"+counter.get());
+				bioLabelPassFlow.setTargetRef("bioInspectionGateway"+counter.get());
+				bioLabelPassFlow.setParentContainer(process);
+				bioLabelPassFlow.setName("个人简介信息标注完成"+counter.get());
+				bioLabelPassFlow.setConditionExpression("${pass}");
+				List<SequenceFlow> bioInspectionGatewayIncomingFlows = new ArrayList<>();
+				bioInspectionGatewayIncomingFlows.add(bioLabelPassFlow);
+				List<SequenceFlow> labelBioTaskOutgoingFlows = new ArrayList<>();
+				labelBioTaskOutgoingFlows.add(bioLabelPassFlow);
+
+				// bioRandomInspectFlow*
+				SequenceFlow bioRandomInspectFlow = new SequenceFlow();
+				bioRandomInspectFlow.setId("bioRandomInspectFlow"+counter.get());
+				bioRandomInspectFlow.setSourceRef("bioInspectionGateway"+counter.get());
+				bioRandomInspectFlow.setTargetRef("inspectBioTask"+counter.get());
+				bioRandomInspectFlow.setParentContainer(process);
+				bioRandomInspectFlow.setName("抽检"+counter.get());
+				bioRandomInspectFlow.setConditionExpression("${isBioNeedInspect}");
+				List<SequenceFlow> inspectBioTaskIncomingFlows = new ArrayList<>();
+				inspectBioTaskIncomingFlows.add(bioRandomInspectFlow);
+				List<SequenceFlow> bioInspectionGatewayOutgoingFlows = new ArrayList<>();
+				bioInspectionGatewayOutgoingFlows.add(bioRandomInspectFlow);
+
+				// bioRandomPassFlow*
+				SequenceFlow bioRandomPassFlow = new SequenceFlow();
+				bioRandomPassFlow.setId("bioRandomPassFlow"+counter.get());
+				bioRandomPassFlow.setSourceRef("bioInspectionGateway"+counter.get());
+				bioRandomPassFlow.setTargetRef("bioInspectionCollectGateway"+counter.get());
+				bioRandomPassFlow.setParentContainer(process);
+				bioRandomPassFlow.setName("不抽检"+counter.get());
+				bioRandomPassFlow.setConditionExpression("${!isBioNeedInspect}");
+				List<SequenceFlow> bioInspectionCollectGatewayIncomingFlows = new ArrayList<>();
+				bioInspectionCollectGatewayIncomingFlows.add(bioRandomPassFlow);
+//				List<SequenceFlow> bioInspectionGatewayOutgoingFlows = new ArrayList<>();
+				bioInspectionGatewayOutgoingFlows.add(bioRandomPassFlow);
+
+				// bioInspectPassFlow*
+				SequenceFlow bioInspectPassFlow = new SequenceFlow();
+				bioInspectPassFlow.setId("bioInspectPassFlow"+counter.get());
+				bioInspectPassFlow.setSourceRef("inspectBioTask"+counter.get());
+				bioInspectPassFlow.setTargetRef("bioInspectionCollectGateway"+counter.get());
+				bioInspectPassFlow.setParentContainer(process);
+				bioInspectPassFlow.setName("质检完成"+counter.get());
+				bioInspectPassFlow.setConditionExpression("${pass}");
+//				List<SequenceFlow> bioInspectionCollectGatewayIncomingFlows = new ArrayList<>();
+				bioInspectionCollectGatewayIncomingFlows.add(bioInspectPassFlow);
+				List<SequenceFlow> inspectBioTaskOutgoingFlows = new ArrayList<>();
+				inspectBioTaskOutgoingFlows.add(bioInspectPassFlow);
+
+				// siPassFlow*
+				SequenceFlow siPassFlow = new SequenceFlow();
+				siPassFlow.setId("siPassFlow"+counter.get());
+				siPassFlow.setSourceRef("bioInspectionCollectGateway"+counter.get());
+				siPassFlow.setTargetRef("collectSamplingInspectionTaskGateway");
+				siPassFlow.setParentContainer(process);
+				List<SequenceFlow> bioInspectionCollectGatewayOutgoingFlows = new ArrayList<>();
+				bioInspectionCollectGatewayOutgoingFlows.add(siPassFlow);
+
+				Gateway bioInspectionGateway = new ExclusiveGateway();
+				bioInspectionGateway.setId("bioInspectionGateway"+counter.get());
+				bioInspectionGateway.setIncomingFlows(bioInspectionGatewayIncomingFlows);
+				bioInspectionGateway.setOutgoingFlows(bioInspectionGatewayOutgoingFlows);
+
+				Gateway bioInspectionCollectGateway = new ExclusiveGateway();
+				bioInspectionCollectGateway.setId("bioInspectionCollectGateway"+counter.get());
+				bioInspectionCollectGateway.setIncomingFlows(bioInspectionCollectGatewayIncomingFlows);
+				bioInspectionCollectGateway.setOutgoingFlows(bioInspectionCollectGatewayOutgoingFlows);
+
+				UserTask labelBioTask = new UserTask();
+				labelBioTask.setId("labelBioTask"+counter.get());
+				labelBioTask.setName(templateComposition.getCompositionName());
+				List<String> labelCandidateGroups = new ArrayList<>();
+				labelCandidateGroups.add(templateComposition.getLabelRoleName());
+				labelBioTask.setCandidateGroups(labelCandidateGroups);
+				labelBioTask.setIncomingFlows(labelBioTaskIncomingFlows);
+				labelBioTask.setOutgoingFlows(labelBioTaskOutgoingFlows);
+				List<CustomProperty> labelPropertyList = buildCustomPropertyListWithComposition(templateComposition, false);
+				labelBioTask.setCustomProperties(labelPropertyList);
+
+				UserTask inspectBioTask = new UserTask();
+				inspectBioTask.setId("inspectBioTask"+counter.get());
+				inspectBioTask.setName(templateComposition.getCompositionName());
+				List<String> inspectionCandidateGroups = new ArrayList<>();
+				inspectionCandidateGroups.add(templateComposition.getInspectionRoleName());
+				inspectBioTask.setCandidateGroups(inspectionCandidateGroups);
+				inspectBioTask.setIncomingFlows(inspectBioTaskIncomingFlows);
+				inspectBioTask.setOutgoingFlows(inspectBioTaskOutgoingFlows);
+				List<CustomProperty> inspectPropertyList = buildCustomPropertyListWithComposition(templateComposition, true);
+				inspectBioTask.setCustomProperties(inspectPropertyList);
+
+				flowElementList.add(siFlow);
+				flowElementList.add(bioLabelPassFlow);
+				flowElementList.add(bioRandomInspectFlow);
+				flowElementList.add(bioRandomPassFlow);
+				flowElementList.add(bioInspectPassFlow);
+				flowElementList.add(siPassFlow);
+				flowElementList.add(bioInspectionGateway);
+				flowElementList.add(bioInspectionCollectGateway);
+				flowElementList.add(labelBioTask);
+				flowElementList.add(inspectBioTask);
+				filteredElementMap.put(siFlow.getId(), siFlow);
+				filteredElementMap.put(bioLabelPassFlow.getId(), bioLabelPassFlow);
+				filteredElementMap.put(bioRandomInspectFlow.getId(), bioRandomInspectFlow);
+				filteredElementMap.put(bioRandomPassFlow.getId(), bioRandomPassFlow);
+				filteredElementMap.put(bioInspectPassFlow.getId(), bioInspectPassFlow);
+				filteredElementMap.put(siPassFlow.getId(), siPassFlow);
+				filteredElementMap.put(bioInspectionGateway.getId(), bioInspectionGateway);
+				filteredElementMap.put(bioInspectionCollectGateway.getId(), bioInspectionCollectGateway);
+				filteredElementMap.put(labelBioTask.getId(), labelBioTask);
+				filteredElementMap.put(inspectBioTask.getId(), inspectBioTask);
+				counter.getAndIncrement();
+			}
+		});
+		if (atomicHasBio.get())
 			bioDataObject.setValue(true);
 		else
 			bioDataObject.setValue(false);
 
-
+		ValuedDataObject iaaDataObject = null;
+		for (ValuedDataObject dataObject: dataObjects ) {
+			if (dataObject.getName().equals("hasIAA"))
+				iaaDataObject = dataObject;
+		}
+		AtomicBoolean atomicHasIAA = new AtomicBoolean(false);
+		counter.set(1);
 		templateCompositions.forEach(templateComposition -> {
 			if (2 == templateComposition.getCompositionType()) {	//基本信息标注
+				atomicHasIAA.set(true);
 				HashMap<String, String> dict = new HashMap<>();
 				dict.put("id", templateComposition.getCompositionId().toString());
 
 				// biFlow*
 				SequenceFlow biFlow = new SequenceFlow();
 				biFlow.setId("biFlow"+counter.get());
-				biFlow.setSourceRef("distributeTaskGateway");
+				biFlow.setSourceRef("distributeIAATaskGateway");
 				biFlow.setTargetRef("exclusiveGateway"+counter.get());
 				biFlow.setParentContainer(process);
 				List<SequenceFlow> exclusiveGatewayIncomingFlows = new ArrayList<>();
@@ -516,7 +658,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				labelBiPassFlow.setSourceRef("labelBiTask"+counter.get());
 				labelBiPassFlow.setTargetRef("exclusiveGateway"+counter.get());
 				labelBiPassFlow.setParentContainer(process);
-				labelBiPassFlow.setName("基本信息标注完成1");
+				labelBiPassFlow.setName("基本信息标注完成"+counter.get());
 				labelBiPassFlow.setConditionExpression("${pass}");
 //				List<SequenceFlow> exclusiveGatewayIncomingFlows = new ArrayList<>();
 				exclusiveGatewayIncomingFlows.add(labelBiPassFlow);
@@ -544,7 +686,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				inspectBiPassFlow.setSourceRef("inspectBiTask"+counter.get());
 				inspectBiPassFlow.setTargetRef("exclusiveCollectGateway"+counter.get());
 				inspectBiPassFlow.setParentContainer(process);
-				inspectBiPassFlow.setName("个人信息质检完成1");
+				inspectBiPassFlow.setName("个人信息质检完成"+counter.get());
 				inspectBiPassFlow.setConditionExpression("${pass}");
 				List<SequenceFlow> exclusiveCollectGatewayIncomingFlows = new ArrayList<>();
 				exclusiveGatewayIncomingFlows.add(inspectBiPassFlow);
@@ -570,7 +712,7 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				SequenceFlow biPassFlow = new SequenceFlow();
 				biPassFlow.setId("biPassFlow"+counter.get());
 				biPassFlow.setSourceRef("exclusiveCollectGateway"+counter.get());
-				biPassFlow.setTargetRef("collectTaskGateway");
+				biPassFlow.setTargetRef("collectIAATaskGateway");
 				biPassFlow.setParentContainer(process);
 				List<SequenceFlow> exclusiveCollectGatewayOutgoingFlows = new ArrayList<>();
 				exclusiveCollectGatewayOutgoingFlows.add(biPassFlow);
@@ -632,6 +774,10 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 				counter.getAndIncrement();
 			}
 		});
+		if (atomicHasIAA.get())
+			iaaDataObject.setValue(true);
+		else
+			iaaDataObject.setValue(false);
 
 		// 补充信息任务设置角色
 		AtomicBoolean hasComplementInfo = new AtomicBoolean(false);
@@ -642,13 +788,17 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 						hasComplementInfo.set(true);
 						UserTask userTask =  (UserTask)flowElement;
 						List<String> candidateGroups = new ArrayList<>();
-						candidateGroups.add(templateDTO.getMoreMessageRoleName());
+						candidateGroups.add(templateComposition.getLabelRoleName());
 						userTask.setCandidateGroups(candidateGroups);
 						List<CustomProperty> customPropertyList = new ArrayList<>();
 						CustomProperty compositionIdProperty = new CustomProperty();
 						compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
 						compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+						CustomProperty compositionTypeProperty = new CustomProperty();
+						compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+						compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
 						customPropertyList.add(compositionIdProperty);
+						customPropertyList.add(compositionTypeProperty);
 						userTask.setCustomProperties(customPropertyList);
 					}
 				});
@@ -658,13 +808,17 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 			if (3 == templateComposition.getCompositionType()) {	//补充信息标注
 				UserTask userTask =  (UserTask)filteredElementMap.get("complementInfoTask");
 				List<String> candidateGroups = new ArrayList<>();
-				candidateGroups.add(templateDTO.getMoreMessageRoleName());
+				candidateGroups.add(templateComposition.getLabelRoleName());
 				userTask.setCandidateGroups(candidateGroups);
 				List<CustomProperty> customPropertyList = new ArrayList<>();
 				CustomProperty compositionIdProperty = new CustomProperty();
 				compositionIdProperty.setName(ProcessConstant.COMPOSITION_ID);
 				compositionIdProperty.setSimpleValue(templateComposition.getCompositionId().toString());
+				CustomProperty compositionTypeProperty = new CustomProperty();
+				compositionTypeProperty.setName(ProcessConstant.COMPOSITION_TYPE);
+				compositionTypeProperty.setSimpleValue(String.valueOf(templateComposition.getCompositionType()));
 				customPropertyList.add(compositionIdProperty);
+				customPropertyList.add(compositionTypeProperty);
 				userTask.setCustomProperties(customPropertyList);
 				filteredElementMap.put("complementInfoTask", userTask);
 			}

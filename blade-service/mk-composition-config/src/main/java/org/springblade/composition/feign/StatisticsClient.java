@@ -36,6 +36,7 @@ import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -150,6 +152,21 @@ public class StatisticsClient implements IStatisticsClient {
 	}
 
 	@Override
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK)
+	@Transactional(rollbackFor = Exception.class)
+	public R initializeSingleCompositionTask(Integer type, Long subTaskId, Long templateId, Long compositionId) {
+
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(subTaskId);
+			statistics.setCompositionId(compositionId);
+			statistics.setTemplateId(templateId);
+			statistics.setType(type);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
+		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
 	@GetMapping(MARK_AS_COMPLETE)
 	public R markAsComplete(Integer type, Long subTaskId, Long compositionId) {
 		boolean res = statisticsService.update(Wrappers.<Statistics>update().lambda().set(Statistics::getStatus, 2)
@@ -159,6 +176,34 @@ public class StatisticsClient implements IStatisticsClient {
 			.eq(Statistics::getUserId, AuthUtil.getUserId())
 		);
 		return R.status(res);
+	}
+
+	@Override
+	@GetMapping(IF_NEED_TO_REMOVE_BASICINFO_STATISTICS)
+	public R ifNeedToRemoveBasicInfoStatistics(Long labelTaskId, Long templateId, Long compositionId) {
+		List<Composition> compositions = templateService.allCompositions(templateId);
+		List<String> homepageFields = new ArrayList<>();
+		AtomicInteger homepageExists = new AtomicInteger(0);
+		compositions.forEach(composition -> {
+			if (1 == composition.getAnnotationType()) {
+				List<AnnotationData> annotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+					.eq(AnnotationData::getSubTaskId, labelTaskId)
+					.eq(AnnotationData::getCompositionId, compositionId)
+				);
+				annotationDataList.forEach(annotationData -> {
+					if (StringUtil.isNotBlank(annotationData.getValue())){
+						homepageExists.getAndIncrement();
+					}
+				});
+			}
+		});
+		if (homepageExists.get() == 0) {
+			boolean res = statisticsService.update(Wrappers.<Statistics>update().lambda().set(Statistics::getIsDeleted, 1)
+				.eq(Statistics::getTime, 0)
+				.eq(Statistics::getSubTaskId, labelTaskId)
+			);
+		}
+		return R.status(true);
 	}
 
 	@Override
@@ -289,9 +334,7 @@ public class StatisticsClient implements IStatisticsClient {
 						}
 					}
 				}
-				if (sameNum > 0) {
-					sameCount.put(entry.getKey(), sameNum);
-				}
+				sameCount.put(entry.getKey(), sameNum);
 			} else if (entry.getKey().equals("titles") || entry.getKey().equals("titlesDesc")) {
 				if (entry.getKey().equals("titles")) {
 					//职称字段先两两对比，在-1时需要对比职称其它字段中的内容
@@ -498,24 +541,44 @@ public class StatisticsClient implements IStatisticsClient {
 
 		if ((int)kv.get("biCounter") == 2 && (int)kv.get("biSame") == 0) {
 			//准备给第三人，建个统计
-			Statistics statistics = new Statistics();
-			statistics.setSubTaskId(labelTaskId);
-			statistics.setCompositionId(compositionId);
-			statistics.setTemplateId(templateId);
-			statistics.setType(1);
-			statistics.setStatus(1);
-			statisticsService.save(statistics);
+			Statistics statistics_query = new Statistics();
+			statistics_query.setSubTaskId(labelTaskId);
+			statistics_query.setCompositionId(compositionId);
+			statistics_query.setTemplateId(templateId);
+			statistics_query.setType(1);
+			statistics_query.setStatus(1);
+
+			Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+			if (statistics == null) {
+				Statistics stat_new = new Statistics();
+				stat_new.setSubTaskId(labelTaskId);
+				stat_new.setCompositionId(compositionId);
+				stat_new.setTemplateId(templateId);
+				stat_new.setType(1);
+				stat_new.setStatus(1);
+				statisticsService.save(stat_new);
+			}
 		}
 
 		if ((int)kv.get("biCounter") == 3 && (int)kv.get("biSame") == 0) {
 			//准备去质检，建个统计
-			Statistics statistics = new Statistics();
-			statistics.setSubTaskId(labelTaskId);
-			statistics.setCompositionId(compositionId);
-			statistics.setTemplateId(templateId);
-			statistics.setType(3);
-			statistics.setStatus(1);
-			statisticsService.save(statistics);
+			Statistics statistics_query = new Statistics();
+			statistics_query.setSubTaskId(labelTaskId);
+			statistics_query.setCompositionId(compositionId);
+			statistics_query.setTemplateId(templateId);
+			statistics_query.setType(3);
+			statistics_query.setStatus(1);
+
+			Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+			if (statistics == null){
+				Statistics stat_new = new Statistics();
+				stat_new.setSubTaskId(labelTaskId);
+				stat_new.setCompositionId(compositionId);
+				stat_new.setTemplateId(templateId);
+				stat_new.setType(3);
+				stat_new.setStatus(1);
+				statisticsService.save(stat_new);
+			}
 		}
 
 		return R.data(kv);

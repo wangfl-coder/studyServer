@@ -140,8 +140,11 @@
         <if test="taskId!=null">
             and l.task_id=#{taskId}
         </if>
-        <if test="type!=null">
-            and l.type=#{type}
+        <if test="taskType!=null">
+            and l.type=#{taskType}
+        </if>
+        <if test="statisticsType!=null">
+            and s.type=#{statisticsType}
         </if>
 
         and s.is_deleted=0

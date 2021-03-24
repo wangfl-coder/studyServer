@@ -21,40 +21,29 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import jodd.util.ThreadUtil;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.ExpertExtend;
 import org.springblade.adata.entity.ExpertOrigin;
-import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.magic.MagicRequest;
-import org.springblade.adata.mapper.ExpertMapper;
+import org.springblade.adata.mapper.ExpertOriginMapper;
 import org.springblade.adata.service.IExpertExtendService;
 import org.springblade.adata.service.IExpertOriginService;
-import org.springblade.adata.service.IExpertService;
 import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.mp.base.BaseServiceImpl;
-import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.utils.AuthUtil;
-import org.springblade.core.tool.api.R;
-
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
-import org.springblade.core.tool.utils.CollectionUtil;
-import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.system.user.entity.User;
 import org.springblade.system.user.feign.IUserClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,12 +59,16 @@ import java.util.stream.Stream;
  */
 @Service
 @AllArgsConstructor
-public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> implements IExpertService {
+public class ExpertOriginServiceImpl extends BaseServiceImpl<ExpertOriginMapper, ExpertOrigin> implements IExpertOriginService {
 
 	private final ITemplateClient iTemplateClient;
 	private final IUserClient iUserClient;
 	private final IExpertExtendService expertExtendService;
-	private final IExpertOriginService expertOriginService;
+
+	@Override
+	public boolean saveOrUpdate(ExpertOrigin entity) {
+		return baseMapper.selectById(entity.getId()) == null ? this.save(entity) : this.updateById(entity);
+	}
 
 	@Override
 	public String fetchDetail(String id) {
@@ -187,199 +180,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 	}
 
 	@Override
-	public Boolean importDetailAndSave(String tenantId, String id, Long taskId) {
-		Expert expert = importDetail(tenantId, id, taskId);
-		saveOrUpdate(expert);
-		ExpertOrigin expertOrigin = Objects.requireNonNull(BeanUtil.copy(expert, ExpertOrigin.class));
-		boolean result = expertOriginService.saveOrUpdate(expertOrigin);
-		return true;
-	}
-
-	/**
-	 * 每次20个学者请求一次智库
-	 * @param ebId
-	 * @param taskId
-	 * @return
-	 */
-	public int getExperts(String tenantId, String ebId, Long taskId, int offset, int size) {
-		JSONArray requestBody = new JSONArray();
-		JSONObject body = new JSONObject();
-
-		JSONObject parameters = new JSONObject();
-		JSONObject filters = new JSONObject();
-		JSONObject dims = new JSONObject();
-		JSONArray eb = new JSONArray();
-		eb.add(ebId);
-		dims.put("eb", eb);
-		filters.put("dims", dims);
-		parameters.put("filters", filters);
-		parameters.put("searchType", "all");
-		parameters.put("offset", offset);
-		parameters.put("size", size);
-		JSONArray sorts = new JSONArray();
-		sorts.add("_id");
-		parameters.put("sorts",sorts);
-
-
-		JSONObject schema = new JSONObject();
-		JSONArray expert = new JSONArray();
-		expert.add("id");
-		schema.put("person", expert);
-
-		body.put("action", "search.search");
-		body.put("parameters", parameters);
-		body.put("schema", schema);
-		requestBody.add(body);
-		String res = MagicRequest.getInstance().magic(requestBody.toString());
-
-		//解析json,拿到每个学者的id
-		JSONObject resObj = JSON.parseObject(res);
-		JSONArray dataArray = resObj.getJSONArray("data");
-		JSONObject tempObj = dataArray.getJSONObject(0);
-		int total = tempObj.getInteger("total");
-		JSONArray experts = tempObj.getJSONArray("items");
-		// 存在有的智库中没有学者
-		if (total == 0) {
-			return 0;
-		}
-		for (int i = 0; i < experts.size(); i++) {
-			String expert_id = experts.getJSONObject(i).getString("id");
-			importDetailAndSave(tenantId, expert_id, taskId);
-		}
-		return total;
-	}
-
-
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public Boolean importExpertBase(String ebId, Long taskId) {
-		if (ebId == null) {
-			return false;
-		}
-		String tenantId = AuthUtil.getTenantId();
-		// 首先导入智库下20个学者，并且得到这个智库下一共有多少学者
-//		for (int i=0;i<200;i++) {
-			int total = getExperts(tenantId, ebId, taskId, 0, 20);
-//		}
-
-		// 循环导入剩下的学者
-		int number = (total-1) / 20;
-		List<Integer> numbers = Stream.iterate(1, n -> n + 1)
-			.limit(number)
-			.collect(Collectors.toList());
-
-		numbers.parallelStream().forEach(i -> {
-			getExperts(tenantId, ebId, taskId, i * 20, 20);
-		});
-		return true;
-	}
-
-
-
-	@Override
-	public Kv isInfoComplete(Long expertId, Long templateId) {
-		Expert expert = getById(expertId);
-		Kv kv = Kv.create();
-		if (expert == null) {
-			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false)
-				.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
-			return kv;
-		}
-		List<Composition> compositions = (List<Composition>)iTemplateClient.allCompositions(templateId).getData();
-		List<String> homepageFields = new ArrayList<>();
-		compositions.forEach(composition -> {
-			if (1 == composition.getAnnotationType()) {
-				String[] fields = composition.getField().split(",");
-				homepageFields.addAll(Arrays.asList(fields));
-			}
-		});
-		AtomicInteger homepageExists = new AtomicInteger(0);
-		homepageFields.forEach(field -> {
-			if (StringUtil.isNotBlank((String)BeanUtil.getProperty(expert, field))){
-				homepageExists.getAndIncrement();
-			}
-		});
-		if (homepageExists.get() > 0) {
-			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
-		} else {
-			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
-		}
-//		if (StringUtil.isAllBlank(
-//			expert.getHomepage(),
-//			expert.getHp(),
-//			expert.getGs(),
-//			expert.getDblp(),
-//			expert.getOtherHomepage()
-//		)) {
-//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
-//		} else {
-//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
-//		}
-
-		List<String> allFields = new ArrayList<>();
-		compositions.forEach(composition -> {
-			String[] fields = composition.getField().split(",");
-			allFields.addAll(Arrays.asList(fields));
-			allFields.removeAll(Arrays.asList(""));
-		});
-		AtomicInteger counter = new AtomicInteger(0);
-		allFields.forEach(field -> {
-			if (StringUtil.isBlank((String)BeanUtil.getProperty(expert, field))){
-				counter.getAndIncrement();
-			}
-		});
-		if (counter.get() > 0) {
-			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
-		} else {
-			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, true);
-
-		}
-		return kv;
-	}
-
-	@Override
-	public User queryNameById(Long userId) {
-		return iUserClient.userInfoById(userId).getData();
-	}
-
-	@Override
-	public List<UserRemarkVO> userRemark(Long personId) {
-		return baseMapper.userRemark(personId);
-	}
-
-	@Override
-	public List<UserRemarkVO> userInspectionRemark(Long personId) {
-		return baseMapper.userInspectionRemark(personId);
-	}
-
-	@Override
-	public List<ExpertExcel> exportExpert(Wrapper<Expert> queryWrapper) {
-		return baseMapper.exportExpert(queryWrapper);
-	}
-
-	@Override
-	public void importExpert(List<ExpertExcel> data, Boolean isCovered) {
-		data.forEach(expertExcel -> {
-			Expert expert = Objects.requireNonNull(BeanUtil.copy(expertExcel, Expert.class));
-			// 覆盖数据
-			if (isCovered) {
-				// 查询用户是否存在
-				QueryWrapper<Expert> expertQueryWrapper = new QueryWrapper<>();
-				expertQueryWrapper.eq("expert_id",expert.getExpertId());
-				Expert oldExpert = getOne(expertQueryWrapper);
-				if (oldExpert != null && oldExpert.getId() != null) {
-					expert.setId(oldExpert.getId());
-					updateById(expert);
-					return;
-				}
-			}
-			save(expert);
-		});
-	}
-
-	@Override
-	public Expert importDetail(String tenantId, String id, Long taskId) {
+	public Boolean importDetail(String tenantId, String id, Long taskId) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -567,6 +368,190 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 			expert.setMag(extend.getMag());
 			expert.setOtherHomepage(extend.getOtherHomepage());
 		}
-		return expert;
+//		saveOrUpdate(expert);
+		return true;
+	}
+
+	/**
+	 * 每次20个学者请求一次智库
+	 * @param ebId
+	 * @param taskId
+	 * @return
+	 */
+	public int getExperts(String tenantId, String ebId, Long taskId, int offset, int size) {
+		JSONArray requestBody = new JSONArray();
+		JSONObject body = new JSONObject();
+
+		JSONObject parameters = new JSONObject();
+		JSONObject filters = new JSONObject();
+		JSONObject dims = new JSONObject();
+		JSONArray eb = new JSONArray();
+		eb.add(ebId);
+		dims.put("eb", eb);
+		filters.put("dims", dims);
+		parameters.put("filters", filters);
+		parameters.put("searchType", "all");
+		parameters.put("offset", offset);
+		parameters.put("size", size);
+		JSONArray sorts = new JSONArray();
+		sorts.add("_id");
+		parameters.put("sorts",sorts);
+
+
+		JSONObject schema = new JSONObject();
+		JSONArray expert = new JSONArray();
+		expert.add("id");
+		schema.put("person", expert);
+
+		body.put("action", "search.search");
+		body.put("parameters", parameters);
+		body.put("schema", schema);
+		requestBody.add(body);
+		String res = MagicRequest.getInstance().magic(requestBody.toString());
+
+		//解析json,拿到每个学者的id
+		JSONObject resObj = JSON.parseObject(res);
+		JSONArray dataArray = resObj.getJSONArray("data");
+		JSONObject tempObj = dataArray.getJSONObject(0);
+		int total = tempObj.getInteger("total");
+		JSONArray experts = tempObj.getJSONArray("items");
+		// 存在有的智库中没有学者
+		if (total == 0) {
+			return 0;
+		}
+		for (int i = 0; i < experts.size(); i++) {
+			String expert_id = experts.getJSONObject(i).getString("id");
+			importDetail(tenantId, expert_id, taskId);
+		}
+		return total;
+	}
+
+
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Boolean importExpertBase(String ebId, Long taskId) {
+		if (ebId == null) {
+			return false;
+		}
+		String tenantId = AuthUtil.getTenantId();
+		// 首先导入智库下20个学者，并且得到这个智库下一共有多少学者
+//		for (int i=0;i<200;i++) {
+			int total = getExperts(tenantId, ebId, taskId, 0, 20);
+//		}
+
+		// 循环导入剩下的学者
+		int number = (total-1) / 20;
+		List<Integer> numbers = Stream.iterate(1, n -> n + 1)
+			.limit(number)
+			.collect(Collectors.toList());
+
+		numbers.parallelStream().forEach(i -> {
+			getExperts(tenantId, ebId, taskId, i * 20, 20);
+		});
+		return true;
+	}
+
+
+
+	@Override
+	public Kv isInfoComplete(Long expertId, Long templateId) {
+		ExpertOrigin expert = getById(expertId);
+		Kv kv = Kv.create();
+		if (expert == null) {
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false)
+				.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
+			return kv;
+		}
+		List<Composition> compositions = (List<Composition>)iTemplateClient.allCompositions(templateId).getData();
+		List<String> homepageFields = new ArrayList<>();
+		compositions.forEach(composition -> {
+			if (1 == composition.getAnnotationType()) {
+				String[] fields = composition.getField().split(",");
+				homepageFields.addAll(Arrays.asList(fields));
+			}
+		});
+		AtomicInteger homepageExists = new AtomicInteger(0);
+		homepageFields.forEach(field -> {
+			if (StringUtil.isNotBlank((String)BeanUtil.getProperty(expert, field))){
+				homepageExists.getAndIncrement();
+			}
+		});
+		if (homepageExists.get() > 0) {
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
+		} else {
+			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
+		}
+//		if (StringUtil.isAllBlank(
+//			expert.getHomepage(),
+//			expert.getHp(),
+//			expert.getGs(),
+//			expert.getDblp(),
+//			expert.getOtherHomepage()
+//		)) {
+//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, false);
+//		} else {
+//			kv.set(ProcessConstant.HOMEPAGE_FOUND_KEY, true);
+//		}
+
+		List<String> allFields = new ArrayList<>();
+		compositions.forEach(composition -> {
+			String[] fields = composition.getField().split(",");
+			allFields.addAll(Arrays.asList(fields));
+			allFields.removeAll(Arrays.asList(""));
+		});
+		AtomicInteger counter = new AtomicInteger(0);
+		allFields.forEach(field -> {
+			if (StringUtil.isBlank((String)BeanUtil.getProperty(expert, field))){
+				counter.getAndIncrement();
+			}
+		});
+		if (counter.get() > 0) {
+			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, false);
+		} else {
+			kv.set(ProcessConstant.BASICINFO_COMPLETE_KEY, true);
+
+		}
+		return kv;
+	}
+
+	@Override
+	public User queryNameById(Long userId) {
+		return iUserClient.userInfoById(userId).getData();
+	}
+
+	@Override
+	public List<UserRemarkVO> userRemark(Long personId) {
+		return baseMapper.userRemark(personId);
+	}
+
+	@Override
+	public List<UserRemarkVO> userInspectionRemark(Long personId) {
+		return baseMapper.userInspectionRemark(personId);
+	}
+
+	@Override
+	public List<ExpertExcel> exportExpert(Wrapper<ExpertOrigin> queryWrapper) {
+		return baseMapper.exportExpert(queryWrapper);
+	}
+
+	@Override
+	public void importExpert(List<ExpertExcel> data, Boolean isCovered) {
+		data.forEach(expertExcel -> {
+			ExpertOrigin expert = Objects.requireNonNull(BeanUtil.copy(expertExcel, ExpertOrigin.class));
+			// 覆盖数据
+			if (isCovered) {
+				// 查询用户是否存在
+				QueryWrapper<ExpertOrigin> expertQueryWrapper = new QueryWrapper<>();
+				expertQueryWrapper.eq("expert_id",expert.getExpertId());
+				ExpertOrigin oldExpert = getOne(expertQueryWrapper);
+				if (oldExpert != null && oldExpert.getId() != null) {
+					expert.setId(oldExpert.getId());
+					updateById(expert);
+					return;
+				}
+			}
+			save(expert);
+		});
 	}
 }

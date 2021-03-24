@@ -20,7 +20,7 @@ import com.baomidou.mybatisplus.annotation.SqlParser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
-import org.springblade.composition.dto.*;
+import org.springblade.composition.dto.UserInspectionDTO;
 import org.springblade.composition.dto.statistics.*;
 import org.springblade.composition.entity.Statistics;
 
@@ -76,10 +76,11 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @param startTime
 	 * @param endTime
 	 * @param taskId
-	 * @param type
+	 * @param taskType
+	 * @param statisticsType
 	 * @return
 	 */
-	List<TaskComposition> taskCompositionWrongCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("type") Integer type);
+	List<TaskComposition> taskCompositionWrongCount2(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("taskId")String taskId, @Param("taskType") Integer taskType, @Param("statisticsType") Integer statisticsType);
 
 	/**
 	 * 查询用户在一段时间内质检的数量和速度

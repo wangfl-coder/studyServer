@@ -20,10 +20,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.ExtensionElement;
 import org.flowable.bpmn.model.UserTask;
+import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -94,8 +96,6 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final ICompositionClient compositionClient;
 
 
-	@Value("${spring.profiles.active}")
-	public String env;
 	private final RepositoryService repositoryService;
 
 	@Override
@@ -206,10 +206,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			taskGroup = TaskUtil.getCandidateGroup();
 		}
 
+		// .includeProcessVariables()有几率取不到一部分任务 flowable6.4.2
 		TaskQuery claimRoleWithTenantIdQuery = taskService.createTaskQuery().taskTenantId(AuthUtil.getTenantId()).taskCandidateGroupIn(Func.toStrList(taskGroup))
 			/*.includeProcessVariables()*/.active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
-			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
+			/*.includeProcessVariables()*/.active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
 //ws0204
 //		List<String> roleAliases = Func.toStrList(taskGroup);
@@ -720,17 +721,15 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	public boolean completeTask(SingleFlow flow) {
 		String taskId = flow.getTaskId();
 		String processInstanceId = flow.getProcessInstanceId();
-		String taskGroup = TaskUtil.getCandidateGroup();
-//		if (taskGroup.equals("ci")){
-//			labelTaskClient.changeStatus(processInstanceId);
-//		}
+		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
+		Map<String, Object> taskVariables = taskService.getVariables(taskId);
+
 		String comment = Func.toStr(flow.getComment(), ProcessConstant.PASS_COMMENT);
 		// 增加评论
 		if (StringUtil.isNoneBlank(processInstanceId, comment)) {
 			taskService.addComment(taskId, processInstanceId, comment);
 		}
-		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
-		Map<String, Object> taskVariables = taskService.getVariables(taskId);
+
 		// 创建变量
 		Map<String, Object> variables = flow.getVariables();
 		if (variables == null) {
@@ -768,6 +767,9 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					}
 				}
 			}
+			if (null != flow.getCompositionType() && 3 == flow.getCompositionType() && hasHomepage) {	//如果需要找主页而前面都没找到，补充信息提交后将前面的基本信息统计删除
+				statisticsClient.ifNeedToRemoveBasicInfoStatistics(labelTask.getId(), labelTask.getTemplateId(),Long.valueOf(flow.getCompositionId()));
+			}
 			if (null != flow.getCompositionType() && 2 == flow.getCompositionType()) {
 				R<List<Composition>> compositionsRes = templateClient.allCompositions(labelTask.getTemplateId());
 				if (compositionsRes.isSuccess()) {
@@ -800,11 +802,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				final Random random = Holder.RANDOM;
 				boolean isEduWorkNeedInspect = random.nextInt(100) < task.getEduWorkInspectPercent() ? true : false;
 				variables.put("isEduWorkNeedInspect", isEduWorkNeedInspect);
+				if (isEduWorkNeedInspect) {
+					statisticsClient.initializeSingleCompositionTask(3, labelTask.getId(), labelTask.getTemplateId(), Long.valueOf(flow.getCompositionId()));
+				}
 			}
 			if (5 == flow.getCompositionType()) {
 				final Random random = Holder.RANDOM;
 				boolean isBioNeedInspect = random.nextInt(100) < task.getBioInspectPercent() ? true : false;
 				variables.put("isBioNeedInspect", isBioNeedInspect);
+				if (isBioNeedInspect) {
+					statisticsClient.initializeSingleCompositionTask(3, labelTask.getId(), labelTask.getTemplateId(), Long.valueOf(flow.getCompositionId()));
+				}
 			}
 
 			Kv kv = res.getData();
@@ -821,9 +829,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //				flowMapper.updateStatistic(env,labelTask.getId(), 3);
 //			}
 			if(null!=flow.getRoleId() && -1!=flow.getRoleId()) {
-				String roleAlias = SysCache.getRoleAlias(flow.getRoleId());
-				processVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
-				taskVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
+				//ws0204
+//				String roleAlias = SysCache.getRoleAlias(flow.getRoleId());
+//				processVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
+//				taskVariables.put(roleAlias + "-" + AuthUtil.getUserId(), true);
 
 				processVariables.put(currentComposition.getName()+"-"+AuthUtil.getUserId()+"-done", true);
 			}
@@ -1100,8 +1109,8 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setCompositionId(extCompId.get(0).getElementText());
 				}
 			}
+//			Map<String, Object> processVariables = task.getProcessVariables();	// .includeProcessVariables()有几率取不到一部分任务 flowable6.4.2
 			Map<String, Object> processVariables = runtimeService.getVariables(task.getProcessInstanceId());
-//			Map<String, Object> processVariables = task.getProcessVariables();
 			if (processVariables.containsKey(task.getName()+"-"+AuthUtil.getUserId()+"-done")) {
 				continue;
 			}
@@ -1122,7 +1131,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setCreateTime(task.getCreateTime());
 			flow.setClaimTime(task.getClaimTime());
 			flow.setExecutionId(task.getExecutionId());
-			flow.setVariables(task.getProcessVariables());
+			flow.setVariables(processVariables);
 			flow.setPriority(task.getPriority());
 			ProcessDefinition processDefinition = FlowCache.getProcessDefinition(task.getProcessDefinitionId());
 			flow.setCategory(processDefinition.getCategory());

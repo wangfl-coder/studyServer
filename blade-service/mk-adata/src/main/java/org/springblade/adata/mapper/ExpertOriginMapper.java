@@ -14,86 +14,38 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.adata.service;
+package org.springblade.adata.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertOrigin;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.vo.UserRemarkVO;
-import org.springblade.core.mp.base.BaseService;
-import org.springblade.core.mp.support.Query;
-import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.support.Kv;
-import org.springblade.system.user.entity.User;
-
 
 import java.util.List;
-import java.util.Map;
+
 
 /**
- * 服务类
+ * Mapper 接口
  *
  * @author Chill
  */
-public interface IExpertService extends BaseService<Expert> {
+public interface ExpertOriginMapper extends BaseMapper<ExpertOrigin> {
 
 	/**
-	 * 详情
-	 * @param id
+	 * 查询质检完成的需要导出专家信息
+	 * @param taskId  标注大任务id
 	 * @return
 	 */
-	String fetchDetail(String id);
-
-	/**
-	 * 列表
-	 * @param params
-	 * @param query
-	 * @return
-	 */
-	String fetchList(Map<String, Object> params, Query query);
-
-	/**
-	 * 导入
-	 * @param id
-	 * @return
-	 */
-	Expert importDetail(String tenantId, String id, Long taskId);
-
-	/**
-	 * 导入并保存
-	 * @param id
-	 * @return
-	 */
-	Boolean importDetailAndSave(String tenantId, String id, Long taskId);
-
-	/**
-	 * 导入智库下所有学者
-	 * @param id
-	 * @return
-	 */
-	Boolean importExpertBase(String id, Long taskId);
-
-
-	/**
-	 * 学者信息是否完整
-	 * @param expertId
-	 * @return
-	 */
-	Kv isInfoComplete(Long expertId, Long templateId);
-
-	/**
-	 * 根据更新人id查询备注人姓名
-	 */
-	User queryNameById(Long userId);
+	List<ExpertOrigin> queryExportExperts(@Param("taskId") Long taskId);
 
 	/**
 	 * 根据专家id从标注小任务表查流程实例id
 	 * @param personId 标注大任务id
 	 * @return
 	 */
-	List<UserRemarkVO> userRemark(Long personId);
+	List<UserRemarkVO> userRemark(@Param("personId") Long personId);
 
 	/**
 	 * 根据专家id从质检小任务表查流程实例id
@@ -108,14 +60,6 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param queryWrapper
 	 * @return
 	 */
-	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<Expert> queryWrapper);
+	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<ExpertOrigin> queryWrapper);
 
-	/**
-	 * 导入专家数据
-	 *
-	 * @param data
-	 * @param isCovered
-	 * @return
-	 */
-	void importExpert(List<ExpertExcel> data, Boolean isCovered);
 }

@@ -42,6 +42,7 @@ public interface IFlowClient {
 
 	String API_PREFIX = "/client";
 	String START_PROCESS_INSTANCE_BY_ID = API_PREFIX + "/start-process-instance-by-id";
+	String START_PROCESS_INSTANCE_BY_ID_PARALLEL = API_PREFIX + "/start-process-instance-by-id-parallel";
 	String START_PROCESS_INSTANCE_BY_KEY = API_PREFIX + "/start-process-instance-by-key";
 	String COMPLETE_TASK = API_PREFIX + "/complete-task";
 	String TASK_VARIABLE = API_PREFIX + "/task-variable";
@@ -61,6 +62,18 @@ public interface IFlowClient {
 	 */
 	@PostMapping(START_PROCESS_INSTANCE_BY_ID)
 	R<BladeFlow> startProcessInstanceById(@RequestParam("processDefinitionId") String processDefinitionId, @RequestParam("businessKey") String businessKey, @RequestBody Map<String, Object> variables);
+
+	/**
+	 * 开启流程
+	 *
+	 * @param createUser		  流程发起人
+	 * @param processDefinitionId 流程id
+	 * @param businessKey         业务key
+	 * @param variables           参数
+	 * @return BladeFlow
+	 */
+	@PostMapping(START_PROCESS_INSTANCE_BY_ID_PARALLEL)
+	R<BladeFlow> startProcessInstanceByIdParallel(@RequestParam("createUser") Long createUser, @RequestParam("processDefinitionId") String processDefinitionId, @RequestParam("businessKey") String businessKey, @RequestBody Map<String, Object> variables);
 
 	/**
 	 * 开启流程

@@ -32,8 +32,6 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	private final QualityInspectionTaskService qualityInspectionTaskService;
 	private final TaskMapper taskMapper;
 
-	@Value("${spring.profiles.active}")
-	public String env;
 
 	@Override
 	public TaskVO setCompletedCount(Task task) {

@@ -41,8 +41,10 @@ public interface IStatisticsClient {
 	String STATISTICS_INITIALIZE_LABELTASK = API_PREFIX + "/statistics/initialize-labeltask";
 	String STATISTICS_INITIALIZE_SINGLE_LABELTASK = API_PREFIX + "/statistics/initialize-single-labeltask";
 	String STATISTICS_INITIALIZE_REALSET_LABELTASK = API_PREFIX + "/statistics/initialize-realset-labeltask";
+	String STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK = API_PREFIX + "/statistics/initialize-single-compositiontask";
 	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
 	String MARK_AS_COMPLETE = API_PREFIX + "/statistics/mark-as-complete";
+	String IF_NEED_TO_REMOVE_BASICINFO_STATISTICS = API_PREFIX + "/statistics/if-need-to-remove-basicinfo-statistics";
 
 	/**
 	 * 初始化任务统计
@@ -63,6 +65,12 @@ public interface IStatisticsClient {
 	R initializeRealSetLabelTask(@RequestBody LabelTask labelTask, @RequestParam Map<String, String> compositionLabelMap);
 
 	/**
+	 * 初始化一个组合的统计
+	 */
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK)
+	R initializeSingleCompositionTask(@RequestParam Integer type, @RequestParam Long subTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
+
+	/**
 	 * 查询基本信息状态
 	 */
 	@GetMapping(QUERY_BASICINFO_STATUS)
@@ -70,4 +78,10 @@ public interface IStatisticsClient {
 
 	@GetMapping(MARK_AS_COMPLETE)
 	R markAsComplete(@RequestParam Integer type, @RequestParam Long subTaskId, @RequestParam Long compositionId);
+
+	/**
+	 * 需要删除基本信息统计
+	 */
+	@GetMapping(IF_NEED_TO_REMOVE_BASICINFO_STATISTICS)
+	R ifNeedToRemoveBasicInfoStatistics(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
 }

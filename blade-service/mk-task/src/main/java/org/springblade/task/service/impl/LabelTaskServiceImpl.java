@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.adata.enums.RealSetExpertStatusEnum;
 import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
@@ -24,6 +25,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.system.cache.SysCache;
+import org.springblade.task.enums.LabelTaskTypeEnum;
 import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
@@ -56,8 +58,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	private final IStatisticsClient statisticsClient;
 	private final QualityInspectionTaskService qualityInspectionTaskService;
 
-	@Value("${spring.profiles.active}")
-	public String env;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -85,6 +85,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			throw new ServiceException("获取模版信息失败");
 		Template template = templateRes.getData();
 		String tenantId = AuthUtil.getTenantId();
+		Long userId = AuthUtil.getUserId();
 		experts.parallelStream().forEach(expert -> {
 			LabelTask labelTask = new LabelTask();
 			labelTask.setTenantId(tenantId);
@@ -94,7 +95,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 			boolean save = save(labelTask);
 			Kv variables = createProcessVariables(task, labelTask);
 			variables.put("isRealSet", false);
-			R<BladeFlow> result = flowClient.startProcessInstanceById(labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
+			R<BladeFlow> result = flowClient.startProcessInstanceByIdParallel(userId, labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
 			if (result.isSuccess()) {
 				log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
 				// 返回流程id写入任务
@@ -103,7 +104,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
-				labelTask.setType(1);	//标注
+				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
 				updateById(labelTask);
 
 				Random random = Holder.RANDOM;
@@ -165,7 +166,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
-				labelTask.setType(1);	//标注
+				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
 				updateById(labelTask);
 
 //				Random random = Holder.RANDOM;
@@ -221,7 +222,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
-				labelTask.setType(2);	//真集
+				labelTask.setType(LabelTaskTypeEnum.REAL_SET.getNum());	//真集
 				updateById(labelTask);
 
 				resultMap.put(entry.getKey(), labelTask.getId().toString());
@@ -229,7 +230,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				throw new ServiceException("开启流程失败");
 			}
 		});
-		expert.setStatus(2);	//已使用
+		expert.setStatus(RealSetExpertStatusEnum.USED.getNum());	//已使用
 		realSetExpertClient.saveExpert(expert);
 		return resultMap;
 	}

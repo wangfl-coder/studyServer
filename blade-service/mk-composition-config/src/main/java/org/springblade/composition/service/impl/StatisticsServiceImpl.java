@@ -44,8 +44,6 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	private final ILogBalanceService logBalanceService;
 	private final ILogPointsService logPointsService;
 
-	@Value("${spring.profiles.active}")
-	public String env;
 	@Override
 	public List<TaskComposition> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType){
 

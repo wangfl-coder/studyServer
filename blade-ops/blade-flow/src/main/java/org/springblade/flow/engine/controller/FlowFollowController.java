@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("follow")
 @AllArgsConstructor
-@PreAuth(RoleConstant.HAS_ROLE_ADMINISTRATOR)
+//@PreAuth(RoleConstant.HAS_ROLE_ADMINISTRATOR)
 public class FlowFollowController {
 
 	private final FlowEngineService flowEngineService;

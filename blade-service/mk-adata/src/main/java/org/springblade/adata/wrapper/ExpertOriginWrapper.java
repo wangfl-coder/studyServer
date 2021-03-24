@@ -14,15 +14,33 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.common.cache;
+package org.springblade.adata.wrapper;
+
+import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertOrigin;
+import org.springblade.adata.vo.ExpertVO;
+import org.springblade.core.mp.support.BaseEntityWrapper;
+import org.springblade.core.tool.utils.BeanUtil;
+
+import java.util.Objects;
 
 /**
- * 缓存名
+ * Expert包装类,返回视图层所需的字段
  *
  * @author Chill
  */
-public interface CacheNames {
+public class ExpertOriginWrapper extends BaseEntityWrapper<ExpertOrigin, ExpertVO> {
 
-	String CAPTCHA_KEY = "blade:auth::blade:captcha:";
-	String FLOW_CLAIMONE_KEY = "blade:flow::mk:claimone:";
+	public static ExpertOriginWrapper build() {
+		return new ExpertOriginWrapper();
+	}
+
+	@Override
+	public ExpertVO entityVO(ExpertOrigin expert) {
+		ExpertVO expertVO = Objects.requireNonNull(BeanUtil.copy(expert, ExpertVO.class));
+//		String dictValue = DictCache.getValue(DictEnum.NOTICE, noticeVO.getCategory());
+//		noticeVO.setCategoryName(dictValue);
+		return expertVO;
+	}
+
 }

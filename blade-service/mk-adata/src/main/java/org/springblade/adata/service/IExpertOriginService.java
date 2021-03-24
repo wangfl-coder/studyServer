@@ -17,17 +17,15 @@
 package org.springblade.adata.service;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertOrigin;
 import org.springblade.adata.excel.ExpertExcel;
 import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
-import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.system.user.entity.User;
-
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +35,7 @@ import java.util.Map;
  *
  * @author Chill
  */
-public interface IExpertService extends BaseService<Expert> {
+public interface IExpertOriginService extends BaseService<ExpertOrigin> {
 
 	/**
 	 * 详情
@@ -59,14 +57,9 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param id
 	 * @return
 	 */
-	Expert importDetail(String tenantId, String id, Long taskId);
+	Boolean importDetail(String tenantId, String id, Long taskId);
 
-	/**
-	 * 导入并保存
-	 * @param id
-	 * @return
-	 */
-	Boolean importDetailAndSave(String tenantId, String id, Long taskId);
+
 
 	/**
 	 * 导入智库下所有学者
@@ -108,7 +101,7 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param queryWrapper
 	 * @return
 	 */
-	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<Expert> queryWrapper);
+	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<ExpertOrigin> queryWrapper);
 
 	/**
 	 * 导入专家数据

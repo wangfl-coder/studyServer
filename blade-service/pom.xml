@@ -25,7 +25,7 @@
         <module>mk-task</module>
         <module>mk-adata</module>
         <module>mk-adata-sidecar</module>
-        <module>mk-customer-service</module>
+<!--        <module>mk-customer-service</module>-->
     </modules>
 
     <dependencies>
