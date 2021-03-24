@@ -18,6 +18,8 @@ package org.springblade.feedback.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -44,21 +46,25 @@ public class Feedback extends BaseEntity {
 	 * 任务ID
 	 */
 	@ApiModelProperty(value = "任务ID")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long taskId;
 	/**
 	 * 子任务ID
 	 */
 	@ApiModelProperty(value = "子任务ID")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long subTaskId;
 	/**
 	 * 专家ID
 	 */
 	@ApiModelProperty(value = "专家ID")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long personId;
 	/**
 	 * 组合ID
 	 */
 	@ApiModelProperty(value = "组合ID")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long compositionId;
 	/**
 	 * 申述字段
@@ -89,6 +95,7 @@ public class Feedback extends BaseEntity {
 	 * 审核员
 	 */
 	@ApiModelProperty(value = "审核员")
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long auditUser;
 	/**
 	 * 审核日期
