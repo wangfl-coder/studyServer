@@ -25,6 +25,7 @@
         <module>mk-task</module>
         <module>mk-adata</module>
         <module>mk-adata-sidecar</module>
+        <module>mk-log</module>
     </modules>
 
     <dependencies>
