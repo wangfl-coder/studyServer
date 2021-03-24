@@ -18,6 +18,7 @@ package org.springblade.log.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.ibatis.annotations.Mapper;
 import org.springblade.log.entity.BladexLogs;
 
 /**
@@ -27,8 +28,9 @@ import org.springblade.log.entity.BladexLogs;
  * @since 2021-03-23
  */
 @Data
+@Mapper
 @EqualsAndHashCode(callSuper = true)
-public class BladexLogsDTO extends BladexLogs {
+public abstract class BladexLogsDTO extends BladexLogs {
 	private static final long serialVersionUID = 1L;
 
 }

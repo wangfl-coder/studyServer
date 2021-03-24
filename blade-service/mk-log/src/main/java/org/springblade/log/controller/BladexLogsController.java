@@ -33,6 +33,8 @@ import org.springblade.log.vo.BladexLogsVO;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  控制器
@@ -48,11 +50,6 @@ public class BladexLogsController extends BladeController {
 
 	private final IBladexLogsService bladexLogsService;
 
-
-	@GetMapping("info")
-	public String info(String name) {
-		return "Hello, My Name Is: " + name;
-	}
 	/**
 	 * 详情
 	 */
@@ -76,7 +73,6 @@ public class BladexLogsController extends BladeController {
 		IPage<BladexLogs> pages = bladexLogsService.page(Condition.getPage(query), Condition.getQueryWrapper(bladexLogs));
 		return R.data(pages);
 	}
-
 	/**
 	 * 自定义分页
 	 */
@@ -128,6 +124,5 @@ public class BladexLogsController extends BladeController {
 	public R remove(@ApiParam(value = "主键集合", required = true) @RequestParam String ids) {
 		return R.status(bladexLogsService.deleteLogic(Func.toLongList(ids)));
 	}
-
 
 }

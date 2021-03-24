@@ -17,9 +17,11 @@
 package org.springblade.log.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springblade.core.mp.base.BaseEntity;
 import org.springblade.core.mp.base.BaseService;
 import org.springblade.log.entity.BladexLogs;
 import org.springblade.log.vo.BladexLogsVO;
+import org.springblade.log.dto.BladexLogsDTO;
 
 /**
  *  服务类
@@ -37,5 +39,6 @@ public interface IBladexLogsService extends BaseService<BladexLogs> {
 	 * @return
 	 */
 	IPage<BladexLogsVO> selectBladexLogsPage(IPage<BladexLogsVO> page, BladexLogsVO bladexLogs);
+
 
 }
