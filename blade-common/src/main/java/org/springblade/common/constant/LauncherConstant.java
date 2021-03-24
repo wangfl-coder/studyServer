@@ -27,11 +27,14 @@ import static org.springblade.core.launch.constant.AppConstant.APPLICATION_NAME_
  */
 public interface LauncherConstant {
 
+
+
 	String MKAPP_NAME_PREFIX = "mk-";
 
 	/**
 	 * marking line
 	 */
+	String MKAPP_CUSTOMER_SERVICE_NAME = MKAPP_NAME_PREFIX + "customer-service";
 	String MKAPP_COMPOSITION_CONFIG_NAME = MKAPP_NAME_PREFIX + "composition-config";
 	String MKAPP_TASK_NAME = MKAPP_NAME_PREFIX + "task";
 	String MKAPP_ADATA_NAME = MKAPP_NAME_PREFIX + "adata";
