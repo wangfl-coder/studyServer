@@ -40,8 +40,6 @@
         <module>blade-service-api</module>
         <module>blade-common</module>
         <module>blade-ops-api</module>
-        <module>mk-log-api</module>
-        <module>mk-custom-service</module>
     </modules>
 
     <dependencyManagement>
