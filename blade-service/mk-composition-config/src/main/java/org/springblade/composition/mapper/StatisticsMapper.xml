@@ -399,4 +399,29 @@
         and s.is_deleted=0
         group by d.id,d.tenant_id,d.dept_name,ta.id,ta.task_name
     </select>
+
+    <select id="userWrongCount" resultType="java.lang.Integer">
+        select count(*) as total from mk_statistics s
+        inner join mk_composition c
+        on s.composition_id=c.id
+        where c.annotation_type=#{annotationType}
+        and s.is_deleted=0
+        and s.update_user=#{userId}
+        <if test="refreshTime!=null">
+            and s.update_time &gt; #{refreshTime}
+        </if>
+    </select>
+
+    <select id="userTotalCount" resultType="java.lang.Integer">
+        select count(*) as total from mk_statistics s
+        inner join mk_composition c
+        on s.composition_id=c.id
+        where c.annotation_type=#{annotationType}
+        and s.is_deleted=0
+        and s.is_wrong>0
+        and s.update_user=#{userId}
+        <if test="refreshTime!=null">
+            and s.update_time &gt; #{refreshTime}
+        </if>
+    </select>
 </mapper>

@@ -26,10 +26,21 @@ import org.springblade.composition.service.ILogPointsService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Condition;
+import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
+import org.springblade.core.tool.api.R;
+import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.system.cache.DictBizCache;
+import org.springblade.system.cache.DictCache;
+import org.springblade.system.enums.DictEnum;
+import org.springblade.system.user.cache.UserCache;
+import org.springblade.system.user.entity.User;
+import org.springblade.system.user.entity.UserInfo;
+import org.springblade.system.user.feign.IUserClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +54,7 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	private final StatisticsMapper statisticsMapper;
 	private final ILogBalanceService logBalanceService;
 	private final ILogPointsService logPointsService;
+	private final IUserClient userClient;
 
 	@Override
 	public List<TaskComposition> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType){
@@ -106,6 +118,47 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 				saveOrUpdate(new_stat);
 			}
 		}
+		return true;
+	}
+
+	@Override
+	public boolean calcReliabilityRate() {
+		User user = UserCache.getUser(AuthUtil.getUserId());
+		String refreshTime = user.getRefreshTime().toString();
+
+		Integer amount = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "start_reliability_rate_amount"));
+		Integer iaaTotal = statisticsMapper.userTotalCount(2, user.getId(), refreshTime);
+		Integer siTotal = statisticsMapper.userTotalCount(5, user.getId(), refreshTime);
+		if (iaaTotal > amount) {
+			Integer iaaWrong = statisticsMapper.userWrongCount(2, user.getId(), refreshTime);
+			int iaaRate = (iaaWrong/iaaTotal)*100;
+			Integer requiredIAARate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "iaa_required_rate"));
+			if (iaaRate < requiredIAARate.intValue()) {
+
+				user.setStatus(2);
+				userClient.saveUser(user);
+			}
+		}
+		if (siTotal > amount) {
+			Integer siWrong = statisticsMapper.userWrongCount(5, user.getId(), refreshTime);
+			int siRate = (siWrong/siTotal)*100;
+			Integer requiredSIRate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "sampling_inspection_required_rate"));
+			if (siRate < requiredSIRate.intValue()) {
+
+				user.setStatus(2);
+				userClient.saveUser(user);
+			}
+		}
+
+
+
+
+
+
+
+
+
+
 		return true;
 	}
 }

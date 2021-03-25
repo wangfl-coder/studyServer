@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>org.springblade</groupId>
+            <artifactId>blade-user-api</artifactId>
+            <version>${bladex.project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
             <artifactId>mk-composition-config-api</artifactId>
             <version>${bladex.project.version}</version>
         </dependency>

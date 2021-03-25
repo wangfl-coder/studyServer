@@ -58,4 +58,11 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @return
 	 */
 	boolean updateAnnotationStatistics(int type, Long subTaskId, Long templateId, Long compositionId, Integer deltaTime);
+
+	/**
+	 * 计算标注员正确率
+	 * @param type
+	 * @return
+	 */
+	boolean calcReliabilityRate();
 }

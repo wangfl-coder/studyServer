@@ -212,6 +212,7 @@ public class RealSetAnnotationDataController extends BladeController {
 					statistics_history.setType(2);
 					if (isCompositionTrue == 2) {
 						statistics_history.setIsWrong(2);
+						statisticsService.calcReliabilityRate();
 					}
 					wrote = true;
 					statisticsService.saveOrUpdate(statistics_history);

@@ -169,4 +169,18 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 */
 	@SqlParser(filter=true)
 	List<DeptTask> deptTaskWrongCount(@Param("startTime")String startTime, @Param("endTime")String endTime, @Param("tenantId")String tenantId, @Param("deptId")String deptId, @Param("type") Integer type);
+
+	/**
+	 * 用户标注错误数
+	 * @param userId
+	 * @return
+	 */
+	Integer userWrongCount(@Param("annotationType")Integer annotationType, @Param("userId")Long userId, @Param("refreshTime")String refreshTime);
+
+	/**
+	 * 用户标注总数
+	 * @param userId
+	 * @return
+	 */
+	Integer userTotalCount(@Param("annotationType")Integer annotationType, @Param("userId")Long userId, @Param("refreshTime")String refreshTime);
 }

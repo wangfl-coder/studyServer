@@ -14,11 +14,4 @@
     <version>${bladex.project.version}</version>
     <packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springblade</groupId>
-            <artifactId>blade-starter-cache</artifactId>
-        </dependency>
-    </dependencies>
-
 </project>
