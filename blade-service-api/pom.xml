@@ -25,6 +25,7 @@
         <module>mk-task-api</module>
         <module>mk-adata-api</module>
         <module>mk-customer-service-api</module>
+        <module>mk-task-log-api</module>
     </modules>
 
     <dependencies>
