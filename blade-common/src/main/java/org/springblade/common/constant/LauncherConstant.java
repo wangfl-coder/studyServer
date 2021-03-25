@@ -39,6 +39,7 @@ public interface LauncherConstant {
 	String MKAPP_TASK_NAME = MKAPP_NAME_PREFIX + "task";
 	String MKAPP_ADATA_NAME = MKAPP_NAME_PREFIX + "adata";
 	String MKAPP_ADATA_SIDECAR_NAME = MKAPP_NAME_PREFIX + "adata-sidecar";
+	String MKAPP_LOG_NAME = MKAPP_NAME_PREFIX + "log";
 
 	/**
 	 * demo

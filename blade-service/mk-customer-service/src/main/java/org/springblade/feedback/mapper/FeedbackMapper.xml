@@ -25,6 +25,7 @@
         <result column="audit_time" property="auditTime"/>
         <result column="audit_remark" property="auditRemark"/>
         <result column="deadline" property="deadline"/>
+        <result column="audit_picture" property="auditPicture"/>
     </resultMap>
 
 
