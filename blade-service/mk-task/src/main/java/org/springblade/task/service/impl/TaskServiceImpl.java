@@ -91,4 +91,13 @@ public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implement
 	public Integer compositionCount(Long taskId) {
 		return taskMapper.compositionCount(env,taskId);
 	}
+
+	@Override
+	public List<TaskVO> batchCastTaskVO(List<Task> tasks) {
+		List<TaskVO> records = tasks.stream().map(task -> {
+			TaskVO taskVO = Objects.requireNonNull(BeanUtil.copy(task, TaskVO.class));
+			return taskVO;
+		}).collect(Collectors.toList());
+		return records;
+	}
 }
