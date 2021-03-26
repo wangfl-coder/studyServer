@@ -14,20 +14,18 @@ public interface TaskMapper extends BaseMapper<Task> {
 	/**
 	 * 已完成子任务数
 	 *
-	 * @param env    	运行环境
 	 * @param taskId    任务Id
 	 * @return
 	 */
-	int labelTaskCompleteCount(String env, Long taskId);
+	int labelTaskCompleteCount(@Param("taskId")Long taskId);
 
 	/**
 	 * 已完成子任务数
 	 *
-	 * @param env    	运行环境
 	 * @param taskId    任务Id
 	 * @return
 	 */
-	int qualityInspectionTaskCompleteCount(String env, Long taskId);
+	int qualityInspectionTaskCompleteCount(@Param("taskId")Long taskId);
 
 	/**
 	 * 查询完成的各种组合的数量
@@ -37,10 +35,16 @@ public interface TaskMapper extends BaseMapper<Task> {
 	List<Integer> compositionCompleteCount(@Param("taskId") Long taskId);
 
 	/**
+	 * 查询当前时刻组合的数量 wangshan：伦哥写的这个为当前时刻可接任务的组合的总数
+	 * @Param taskId 任务id
+	 * @return
+	 */
+	Integer compositionCount(@Param("taskId") Long taskId);
+
+	/**
 	 * 查询当前时刻组合的数量
 	 * @Param taskId 任务id
 	 * @return
 	 */
-	Integer compositionCount(@Param("env")String env,@Param("taskId") Long taskId);
-
+	Integer compositionCount2(@Param("taskId") Long taskId);
 }

@@ -24,5 +24,5 @@ package org.springblade.common.cache;
 public interface CacheNames {
 
 	String CAPTCHA_KEY = "blade:auth::blade:captcha:";
-
+	String FLOW_CLAIMONE_KEY = "blade:flow::mk:claimone:";
 }

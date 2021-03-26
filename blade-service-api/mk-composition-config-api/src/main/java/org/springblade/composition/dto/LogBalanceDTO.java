@@ -14,28 +14,21 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.vo;
+package org.springblade.composition.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
-import org.springblade.composition.dto.TaskCompositionDTO;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
+import org.springblade.composition.entity.LogBalance;
 
 /**
- * 数据传输对象实体类
+ * 余额日志数据传输对象实体类
  *
- * @author Chill
+ * @author BladeX
+ * @since 2021-03-04
  */
 @Data
-@ApiModel(value = "TaskCompositionDTO对象", description = "TaskCompositionDTO对象")
-public class TaskCompositionVO extends TaskCompositionDTO {
+@EqualsAndHashCode(callSuper = true)
+public class LogBalanceDTO extends LogBalance {
+	private static final long serialVersionUID = 1L;
 
-	private Integer todo;
-
-	private Integer done;
-
-	private Integer wrong;
 }

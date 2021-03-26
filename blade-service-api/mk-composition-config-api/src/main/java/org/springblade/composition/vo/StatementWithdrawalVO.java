@@ -14,33 +14,23 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.composition.dto;
+package org.springblade.composition.vo;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
+import org.springblade.composition.entity.StatementWithdrawal;
 
 /**
- * 数据传输对象实体类
+ * 提现单视图实体类
  *
- * @author Chill
+ * @author BladeX
+ * @since 2021-03-04
  */
 @Data
-@ApiModel(value = "TaskCompositionDTO对象", description = "TaskCompositionDTO对象")
-public class TaskCompositionDTO implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "StatementWithdrawalVO对象", description = "提现单")
+public class StatementWithdrawalVO extends StatementWithdrawal {
 	private static final long serialVersionUID = 1L;
 
-	@JsonSerialize(using = ToStringSerializer.class)
-	private Long compositionId;
-
-	private String compositionName;
-
-	private Integer number;
-
-	private Integer wrong;
-
-	private Integer averageSpeed;
 }

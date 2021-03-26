@@ -25,18 +25,23 @@ import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.Holder;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
+import org.springblade.task.dto.MergeExpertTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
+import org.springblade.task.enums.TaskStatusEnum;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.LabelTaskService;
+import org.springblade.task.service.MergeExpertTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springblade.task.vo.TaskVO;
@@ -44,10 +49,7 @@ import org.springblade.task.wrapper.TaskWrapper;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -62,6 +64,7 @@ public class TaskController extends BladeController {
 	private LabelTaskService labelTaskService;
 	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
+	private MergeExpertTaskService mergeExpertTaskService;
 	private IStatisticsClient statisticsClient;
 	private IFlowClient flowClient;
 	private TaskMapper taskMapper;
@@ -108,7 +111,7 @@ public class TaskController extends BladeController {
 		}else if(qualityInspectionDTO.getInspectionType()==2){
 			labelTasks = labelTaskService.queryUniqueCompleteTask(task.getAnnotationTaskId());
 		}
-		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()){
+		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()) {
 			boolean save = taskService.save(task);
 			try {
 				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getCount(), task.getInspectionType(), task, labelTasks);
@@ -119,6 +122,30 @@ public class TaskController extends BladeController {
 			}
 		}else if(labelTasks.size()<qualityInspectionDTO.getCount()) {
 			return R.fail("质检count超过最大可以质检的数量，最大可以质检的数量为："+labelTasks.size());
+		}else{
+			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
+		}
+	}
+
+	@PostMapping(value = "/merge-expert/save")
+	@ApiOperation(value = "添加质检任务")
+	public R mergeExpertSave(@RequestBody MergeExpertTaskDTO mergeExpertTaskDTO) {
+		Boolean result;
+		Task task = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
+//		if (task.getStatus() != TaskStatusEnum.EXPORTED.getNum()) {
+//			return R.fail("这个标注任务并未生效，无法合并");
+//		}
+		Task mergeTask = Objects.requireNonNull(BeanUtil.copy(mergeExpertTaskDTO, Task.class));
+		List<LabelTask> labelTasks = labelTaskService.getByTaskId(mergeTask.getAnnotationTaskId());
+		if (labelTasks.size() > 0) {
+			boolean save = taskService.save(mergeTask);
+			try {
+				result = mergeExpertTaskService.startProcess(mergeExpertTaskDTO.getProcessDefinitionId(), labelTasks.size(), 0, mergeTask, labelTasks);
+				return R.status(result);
+			} catch (Exception e) {
+				taskService.removeById(mergeTask.getId());
+				return R.fail("创建质检小任务失败");
+			}
 		}else{
 			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
 		}
@@ -153,6 +180,7 @@ public class TaskController extends BladeController {
 					experts);
 				task.setCount(experts.size());
 				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
+				task.setStatus(TaskStatusEnum.IMPORTED.getNum());
 				taskService.saveOrUpdate(task);
 			} else {
 				return R.fail("读取专家列表失败");
@@ -163,6 +191,43 @@ public class TaskController extends BladeController {
 		}
 		statisticsClient.initializeLabelTask(task.getId());
 		return R.status(result);
+	}
+
+	@PostMapping(value = "/fix")
+	@ApiOperation(value = "添加标注任务")
+	public R fix(Long taskId) {
+//			long taskId=L;
+			String defId="AnnotationV2:12:35c81237-7c0f-11eb-96ae-5e380f867c41";
+			Task task = taskService.getById(taskId);
+			R<List<Expert>> expertsResult = expertClient.getExpertIds(taskId);
+			if (expertsResult.isSuccess()) {
+				List<Expert> experts = expertsResult.getData();
+//				if(expertBaseTaskDTO.getRealSetRate() != null) {
+//					// 设置任务的真题比例，[0,100)
+//					task.setRealSetRate(expertBaseTaskDTO.getRealSetRate());
+//				}
+				for (Expert expert: experts) {
+					QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
+					labelTaskQueryWrapper.eq("person_id",expert.getId());
+					Integer count = labelTaskMapper.selectCount(labelTaskQueryWrapper);
+					if (count == 0) {
+						LabelTask labelTask = labelTaskService.startFixProcess(
+							defId,
+							task,
+							expert);
+						//				task.setCount(experts.size());
+						//				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
+						//				taskService.saveOrUpdate(task);
+						statisticsClient.initializeSingleLabelTask(labelTask);
+					}
+				}
+
+			} else {
+				return R.fail("读取专家列表失败");
+			}
+
+
+		return R.status(true);
 	}
 
 	@RequestMapping(value = "/detail/{id}" , method = RequestMethod.GET)

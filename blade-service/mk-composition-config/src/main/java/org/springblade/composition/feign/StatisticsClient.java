@@ -17,6 +17,7 @@
 package org.springblade.composition.feign;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
@@ -27,22 +28,24 @@ import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.composition.service.*;
 import org.springblade.core.mp.support.Condition;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.api.ResultCode;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
+import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -78,25 +81,49 @@ public class StatisticsClient implements IStatisticsClient {
 			List<Composition> compositionList = templateService.allCompositions(templateId);
 			labelTaskList.forEach(labelTask -> {
 				compositionList.forEach(composition ->{
-					Statistics statistics = new Statistics();
-					statistics.setSubTaskId(labelTask.getId());
-					statistics.setCompositionId(composition.getId());
-					statistics.setTemplateId(templateId);
-					statistics.setType(1);
-					statisticsService.save(statistics);
+					if (composition.getAnnotationType() != 3) {		//除补充信息外全部初始化1条
+						Statistics statistics = new Statistics();
+						statistics.setSubTaskId(labelTask.getId());
+						statistics.setCompositionId(composition.getId());
+						statistics.setTemplateId(templateId);
+						statistics.setType(1);
+						statistics.setStatus(1);
+						statisticsService.save(statistics);
+					}
 
-					//现在每条基本信息标注任务一开始有两个人做
+					//现在每条基本信息标注任务一开始有两个人做，额外初始化1条
 					if (composition.getAnnotationType() == 2) {
 						Statistics statistics2 = new Statistics();
 						statistics2.setSubTaskId(labelTask.getId());
 						statistics2.setCompositionId(composition.getId());
 						statistics2.setTemplateId(templateId);
 						statistics2.setType(1);
+						statistics2.setStatus(1);
 						statisticsService.save(statistics2);
 					}
 				});
 			});
 		}
+		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_LABELTASK)
+	@Transactional(rollbackFor = Exception.class)
+	public R initializeSingleLabelTask(LabelTask labelTask) {
+		// 默认至少有一个要标注的人
+		Long templateId = labelTask.getTemplateId();
+		List<Composition> compositionList = templateService.allCompositions(templateId);
+
+		compositionList.forEach(composition ->{
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(labelTask.getId());
+			statistics.setCompositionId(composition.getId());
+			statistics.setTemplateId(templateId);
+			statistics.setType(1);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
+		});
 		return R.success("初始化Statistics表成功");
 	}
 
@@ -122,6 +149,61 @@ public class StatisticsClient implements IStatisticsClient {
 		});
 
 		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
+	@PostMapping(STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK)
+	@Transactional(rollbackFor = Exception.class)
+	public R initializeSingleCompositionTask(Integer type, Long subTaskId, Long templateId, Long compositionId) {
+
+			Statistics statistics = new Statistics();
+			statistics.setSubTaskId(subTaskId);
+			statistics.setCompositionId(compositionId);
+			statistics.setTemplateId(templateId);
+			statistics.setType(type);
+			statistics.setStatus(1);
+			statisticsService.save(statistics);
+		return R.success("初始化Statistics表成功");
+	}
+
+	@Override
+	@GetMapping(MARK_AS_COMPLETE)
+	public R markAsComplete(Integer type, Long subTaskId, Long compositionId) {
+		boolean res = statisticsService.update(Wrappers.<Statistics>update().lambda().set(Statistics::getStatus, 2)
+			.eq(Statistics::getType, type)
+			.eq(Statistics::getSubTaskId, subTaskId)
+			.eq(Statistics::getCompositionId, compositionId)
+			.eq(Statistics::getUserId, AuthUtil.getUserId())
+		);
+		return R.status(res);
+	}
+
+	@Override
+	@GetMapping(IF_NEED_TO_REMOVE_BASICINFO_STATISTICS)
+	public R ifNeedToRemoveBasicInfoStatistics(Long labelTaskId, Long templateId, Long compositionId) {
+		List<Composition> compositions = templateService.allCompositions(templateId);
+		List<String> homepageFields = new ArrayList<>();
+		AtomicInteger homepageExists = new AtomicInteger(0);
+		compositions.forEach(composition -> {
+			if (1 == composition.getAnnotationType()) {
+				List<AnnotationData> annotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+					.eq(AnnotationData::getSubTaskId, labelTaskId)
+					.eq(AnnotationData::getCompositionId, compositionId)
+				);
+				annotationDataList.forEach(annotationData -> {
+					if (StringUtil.isNotBlank(annotationData.getValue())){
+						homepageExists.getAndIncrement();
+					}
+				});
+			}
+		});
+		if (homepageExists.get() == 0) {
+			boolean res = statisticsService.update(Wrappers.<Statistics>update().lambda().set(Statistics::getIsDeleted, 1)
+				.eq(Statistics::getTime, 0)
+				.eq(Statistics::getSubTaskId, labelTaskId)
+			);
+		}
+		return R.status(true);
 	}
 
 	@Override
@@ -232,6 +314,27 @@ public class StatisticsClient implements IStatisticsClient {
 			int sameNum = 0;
 			if (entry.getKey().equals("avatar")) {
 				continue;
+			} else if (entry.getKey().equals("phone")
+				|| entry.getKey().equals("fax")
+				|| entry.getKey().equals("email")
+				|| entry.getKey().equals("affiliation")
+				|| entry.getKey().equals("affiliationZh")) {	//可能有多个值的字段，转成数组两两比较
+				List<AnnotationData> list = entry.getValue();
+				for (int i = 0; i < list.size(); i++) {
+					for (int j = i + 1; j < list.size(); j++) {
+						if (Func.isNoneBlank(list.get(i).getValue(), list.get(j).getValue())) {
+							List<String> left = Arrays.asList(StringUtil.splitTrim(list.get(i).getValue(), "%_%"));
+							List<String> right = Arrays.asList(StringUtil.splitTrim(list.get(j).getValue(), "%_%"));
+							Collections.sort(left);
+							Collections.sort(right);
+							if (left.equals(right)) {
+								sameNum++;
+								sameValue.put(entry.getKey(), list.get(i).getValue());
+							}
+						}
+					}
+				}
+				sameCount.put(entry.getKey(), sameNum);
 			} else if (entry.getKey().equals("titles") || entry.getKey().equals("titlesDesc")) {
 				if (entry.getKey().equals("titles")) {
 					//职称字段先两两对比，在-1时需要对比职称其它字段中的内容
@@ -311,10 +414,15 @@ public class StatisticsClient implements IStatisticsClient {
 				//在count为3，same count为1时，因为有两个空所以要去质检
 				kv.put("biSame", 0);
 			}
+			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 2 && (int)kv.get("biSame") == 3) {
+				//两个头像为空，一个有会导致在count为3，same count为3，notfound为2，因为有两个空所以要去质检
+				kv.put("biSame", 0);
+			}
 			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 3 && (int)kv.get("biSame") == 0) {
 				//在count为3，same count为0时，此时有两种情况，在biNotfound也为3时，有三者不同和都没有值的情况，三者不同去质检，都没有值不去
 				if (allNotFoundNum < dataPerField.size()) {
 					boolean threeDiff = false;	//在count3 notfound3会跳过质检，这时寻找有没有3个都不一样的，有就要去质检
+					boolean threeSame = true;
 					for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
 						if (entry.getValue() == 0) {
 							Integer notFoundNum = notFoundCount.get(entry.getKey());
@@ -322,23 +430,43 @@ public class StatisticsClient implements IStatisticsClient {
 								if (notFoundNum == 0)
 									threeDiff = true;
 							}
+							if (null != notFoundNum && notFoundNum != 3 ) {
+								threeSame = false;
+							}
+						}
+						if (entry.getValue() == 3) {
+							Integer notFoundNum = notFoundCount.get(entry.getKey());
+							if (null != notFoundNum && notFoundNum != 0)
+								threeSame = false;
 						}
 					}
 					if (threeDiff)
 						kv.put("biNotfound", 0); //在count3 notfound3会跳过质检，这时不能跳过
+					if (threeSame)
+						kv.put("biSame", 1);
 				}
 			}
 			if ((int)kv.get("biCounter") == 3 && (int)kv.get("biNotfound") == 1 && (int)kv.get("biSame") == 0) {
-				//在count为3，same count为0时，此时有两种情况，在biNotfound为1时，未找到的字段另外两个有不同和相同情况，两者不同去质检，相同不去
+				//在count为3，same count为0时，此时有两种情况，在biNotfound为1时，未找到的字段另外两个有不同和都相同情况，两者不同去质检，都相同不去
 				boolean twoSame = true;	//在count3 same0会去质检，这时寻找notfound字段另外两个有没有都一样的，有就跳过质检
+				boolean allDiff = true;
 				for (Map.Entry<String,Integer> entry : sameCount.entrySet()) {
 					if (entry.getValue() == 1) {
+						allDiff = false;
 						Set<String> keySet = sameValue.keySet();
 						if (!keySet.contains(entry.getKey()))
 							twoSame = false;
 					}
 				}
-				if (twoSame)
+				for (Map.Entry<String,Integer> entry : notFoundCount.entrySet()) {
+					if (entry.getValue() == 1) {
+						Integer cnt = sameCount.get(entry.getKey());
+						if (cnt!=null && cnt.intValue() == 0){
+							allDiff = true;
+						}
+					}
+				}
+				if (twoSame && !allDiff)
 					kv.put("biSame", 1); //在count3 same0会去质检，这时可以跳过
 			}
 		} else {
@@ -353,8 +481,13 @@ public class StatisticsClient implements IStatisticsClient {
 			}
 		}
 
+		Map<String, Integer> sameCountFiltered = sameCount.entrySet()
+			.stream()
+			.filter(map -> sameValue.get(map.getKey()) != null)
+			.collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
+
 		if (3 == (int)kv.get("biCounter")) {	// 3人中2人一致的情况，将剩下的计入错误日志
-			sameCount.entrySet().forEach(entry -> {
+			sameCountFiltered.entrySet().forEach(entry -> {
 				if (1 == entry.getValue()) {
 					statisticsList.forEach(statistics -> {
 						AnnotationData annoData = annotationDataList.stream().filter(elem -> {
@@ -399,11 +532,54 @@ public class StatisticsClient implements IStatisticsClient {
 									.eq(Statistics::getCompositionId, statistics.getCompositionId())
 									.eq(Statistics::getUserId, statistics.getUserId())
 							);
+							statisticsService.calcReliabilityRate(statistics.getUserId());
 						}
 					});
 
 				}
 			});
+		}
+
+		if ((int)kv.get("biCounter") == 2 && (int)kv.get("biSame") == 0) {
+			//准备给第三人，建个统计
+			Statistics statistics_query = new Statistics();
+			statistics_query.setSubTaskId(labelTaskId);
+			statistics_query.setCompositionId(compositionId);
+			statistics_query.setTemplateId(templateId);
+			statistics_query.setType(1);
+			statistics_query.setStatus(1);
+
+			Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+			if (statistics == null) {
+				Statistics stat_new = new Statistics();
+				stat_new.setSubTaskId(labelTaskId);
+				stat_new.setCompositionId(compositionId);
+				stat_new.setTemplateId(templateId);
+				stat_new.setType(1);
+				stat_new.setStatus(1);
+				statisticsService.save(stat_new);
+			}
+		}
+
+		if ((int)kv.get("biCounter") == 3 && (int)kv.get("biSame") == 0) {
+			//准备去质检，建个统计
+			Statistics statistics_query = new Statistics();
+			statistics_query.setSubTaskId(labelTaskId);
+			statistics_query.setCompositionId(compositionId);
+			statistics_query.setTemplateId(templateId);
+			statistics_query.setType(3);
+			statistics_query.setStatus(1);
+
+			Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
+			if (statistics == null){
+				Statistics stat_new = new Statistics();
+				stat_new.setSubTaskId(labelTaskId);
+				stat_new.setCompositionId(compositionId);
+				stat_new.setTemplateId(templateId);
+				stat_new.setType(3);
+				stat_new.setStatus(1);
+				statisticsService.save(stat_new);
+			}
 		}
 
 		return R.data(kv);

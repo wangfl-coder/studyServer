@@ -16,12 +16,10 @@
  */
 package org.springblade.composition.service;
 
-import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
-import org.springblade.composition.dto.TaskCompositionDTO;
+import org.springblade.composition.dto.statistics.TaskComposition;
 import org.springblade.composition.entity.Statistics;
 import org.springblade.core.mp.base.BaseService;
-import org.springblade.task.feign.ILabelTaskClient;
 
 import java.util.List;
 
@@ -37,10 +35,11 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @param startTime
 	 * @param endTime
 	 * @param taskId
-	 * @param type
+	 * @param taskType
+	 * @param statisticsType
 	 * @return
 	 */
-	List<TaskCompositionDTO> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer type);
+	List<TaskComposition> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType);
 
 	/**
 	 * 通过标注子任务id获取专家
@@ -48,4 +47,22 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @return
 	 */
 	Expert getExpertByLabelTaskId(Long id);
+
+	/**
+	 * 更新标注任务统计
+	 * @param type
+	 * @param subTaskId
+	 * @param templateId
+	 * @param compositionId
+	 * @param deltaTime
+	 * @return
+	 */
+	boolean updateAnnotationStatistics(int type, Long subTaskId, Long templateId, Long compositionId, Integer deltaTime);
+
+	/**
+	 * 计算标注员正确率
+	 * @param userId
+	 * @return
+	 */
+	boolean calcReliabilityRate(Long userId);
 }

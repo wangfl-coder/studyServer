@@ -49,7 +49,6 @@ import java.util.Objects;
 @RequestMapping("manager")
 @AllArgsConstructor
 @Api(value = "流程管理接口", tags = "流程管理接口")
-@PreAuth(RoleConstant.HAS_ROLE_ADMINISTRATOR)
 public class FlowManagerController {
 
 	private final FlowEngineService flowEngineService;

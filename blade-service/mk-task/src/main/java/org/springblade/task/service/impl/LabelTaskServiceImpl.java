@@ -8,8 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
+import org.springblade.adata.enums.RealSetExpertStatusEnum;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
+import org.springblade.composition.entity.Template;
+import org.springblade.composition.feign.IStatisticsClient;
+import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -20,6 +25,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.system.cache.SysCache;
+import org.springblade.task.enums.LabelTaskTypeEnum;
 import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
@@ -47,11 +53,11 @@ import java.util.*;
 public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, LabelTask> implements LabelTaskService {
 
 	private final IFlowClient flowClient;
+	private final ITemplateClient templateClient;
 	private final IRealSetExpertClient realSetExpertClient;
+	private final IStatisticsClient statisticsClient;
 	private final QualityInspectionTaskService qualityInspectionTaskService;
 
-	@Value("${spring.profiles.active}")
-	public String env;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -61,8 +67,90 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 								List<Expert> experts) {
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 		//List<Expert> experts = persons.getData();
-		experts.forEach(expert -> {
+		boolean noHomepage = false;
+		R<List<Composition>> compositionsRes = templateClient.allCompositions(task.getTemplateId());
+		if (compositionsRes.isSuccess()) {
+			List<Composition> compositionList = compositionsRes.getData();
+			Composition composition = compositionList.stream()
+				.filter(elem -> elem.getAnnotationType() == 1)
+				.findAny()
+				.orElse(null);
+			if (composition == null) {
+				noHomepage = true;
+			}
+		}
+		boolean finalNoHomepage = noHomepage;
+		R<Template> templateRes = templateClient.getTemplateById(task.getTemplateId());
+		if (!templateRes.isSuccess())
+			throw new ServiceException("获取模版信息失败");
+		Template template = templateRes.getData();
+		String tenantId = AuthUtil.getTenantId();
+		Long userId = AuthUtil.getUserId();
+		experts.parallelStream().forEach(expert -> {
 			LabelTask labelTask = new LabelTask();
+			labelTask.setTenantId(tenantId);
+			labelTask.setProcessDefinitionId(processDefinitionId);
+			// 保存任务
+			labelTask.setCreateTime(DateUtil.now());
+			boolean save = save(labelTask);
+			Kv variables = createProcessVariables(task, labelTask);
+			variables.put("isRealSet", false);
+			R<BladeFlow> result = flowClient.startProcessInstanceByIdParallel(userId, labelTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(labelTask.getId())), variables);
+			if (result.isSuccess()) {
+				log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
+				// 返回流程id写入任务
+				labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
+				labelTask.setTemplateId(task.getTemplateId());
+				labelTask.setTaskId(task.getId());
+				labelTask.setPersonId(expert.getId());
+				labelTask.setPersonName(expert.getName());
+				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
+				updateById(labelTask);
+
+				Random random = Holder.RANDOM;
+				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
+				if (insertRealSet && finalNoHomepage) {		//需要添加真集又不需要标主页，直接加到流水线中
+					Map<String, String> compositionLabelMap = startRealSetProcess(template.getRealSetProcessDefinitions(), task);
+					if (compositionLabelMap != null) {
+						statisticsClient.initializeRealSetLabelTask(labelTask, compositionLabelMap);
+					}
+				}
+			} else {
+				throw new ServiceException("开启流程失败");
+			}
+		});
+		return true;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	// @GlobalTransactional
+	public LabelTask startFixProcess(String processDefinitionId,
+								Task task,
+								Expert expert) {
+		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
+		//List<Expert> experts = persons.getData();
+		boolean noHomepage = false;
+		R<List<Composition>> compositionsRes = templateClient.allCompositions(task.getTemplateId());
+		if (compositionsRes.isSuccess()) {
+			List<Composition> compositionList = compositionsRes.getData();
+			Composition composition = compositionList.stream()
+				.filter(elem -> elem.getAnnotationType() == 1)
+				.findAny()
+				.orElse(null);
+			if (composition == null) {
+				noHomepage = true;
+			}
+		}
+		boolean finalNoHomepage = noHomepage;
+		R<Template> templateRes = templateClient.getTemplateById(task.getTemplateId());
+		if (!templateRes.isSuccess())
+			throw new ServiceException("获取模版信息失败");
+		Template template = templateRes.getData();
+		String tenantId = AuthUtil.getTenantId();
+
+			LabelTask labelTask = new LabelTask();
+			labelTask.setTenantId(tenantId);
 			labelTask.setProcessDefinitionId(processDefinitionId);
 			// 保存任务
 			labelTask.setCreateTime(DateUtil.now());
@@ -78,13 +166,22 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
-				labelTask.setType(1);	//标注
+				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
 				updateById(labelTask);
+
+//				Random random = Holder.RANDOM;
+//				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
+//				if (insertRealSet && finalNoHomepage) {		//需要添加真集又不需要标主页，直接加到流水线中
+//					Map<String, String> compositionLabelMap = startRealSetProcess(template.getRealSetProcessDefinitions(), task);
+//					if (compositionLabelMap != null) {
+//						statisticsClient.initializeRealSetLabelTask(labelTask, compositionLabelMap);
+//					}
+//				}
 			} else {
 				throw new ServiceException("开启流程失败");
 			}
-		});
-		return true;
+
+		return labelTask;
 	}
 
 	@Override
@@ -125,7 +222,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
-				labelTask.setType(2);	//真集
+				labelTask.setType(LabelTaskTypeEnum.REAL_SET.getNum());	//真集
 				updateById(labelTask);
 
 				resultMap.put(entry.getKey(), labelTask.getId().toString());
@@ -133,14 +230,14 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				throw new ServiceException("开启流程失败");
 			}
 		});
-		expert.setStatus(2);	//已使用
+		expert.setStatus(RealSetExpertStatusEnum.USED.getNum());	//已使用
 		realSetExpertClient.saveExpert(expert);
 		return resultMap;
 	}
 
 	@Override
 	public int completeCount(Long taskId) {
-		return baseMapper.completeCount(env, taskId);
+		return baseMapper.completeCount(taskId);
 	}
 
 	@Override
@@ -155,7 +252,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	 */
 	@Override
 	public List<LabelTask> queryCompleteTask(Long taskId) {
-		return baseMapper.queryCompleteTask(env, taskId);
+		return baseMapper.queryCompleteTask(taskId);
 	}
 
 	/**
@@ -165,7 +262,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	 */
 	@Override
 	public List<LabelTask> queryUniqueCompleteTask(Long taskId) {
-		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(env, taskId);
+		List<LabelTask> labelTasks = baseMapper.queryCompleteTask(taskId);
 		List<LabelTask> uniqueCompleteTasks = new ArrayList<>();
 		for(LabelTask labelTask:labelTasks){
 			QueryWrapper<QualityInspectionTask> qualityInspectionTaskQueryWrapper = new QueryWrapper<>();
@@ -244,32 +341,32 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public long annotationDoneCount(String param2) {
-		return baseMapper.annotationDoneCount(env,param2);
+		return baseMapper.annotationDoneCount(param2);
 	}
 
 	@Override
 	public long annotationTodoCount(String param2) {
-		return baseMapper.annotationTodoCount(env,param2);
+		return baseMapper.annotationTodoCount(param2);
 	}
 
 	@Override
 	public int annotationClaimCount(List<String> roleAlias) {
-		return baseMapper.annotationClaimCount2(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.annotationClaimCount2(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<RoleClaimCountVO> roleClaimCount(List<String> roleAlias) {
-		return baseMapper.roleClaimCount(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.roleClaimCount(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<CompositionClaimCountVO> compositionClaimCount(List<String> roleAlias) {
-		return baseMapper.compositionClaimCount(env, roleAlias, AuthUtil.getUserId());
+		return baseMapper.compositionClaimCount(roleAlias, AuthUtil.getUserId());
 	}
 
 	@Override
 	public List<CompositionClaimListVO> compositionClaimList(List<String> roleAliases) {
-		return baseMapper.compositionClaimList(env, roleAliases, AuthUtil.getUserId());
+		return baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
 	}
 
 	private Kv createProcessVariables(Task task, LabelTask labelTask) {

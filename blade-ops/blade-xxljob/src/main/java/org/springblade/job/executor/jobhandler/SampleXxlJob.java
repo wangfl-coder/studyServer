@@ -37,7 +37,7 @@ public class SampleXxlJob {
 	private final IFlowClient flowClient;
 
 	/**
-	 * 1、简单任务示例（Bean模式）
+	 * 流程超时返回待领取任务（Bean模式）
 	 */
 	@XxlJob("todoTimeoutHandler")
 	public ReturnT<String> todoTimeoutHandler(String param) throws Exception {

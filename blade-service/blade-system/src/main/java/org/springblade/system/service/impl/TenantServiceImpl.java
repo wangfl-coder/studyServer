@@ -19,6 +19,8 @@ package org.springblade.system.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springblade.composition.entity.Composition;
+import org.springblade.composition.feign.ICompositionClient;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
@@ -65,6 +67,7 @@ public class TenantServiceImpl extends BaseServiceImpl<TenantMapper, Tenant> imp
 	private final IRoleMenuService roleMenuService;
 	private final IDictBizService dictBizService;
 	private final IUserClient userClient;
+	private final ICompositionClient compositionClient;
 
 	@Override
 	public IPage<Tenant> selectTenantPage(IPage<Tenant> page, Tenant tenant) {
@@ -136,6 +139,12 @@ public class TenantServiceImpl extends BaseServiceImpl<TenantMapper, Tenant> imp
 				dictBiz.setTenantId(tenantId);
 			});
 			dictBizService.saveBatch(dictBizList);
+			Composition tmp = new Composition();
+			tmp.setTenantId(tenantId);
+			tmp.setName("补充信息");
+			tmp.setAnnotationType(3);
+			tmp.setStatus(1);
+			compositionClient.submit(tmp);
 			// 新建租户对应的默认管理用户
 			User user = new User();
 			user.setTenantId(tenantId);

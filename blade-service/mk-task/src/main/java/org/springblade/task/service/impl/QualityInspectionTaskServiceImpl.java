@@ -39,8 +39,6 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 
 	private final IFlowClient flowClient;
 
-	@Value("${spring.profiles.active}")
-	public String env;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -66,7 +64,6 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 					.set("taskUser", TaskUtil.getTaskUser(inspectionTask.getTaskUser()))
 					.set("type", inspectionType)
 				    .set("priority", task.getPriority());
-					//set("days", DateUtil.between(subTask.getStartTime(), subTask.getEndTime()).toDays());
 				R<BladeFlow> result = flowClient.startProcessInstanceById(processDefinitionId, FlowUtil.getBusinessKey(businessTable, String.valueOf(inspectionTask.getId())), variables);
 				if (result.isSuccess()) {
 					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
@@ -94,7 +91,7 @@ public class QualityInspectionTaskServiceImpl extends BaseServiceImpl<QualityIns
 
 	@Override
 	public int completeCount(Long taskId) {
-		return baseMapper.completeCount(env, taskId);
+		return baseMapper.completeCount(taskId);
 	}
 
 	@Override

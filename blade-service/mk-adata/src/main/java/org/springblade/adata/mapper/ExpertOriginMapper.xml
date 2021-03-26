@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.adata.mapper.ExpertOriginMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="paramResultMap" type="org.springblade.adata.entity.ExpertOrigin">
+        <result column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="create_user" property="createUser"/>
+        <result column="create_dept" property="createDept"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="name" property="name"/>
+        <result column="name_zh" property="nameZh"/>
+        <result column="titles" property="titles"/>
+        <result column="phone" property="phone"/>
+        <result column="fax" property="fax"/>
+        <result column="email" property="email"/>
+        <result column="affiliation" property="affiliation"/>
+        <result column="affiliation_zh" property="affiliationZh"/>
+        <result column="address" property="address"/>
+        <result column="homepage" property="homepage"/>
+        <result column="other_homepage" property="otherHomepage"/>
+        <result column="hp" property="hp"/>
+        <result column="gs" property="gs"/>
+        <result column="dblp" property="dblp"/>
+        <result column="mag" property="mag"/>
+        <result column="gender" property="gender"/>
+        <result column="language" property="language"/>
+        <result column="avatar" property="avatar"/>
+        <result column="edu" property="edu"/>
+        <result column="work" property="work"/>
+        <result column="bio" property="bio"/>
+        <result column="bio_zh" property="bioZh"/>
+        <result column="remark" property="remark"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="inner_inspection_time" property="innerInspectionTime"/>
+        <result column="deliver_inspection_time" property="deliverInspectionTime"/>
+    </resultMap>
+
+    <resultMap id="userRemarkResultMap" type="org.springblade.adata.vo.UserRemarkVO">
+        <result column="id" property="personId"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+    </resultMap>
+
+    <select id="queryExportExperts" resultMap="paramResultMap">
+        select * from mk_adata_expert_origin
+        where task_id=#{taskId}
+    </select>
+
+    <select id="userRemark" resultMap="userRemarkResultMap">
+        select e.id,l.process_instance_id from mk_adata_expert e
+        inner join mk_task_label l
+        on l.person_id=e.id
+        where e.id=#{personId}
+    </select>
+
+    <select id="userInspectionRemark" resultMap="userRemarkResultMap">
+        select e.id,q.process_instance_id from mk_adata_expert e
+        inner join mk_task_quality_inspection q
+        on q.person_id=e.id
+        where e.id=#{personId}
+    </select>
+
+    <select id="exportExpert" resultType="org.springblade.adata.excel.ExpertExcel">
+        SELECT * FROM mk_adata_expert_origin ${ew.customSqlSegment}
+    </select>
+
+</mapper>

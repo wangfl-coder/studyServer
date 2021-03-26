@@ -29,6 +29,8 @@ public class Composition extends TenantEntity {
 	private String description;
 	@ApiModelProperty("标注类型")
 	private Integer annotationType;
+//	@ApiModelProperty("积分")
+//	private Integer points;
 
 	@TableField(exist = false)
 	@ApiModelProperty("提交（完成）的数量")

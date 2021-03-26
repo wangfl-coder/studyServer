@@ -12,6 +12,6 @@ oss:
 #  bucket-name: bladex
   name: minio
   tenant-mode: false
-  endpoint: http://192.168.6.202:9000
+  endpoint: http://192.168.6.202:9010
   access-key: minio
   secret-key: minio2020

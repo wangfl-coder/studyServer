@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.composition.mapper.StatementWithdrawalMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="statementWithdrawalResultMap" type="org.springblade.composition.entity.StatementWithdrawal">
+        <result column="id" property="id"/>
+        <result column="create_user" property="createUser"/>
+        <result column="create_dept" property="createDept"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="order_id" property="orderId"/>
+        <result column="user_id" property="userId"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="type" property="type"/>
+        <result column="account_bank" property="accountBank"/>
+        <result column="account_name" property="accountName"/>
+        <result column="withdrawal_account" property="withdrawalAccount"/>
+        <result column="withdrawal_id" property="withdrawalId"/>
+        <result column="pay_status" property="payStatus"/>
+        <result column="content" property="content"/>
+        <result column="handling_idea" property="handlingIdea"/>
+        <result column="handling_time" property="handlingTime"/>
+        <result column="channel" property="channel"/>
+        <result column="bank_account" property="bankAccount"/>
+        <result column="amount" property="amount"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+
+    <select id="selectStatementWithdrawalPage" resultMap="statementWithdrawalResultMap">
+        select * from mk_statement_withdrawal where is_deleted = 0
+    </select>
+
+</mapper>

@@ -8,6 +8,4 @@ import java.util.List;
 
 public interface ICompositionService extends BaseService<Composition> {
 
-	Composition getByIdIgnoreTenant(Long id);
-
 }

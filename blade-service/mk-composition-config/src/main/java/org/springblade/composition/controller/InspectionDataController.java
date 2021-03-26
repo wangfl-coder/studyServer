@@ -141,27 +141,36 @@ public class InspectionDataController extends BladeController {
 		qualityInspectionTask.setRemark(inspectionDataVO.getRemark());
 
 		// 更新学者表
-		Expert expert = new Expert();
-		expert.setId(inspectionDataVO.getExpertId());
-		if (oldInspectionDataList.size() != 0) {
-			// 如果质检后来修改为正确，需要把专家表中的字段改成标注人员标注的
-			oldInspectionDataList.forEach(oldInspectionData->{
-				AnnotationData annotation = new AnnotationData();
-				annotation.setSubTaskId(inspectionDataVO.getLabelTaskId());
-				annotation.setField(oldInspectionData.getField());
-				annotation = annotationDataService.getOne(Condition.getQueryWrapper(annotation));
-				// 修改质检报错，如果标注人员没有标注，质检人员修改时，恢复expert表对应的值为null
-				if (annotation != null) {
-					BeanUtil.setProperty(expert, oldInspectionData.getField(), annotation.getValue());
-				}else{
-					// 这个位置赋值必须时“”,不能是null,因为更新expert表用的是saveUpdate方法，对于null会默认不更新
-					BeanUtil.setProperty(expert, oldInspectionData.getField(), "");
-				}
-			});
-			// 2 是质检正确
-			qualityInspectionTask.setStatus(2);
-
+//		Expert expert = new Expert();
+//		expert.setId(inspectionDataVO.getExpertId());
+//		if (oldInspectionDataList.size() != 0) {
+//			// 如果质检后来修改为正确，需要把专家表中的字段改成标注人员标注的
+//			oldInspectionDataList.forEach(oldInspectionData->{
+//				AnnotationData annotation = new AnnotationData();
+//				annotation.setSubTaskId(inspectionDataVO.getLabelTaskId());
+//				annotation.setField(oldInspectionData.getField());
+//				annotation = annotationDataService.getOne(Condition.getQueryWrapper(annotation));
+//				// 修改质检报错，如果标注人员没有标注，质检人员修改时，恢复expert表对应的值为null
+//				if (annotation != null) {
+//					BeanUtil.setProperty(expert, oldInspectionData.getField(), annotation.getValue());
+//				}else{
+//					// 这个位置赋值必须时“”,不能是null,因为更新expert表用的是saveUpdate方法，对于null会默认不更新
+//					BeanUtil.setProperty(expert, oldInspectionData.getField(), "");
+//				}
+//			});
+//			// 2 是质检正确
+//			qualityInspectionTask.setStatus(2);
+//
+//		}
+		Expert expertQuery = new Expert();
+		expertQuery.setId(inspectionDataVO.getExpertId());
+		R<Expert> expertRes = expertClient.detail(expertQuery);
+		if (!expertRes.isSuccess()) {
+			return R.fail("获取专家失败");
 		}
+		Expert expert = expertRes.getData();
+		// 2 是质检正确
+		qualityInspectionTask.setStatus(2);
 		if (inspectionDataList != null){
 			inspectionDataList.forEach(inspectionData->BeanUtil.setProperty(expert, inspectionData.getField(),inspectionData.getValue()));
 			// 3 是质检错误

@@ -88,6 +88,35 @@ public class FlowClient implements IFlowClient {
 	}
 
 	@Override
+	@PostMapping(START_PROCESS_INSTANCE_BY_ID_PARALLEL)
+	public R<BladeFlow> startProcessInstanceByIdParallel(Long createUser, String processDefinitionId, String businessKey, @RequestBody Map<String, Object> variables) {
+		// 设置流程启动用户
+		identityService.setAuthenticatedUserId(TaskUtil.getTaskUser(createUser.toString()));
+
+		Process process = repositoryService.getBpmnModel(processDefinitionId).getMainProcess();
+		// 获取之前存入dataObjects的变量
+		List<ValuedDataObject> datas = repositoryService.getBpmnModel(processDefinitionId).getMainProcess().getDataObjects();
+		for (ValuedDataObject data : datas) {
+			variables.put(data.getName(), data.getValue());
+		}
+
+		// 开启流程
+		ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
+		List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
+		if(variables.get("priority")!=null){
+			tasks.forEach(t -> {
+				int p = (int)variables.get("priority");
+				taskService.setPriority(t.getId(), p);
+			});
+		}
+
+		// 组装流程通用类
+		BladeFlow flow = new BladeFlow();
+		flow.setProcessInstanceId(processInstance.getId());
+		return R.data(flow);
+	}
+
+	@Override
 	@PostMapping(START_PROCESS_INSTANCE_BY_KEY)
 	public R<BladeFlow> startProcessInstanceByKey(String processDefinitionKey, String businessKey, @RequestBody Map<String, Object> variables) {
 		// 设置流程启动用户

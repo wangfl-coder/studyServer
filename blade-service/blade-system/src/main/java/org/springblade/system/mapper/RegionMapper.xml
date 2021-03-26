@@ -92,7 +92,7 @@
                 and region.code like concat(concat('%', #{param2.code}),'%')
             </if>
             <if test="param2.name!=null and param2.name!=''">
-                and region.name like concat(concat('%', #{param2.name}),'%')
+                and region.name like d
             </if>
         </where>
         ORDER BY region.code

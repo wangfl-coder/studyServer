@@ -119,7 +119,7 @@ public class AnnotationDataController extends BladeController {
 			List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList().stream().filter(annotationData -> Func.isNotBlank(annotationData.getField())).collect(Collectors.toList());
 			annotationDataVO.setAnnotationDataList(annotationDataList);
 		}
-		Long subTaskId  = annotationDataVO.getSubTaskId();
+
 		List<AnnotationData> annotationDataList = annotationDataVO.getAnnotationDataList();
 		//获得之前标注的数据
 		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
@@ -146,51 +146,12 @@ public class AnnotationDataController extends BladeController {
 		expertClient.saveExpert(expert);
 
 		//更新统计表，记录标注用时
-		Statistics statistics_query = new Statistics();
-		statistics_query.setSubTaskId(subTaskId);
-		statistics_query.setCompositionId(annotationDataVO.getCompositionId());
-		statistics_query.setUserId(AuthUtil.getUserId());
-		statistics_query.setType(1);
-
-		Statistics statistics = statisticsService.getOne(Condition.getQueryWrapper(statistics_query));
-		if (statistics != null){
-			statistics.setTime(statistics.getTime() + annotationDataVO.getTime());
-			statistics.setStatus(2);
-			statisticsService.saveOrUpdate(statistics);
-		} else {	//有两种情况:
-			// 1.组合没有被标;2.被标过但不是当前的人
-			boolean wrote = false;
-			Statistics stat_his_query = new Statistics();
-			stat_his_query.setSubTaskId(subTaskId);
-			stat_his_query.setCompositionId(annotationDataVO.getCompositionId());
-			stat_his_query.setType(1);
-			List<Statistics> statistics_his = statisticsService.list(Condition.getQueryWrapper(stat_his_query));
-			for(Statistics statistics_history: statistics_his) {
-				if (null == statistics_history.getUserId()) {	//	组合没有被标
-					statistics_history.setTime(annotationDataVO.getTime());
-					statistics_history.setStatus(2);
-					statistics_history.setUserId(AuthUtil.getUserId());
-					statistics_history.setCompositionId(annotationDataVO.getCompositionId());
-					statistics_history.setSubTaskId(subTaskId);
-					statistics_history.setTemplateId(annotationDataVO.getTemplateId());
-					statistics_history.setType(1);
-					wrote = true;
-					statisticsService.saveOrUpdate(statistics_history);
-					break;
-				}
-			};
-			if (!wrote) {    //	被标过但不是当前的人
-				Statistics new_stat = new Statistics();
-				new_stat.setTime(annotationDataVO.getTime());
-				new_stat.setStatus(2);
-				new_stat.setUserId(AuthUtil.getUserId());
-				new_stat.setCompositionId(annotationDataVO.getCompositionId());
-				new_stat.setSubTaskId(subTaskId);
-				new_stat.setTemplateId(annotationDataVO.getTemplateId());
-				new_stat.setType(1);
-				statisticsService.saveOrUpdate(new_stat);
-			}
-		}
+		statisticsService.updateAnnotationStatistics(
+			1,
+			annotationDataVO.getSubTaskId(),
+			annotationDataVO.getTemplateId(),
+			annotationDataVO.getCompositionId(),
+			annotationDataVO.getTime());
 
 		if(annotationDataList != null){
 			return R.status(annotationDataService.saveBatch(annotationDataList));

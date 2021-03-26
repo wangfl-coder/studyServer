@@ -17,6 +17,7 @@
 package org.springblade.composition.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.TemplateComposition;
 
@@ -34,6 +35,6 @@ public interface TemplateCompositionMapper extends BaseMapper<TemplateCompositio
 	 * @param templateId 模版Id
 	 * @return
 	 */
-	List<Composition> allCompositions(Long templateId);
+	List<Composition> allCompositions(@Param("templateId")Long templateId);
 
 }

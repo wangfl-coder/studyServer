@@ -59,9 +59,14 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @param id
 	 * @return
 	 */
-	Boolean importDetail(String id, Long taskId);
+	Expert importDetail(String tenantId, String id, Long taskId);
 
-
+	/**
+	 * 导入并保存
+	 * @param id
+	 * @return
+	 */
+	Boolean importDetailAndSave(String tenantId, String id, Long taskId);
 
 	/**
 	 * 导入智库下所有学者

@@ -5,7 +5,6 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="paramResultMap" type="org.springblade.adata.entity.ExpertExtend">
         <result column="id" property="id"/>
-        <result column="tenant_id" property="tenantId"/>
         <result column="create_user" property="createUser"/>
         <result column="create_dept" property="createDept"/>
         <result column="create_time" property="createTime"/>

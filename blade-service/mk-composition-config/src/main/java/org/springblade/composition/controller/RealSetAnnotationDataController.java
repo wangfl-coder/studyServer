@@ -155,23 +155,27 @@ public class RealSetAnnotationDataController extends BladeController {
 			if (answer == null){
 				answer = "";
 			}
-			if(realSetAnnotationData.getValue().equals(answer)){
-				is_true = 1;
+			if ("avatar".equals(realSetAnnotationData.getField())) {	//头像默认正确，直接保存
+				realSetAnnotationData.setIsTrue(1);
+				realSetAnnotationDataService.save(realSetAnnotationData);
+			}else {
+				if (realSetAnnotationData.getValue().equals(answer)) {
+					is_true = 1;
+				}
+				realSetAnnotationData.setIsTrue(is_true);
+				realSetAnnotationDataService.save(realSetAnnotationData);
+				if (is_true == 2) {
+					isCompositionTrue = 2;
+					AnnotationDataErrata annotationDataErrata = Objects.requireNonNull(BeanUtil.copy(realSetAnnotationData, AnnotationDataErrata.class));
+					annotationDataErrata.setSubTaskId(annotationDataVO.getSubTaskId());
+					annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
+					annotationDataErrata.setLabelerId(AuthUtil.getUserId());
+					annotationDataErrata.setValue(answer);
+					annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
+					annotationDataErrata.setSource(2);
+					annotationDataErrataList.add(annotationDataErrata);
+				}
 			}
-			realSetAnnotationData.setIsTrue(is_true);
-			realSetAnnotationDataService.save(realSetAnnotationData);
-			if(is_true==2){
-				isCompositionTrue = 2;
-				AnnotationDataErrata annotationDataErrata = Objects.requireNonNull(BeanUtil.copy(realSetAnnotationData, AnnotationDataErrata.class));
-				annotationDataErrata.setSubTaskId(annotationDataVO.getSubTaskId());
-				annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
-				annotationDataErrata.setLabelerId(AuthUtil.getUserId());
-				annotationDataErrata.setValue(answer);
-				annotationDataErrata.setAnnotationDataId(realSetAnnotationData.getId());
-				annotationDataErrata.setSource(2);
-				annotationDataErrataList.add(annotationDataErrata);
-			}
-
 		}
 		if (annotationDataErrataList.size() > 0) {
 			annotationDataErrataService.saveBatch(annotationDataErrataList);
@@ -208,6 +212,7 @@ public class RealSetAnnotationDataController extends BladeController {
 					statistics_history.setType(2);
 					if (isCompositionTrue == 2) {
 						statistics_history.setIsWrong(2);
+						statisticsService.calcReliabilityRate(AuthUtil.getUserId());
 					}
 					wrote = true;
 					statisticsService.saveOrUpdate(statistics_history);

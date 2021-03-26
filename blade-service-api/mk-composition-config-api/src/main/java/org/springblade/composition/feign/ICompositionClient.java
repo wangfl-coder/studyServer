@@ -21,8 +21,11 @@ import org.springblade.common.constant.LauncherConstant;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.core.tool.api.R;
+import org.springblade.task.entity.LabelTask;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -37,6 +40,8 @@ public interface ICompositionClient {
 
 	String API_PREFIX = "/client";
 	String GET_COMPOSITION_BY_ID = API_PREFIX + "/mk-composition-config/get-composition-by-id";
+	String SUBMIT_COMPOSITION = API_PREFIX + "/mk-composition-config/submit-composition";
+	String GET_COMPLEMENT_COMPOSITION_ID = API_PREFIX + "/mk-composition-config/get-complement-composition-id";
 
 
 	/**
@@ -44,4 +49,16 @@ public interface ICompositionClient {
 	 */
 	@GetMapping(GET_COMPOSITION_BY_ID)
 	R<Composition> getById(@RequestParam("id") Long compositionId);
+
+	/**
+	 * 获取模版
+	 */
+	@PostMapping(SUBMIT_COMPOSITION)
+	R<Boolean> submit(@RequestBody Composition composition);
+
+	/**
+	 * 获取补充信息组合Id
+	 */
+	@GetMapping(GET_COMPLEMENT_COMPOSITION_ID)
+	R<Long> getComplementCompositionId(@RequestParam("tenantId") String tenantId);
 }

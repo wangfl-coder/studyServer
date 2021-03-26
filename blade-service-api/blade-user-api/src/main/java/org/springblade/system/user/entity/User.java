@@ -99,6 +99,9 @@ public class User extends TenantEntity {
 	 * 岗位id
 	 */
 	private String postId;
-
+	/**
+	 * 错误率刷新时间
+	 */
+	private Date refreshTime;
 
 }
