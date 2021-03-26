@@ -61,8 +61,8 @@ public interface IStatisticsService extends BaseService<Statistics> {
 
 	/**
 	 * 计算标注员正确率
-	 * @param type
+	 * @param userId
 	 * @return
 	 */
-	boolean calcReliabilityRate();
+	boolean calcReliabilityRate(Long userId);
 }

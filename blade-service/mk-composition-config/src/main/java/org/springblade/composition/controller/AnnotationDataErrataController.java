@@ -178,22 +178,31 @@ public class AnnotationDataErrataController extends BladeController {
 						.eq(Statistics::getCompositionId, oldAnnotationData.getCompositionId())
 						.eq(Statistics::getUserId, oldAnnotationData.getLabelerId())
 				);
+				statisticsService.calcReliabilityRate(oldAnnotationData.getLabelerId());
 			});
 			annotationDataErrataService.deleteLogic(oldAnnotationDataIds);
 		}else if (annotationDataErrataList != null && oldAnnotationDataList.size() == 0) {
-			//获得之前标注的数据
-			List<AnnotationData> oldAnnotationList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
-				.eq(AnnotationData::getSubTaskId, annotationDataErrataDTO.getSubTaskId())
-				.eq(AnnotationData::getCompositionId, annotationDataErrataDTO.getCompositionId())
-			);
 			annotationDataErrataList.forEach(annotationDataErrata -> {
-				if (Func.isNotBlank(annotationDataErrata.getValue())) {
-					boolean temp2 = statisticsService.update(
+				if (Func.isNotBlank(annotationDataErrata.getValue())) {	//质检填了，没填算错
+					List<Statistics> statList = statisticsService.list(
 						Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
 							.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
 							.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
 					);
+					statList.forEach(statistics -> {
+						boolean temp2 = statisticsService.update(
+							Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
+								.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
+								.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
+						);
+						statisticsService.calcReliabilityRate(statistics.getUpdateUser());
+					});
 				}else {	//质检没填，填了的算错
+					//获得之前标注员标注的数据
+					List<AnnotationData> oldAnnotationList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
+						.eq(AnnotationData::getSubTaskId, annotationDataErrataDTO.getSubTaskId())
+						.eq(AnnotationData::getCompositionId, annotationDataErrataDTO.getCompositionId())
+					);
 					oldAnnotationList.forEach(oldAnnotation -> {
 						if (Func.isNotBlank(oldAnnotation.getValue())) {
 							boolean temp2 = statisticsService.update(
@@ -202,6 +211,7 @@ public class AnnotationDataErrataController extends BladeController {
 									.eq(Statistics::getCompositionId, oldAnnotation.getCompositionId())
 									.eq(Statistics::getUserId, oldAnnotation.getUpdateUser())
 							);
+							statisticsService.calcReliabilityRate(oldAnnotation.getUpdateUser());
 						}
 					});
 				}

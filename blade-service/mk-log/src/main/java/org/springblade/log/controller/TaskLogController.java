@@ -42,7 +42,7 @@ import javax.validation.Valid;
  */
 @RestController
 @AllArgsConstructor
-@RequestMapping("/logs")
+@RequestMapping("/task-log")
 @Api(value = "", tags = "接口")
 public class TaskLogController extends BladeController {
 

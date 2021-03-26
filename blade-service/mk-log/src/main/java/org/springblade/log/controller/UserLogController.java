@@ -62,7 +62,7 @@ import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
  */
 @NonDS
 @RestController
-@RequestMapping
+@RequestMapping("/user-log")
 @AllArgsConstructor
 public class UserLogController {
 

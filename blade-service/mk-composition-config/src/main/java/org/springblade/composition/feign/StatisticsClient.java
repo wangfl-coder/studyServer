@@ -532,6 +532,7 @@ public class StatisticsClient implements IStatisticsClient {
 									.eq(Statistics::getCompositionId, statistics.getCompositionId())
 									.eq(Statistics::getUserId, statistics.getUserId())
 							);
+							statisticsService.calcReliabilityRate(statistics.getUserId());
 						}
 					});
 

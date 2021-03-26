@@ -33,6 +33,7 @@ import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.common.cache.CacheNames;
 import org.springblade.composition.entity.AnnotationData;
+import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.redis.cache.BladeRedis;
@@ -48,6 +49,10 @@ import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.flow.engine.entity.FlowProcess;
 import org.springblade.flow.engine.service.FlowEngineService;
 import org.springblade.system.cache.SysCache;
+import org.springblade.system.user.cache.UserCache;
+import org.springblade.system.user.entity.User;
+import org.springblade.system.user.enums.UserStatusEnum;
+import org.springblade.system.user.feign.IUserClient;
 import org.springblade.task.entity.LabelTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
@@ -61,6 +66,7 @@ import java.time.Duration;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
 
 /**
  * 流程事务通用接口
@@ -82,6 +88,7 @@ public class WorkController {
 	private final ILabelTaskClient labelTaskClient;
 	private final IExpertClient expertClient;
 	private final BladeRedis bladeRedis;
+	private final IUserClient userClient;
 
 
 	/**
@@ -126,6 +133,10 @@ public class WorkController {
 //		}else {
 //			return null;
 //		}
+		User user = UserCache.getUser(AuthUtil.getUserId());
+		if (user.getStatus() == UserStatusEnum.BLOCKED.getNum()) {
+			return R.fail("错误率过高，无法接任务，请联系管理员");
+		}
 		String redisCode = this.bladeRedis.get(CacheNames.FLOW_CLAIMONE_KEY + AuthUtil.getUserId());
 		if (redisCode != null) {
 			return R.fail("领取任务过快");

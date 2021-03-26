@@ -18,6 +18,7 @@ package org.springblade.system.user.feign;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.Func;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
 
 /**
  * 用户服务Feign实现类
@@ -95,6 +98,13 @@ public class UserClient implements IUserClient {
 	@PostMapping(SAVE_USER)
 	public R<Boolean> saveUser(@RequestBody User user) {
 		return R.data(service.submit(user));
+	}
+
+	@Override
+	@PostMapping(UPDATE_USER)
+	public R<Boolean> updateUser(@RequestBody User user) {
+		CacheUtil.clear(USER_CACHE);
+		return R.data(service.updateUser(user));
 	}
 
 	@Override

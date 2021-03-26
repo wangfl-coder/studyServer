@@ -24,24 +24,34 @@ import org.springblade.composition.mapper.StatisticsMapper;
 import org.springblade.composition.service.ILogBalanceService;
 import org.springblade.composition.service.ILogPointsService;
 import org.springblade.composition.service.IStatisticsService;
+import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
+import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.log.entity.UserLog;
 import org.springblade.system.cache.DictBizCache;
 import org.springblade.system.cache.DictCache;
 import org.springblade.system.enums.DictEnum;
 import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
 import org.springblade.system.user.entity.UserInfo;
+import org.springblade.system.user.entity.UserOauth;
+import org.springblade.system.user.enums.UserStatusEnum;
 import org.springblade.system.user.feign.IUserClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
+import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
+import static org.springblade.core.launch.constant.FlowConstant.TASK_USR_PREFIX;
 
 /**
  * 服务实现类
@@ -122,31 +132,42 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	}
 
 	@Override
-	public boolean calcReliabilityRate() {
-		User user = UserCache.getUser(AuthUtil.getUserId());
-		String refreshTime = user.getRefreshTime().toString();
+	public boolean calcReliabilityRate(Long userId) {
+		User user = UserCache.getUser(userId);
+		if (user.getStatus() == UserStatusEnum.BLOCKED.getNum())
+			return true;
+		String refreshTime = null;
+		if (user.getRefreshTime() != null) {
+			refreshTime = user.getRefreshTime().toString();
+		}
 
 		Integer amount = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "start_reliability_rate_amount"));
 		Integer iaaTotal = statisticsMapper.userTotalCount(2, user.getId(), refreshTime);
 		Integer siTotal = statisticsMapper.userTotalCount(5, user.getId(), refreshTime);
-		if (iaaTotal > amount) {
+		if (iaaTotal >= amount) {
 			Integer iaaWrong = statisticsMapper.userWrongCount(2, user.getId(), refreshTime);
-			int iaaRate = (iaaWrong/iaaTotal)*100;
+			int iaaRate = (int)((1-(iaaWrong.floatValue()/iaaTotal))*100);
 			Integer requiredIAARate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "iaa_required_rate"));
 			if (iaaRate < requiredIAARate.intValue()) {
-
-				user.setStatus(2);
-				userClient.saveUser(user);
+				UserLog userLog = Objects.requireNonNull(BeanUtil.copy(user, UserLog.class));
+				userLog.setType(1);
+				userLog.setRemark(StringUtil.format("用户{}因为多人标注正确率过低：{}%被封停无法再接任务", user.getAccount(), iaaRate));
+				user.setStatus(UserStatusEnum.BLOCKED.getNum());
+				CacheUtil.clear(USER_CACHE);
+				userClient.updateUser(user);
 			}
 		}
-		if (siTotal > amount) {
+		if (siTotal >= amount) {
 			Integer siWrong = statisticsMapper.userWrongCount(5, user.getId(), refreshTime);
-			int siRate = (siWrong/siTotal)*100;
+			int siRate = (int)((1-(siWrong.floatValue()/siTotal))*100);
 			Integer requiredSIRate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "sampling_inspection_required_rate"));
 			if (siRate < requiredSIRate.intValue()) {
-
-				user.setStatus(2);
-				userClient.saveUser(user);
+				UserLog userLog = Objects.requireNonNull(BeanUtil.copy(user, UserLog.class));
+				userLog.setType(1);
+				userLog.setRemark(StringUtil.format("用户{}因为人工抽检正确率过低：{}%被封停无法再接任务", user.getAccount(), siRate));
+				user.setStatus(UserStatusEnum.BLOCKED.getNum());
+				CacheUtil.clear(USER_CACHE);
+				userClient.updateUser(user);
 			}
 		}
 

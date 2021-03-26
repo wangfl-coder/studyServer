@@ -17,6 +17,7 @@
 package org.springblade.log.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springblade.core.tenant.mp.TenantEntity;
@@ -38,70 +39,76 @@ public class UserLog extends TenantEntity {
 	/**
 	 * 用户编号
 	 */
+	@ApiModelProperty(value = "用户编号")
 	private String code;
 	/**
 	 * 用户平台
 	 */
+	@ApiModelProperty(value = "用户平台")
 	private Integer userType;
 	/**
 	 * 账号
 	 */
+	@ApiModelProperty(value = "账号")
 	private String account;
-	/**
-	 * 密码
-	 */
-	private String password;
 	/**
 	 * identifier
 	 */
+	@ApiModelProperty(value = "身份证")
 	private String identifier;
 	/**
 	 * 昵称
 	 */
+	@ApiModelProperty(value = "昵称")
 	private String name;
 	/**
 	 * 真名
 	 */
+	@ApiModelProperty(value = "真名")
 	private String realName;
 	/**
 	 * 头像
 	 */
+	@ApiModelProperty(value = "头像")
 	private String avatar;
 	/**
 	 * 邮箱
 	 */
+	@ApiModelProperty(value = "邮箱")
 	private String email;
 	/**
 	 * 手机
 	 */
+	@ApiModelProperty(value = "手机")
 	private String mobile;
 	/**
 	 * 电话
 	 */
+	@ApiModelProperty(value = "电话")
 	private String phone;
 	/**
-	 * 生日
+	 * 事件类型1.因准确率屏蔽
 	 */
-	private Date birthday;
+	@ApiModelProperty(value = "事件类型1.因准确率屏蔽")
+	private Integer type;
 	/**
-	 * 性别
+	 * 操作员
 	 */
-	private Integer sex;
+	@ApiModelProperty(value = "操作员")
+	private String operator;
 	/**
-	 * 角色id
+	 * 备注
 	 */
-	private String roleId;
+	@ApiModelProperty(value = "备注")
+	private String remark;
 	/**
-	 * 部门id
+	 * 处理类型 1.已处理2.延后处理3.不予解决
 	 */
-	private String deptId;
+	@ApiModelProperty(value = "处理类型 1.已处理2.延后处理3.不予解决")
+	private Integer treat_type;
 	/**
-	 * 岗位id
+	 * 处理意见
 	 */
-	private String postId;
-	/**
-	 * 错误率刷新时间
-	 */
-	private Date refreshTime;
-
+	@ApiModelProperty(value = "备注")
+	private String treat_remark;
 }

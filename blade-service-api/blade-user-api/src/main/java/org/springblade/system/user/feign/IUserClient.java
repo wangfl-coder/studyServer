@@ -48,6 +48,7 @@ public interface IUserClient {
 	String GET_USER_INFO_BY_EMAIL = API_PREFIX + "/get-user-info-by-email";
 	String USER_AUTH_INFO = API_PREFIX + "/user-auth-info";
 	String SAVE_USER = API_PREFIX + "/save-user";
+	String UPDATE_USER = API_PREFIX + "/update-user";
 	String REMOVE_USER = API_PREFIX + "/remove-user";
 
 	/**
@@ -141,6 +142,15 @@ public interface IUserClient {
 	 */
 	@PostMapping(SAVE_USER)
 	R<Boolean> saveUser(@RequestBody User user);
+
+	/**
+	 * 修改用户
+	 *
+	 * @param user 用户实体
+	 * @return
+	 */
+	@PostMapping(UPDATE_USER)
+	R<Boolean> updateUser(@RequestBody User user);
 
 	/**
 	 * 删除用户
