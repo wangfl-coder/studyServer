@@ -271,12 +271,12 @@ public class TaskController extends BladeController {
 		@ApiImplicitParam(name = "taskName", value = "查询条件", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "taskType", value = "任务类型", paramType = "query", dataType = "integer"),
 		@ApiImplicitParam(name = "tenantId", value = "要过滤的租户Id（只对管理租户起作用）", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "isComposition", value = "是否为该组合", paramType = "query", dataType = "boolean")
+		@ApiImplicitParam(name = "isCount", value = "是否需要统计", paramType = "query", dataType = "boolean")
 	})
 	@ApiOperation(value = "分页查询全部任务")
 	public R<IPage<TaskVO>> list(@ApiIgnore @RequestParam Map<String, Object> task, Query query, BladeUser bladeUser) {
-		boolean isComposition = Boolean.parseBoolean((String) task.get("isComposition"));
-		task.remove("isComposition");
+		boolean isCount = Boolean.parseBoolean((String) task.get("isCount"));
+		task.remove("isCount");
 		QueryWrapper<Task> queryWrapper = Condition.getQueryWrapper(task, Task.class);
 		String name = (String)task.get("taskName");
 		if (name != null) {
@@ -290,7 +290,7 @@ public class TaskController extends BladeController {
 			queryWrapper.lambda().eq(Task::getTenantId, bladeUser.getTenantId());
 		}
 		IPage<Task> pages = taskService.page(Condition.getPage(query), queryWrapper.orderByDesc("update_time"));
-		if (!isComposition){
+		if (!isCount){
 			List<TaskVO> taskVOS = taskService.batchCastTaskVO(pages.getRecords());
 			IPage<TaskVO> pageVo = new Page(pages.getCurrent(), pages.getSize(), pages.getTotal());
 			pageVo.setRecords(taskVOS);
