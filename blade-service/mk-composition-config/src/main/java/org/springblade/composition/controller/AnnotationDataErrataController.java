@@ -29,11 +29,14 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.dto.AnnotationCompleteDTO;
 import org.springblade.composition.dto.AnnotationDataErrataDTO;
+import org.springblade.composition.dto.AnnotationErrataCompleteDTO;
 import org.springblade.composition.entity.*;
 import org.springblade.composition.service.*;
 import org.springblade.composition.vo.AnnotationCompositionErrataVO;
 import org.springblade.composition.vo.AnnotationDataErrataVO;
+import org.springblade.composition.vo.AnnotationDataVO;
 import org.springblade.composition.vo.RealSetAnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -45,6 +48,8 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.entity.SingleFlow;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.vo.TaskVO;
@@ -79,6 +84,7 @@ public class AnnotationDataErrataController extends BladeController {
 	private final ICompositionService compositionService;
 	private final IRealSetAnnotationDataService realSetAnnotationDataService;
 	private final IRealSetExpertClient realSetExpertClient;
+	private final IFlowClient flowClient;
 
 	/**
 	 * 查询标注数据
@@ -145,8 +151,35 @@ public class AnnotationDataErrataController extends BladeController {
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataDTO对象")
-	public R submit(@Valid @RequestBody AnnotationDataErrataDTO annotationDataErrataDTO, BladeUser bladeUser) {
-		// 清理标注数据前后的多余空白字符
+	public R submit(@Valid @RequestBody AnnotationDataErrataDTO annotationDataErrataDTO) {
+		boolean res = submitData(annotationDataErrataDTO);
+		return R.status(res);
+	}
+
+	/**
+	 * 批量新增或修改标注数据
+	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
+	 * 每次修改后同时更新mk_adata_expert表中的数据
+	 */
+	@PostMapping("/submit-and-complete")
+	@ApiOperationSupport(order = 3)
+	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationCompleteDTO对象")
+	public R submitAndComplete(@Valid @RequestBody AnnotationErrataCompleteDTO annotationErrataCompleteDTO) {
+		AnnotationDataErrataDTO annotationDataErrataDTO = Objects.requireNonNull(BeanUtil.copy(annotationErrataCompleteDTO, AnnotationDataErrataDTO.class));
+		boolean res = submitData(annotationDataErrataDTO);
+		SingleFlow singleFlow = Objects.requireNonNull(BeanUtil.copy(annotationErrataCompleteDTO, SingleFlow.class));
+		R<Boolean> res2 = flowClient.completeTask(singleFlow);
+		if (res2.isSuccess()) {
+			return R.status(res2.getData());
+		}else {
+			return R.fail("完成任务失败");
+		}
+
+	}
+
+	private boolean submitData(AnnotationDataErrataDTO annotationDataErrataDTO) {
+// 清理标注数据前后的多余空白字符
 		if (annotationDataErrataDTO.getAnnotationDataErrataList() != null) {
 			annotationDataErrataDTO.getAnnotationDataErrataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
 		}
@@ -185,16 +218,17 @@ public class AnnotationDataErrataController extends BladeController {
 			annotationDataErrataList.forEach(annotationDataErrata -> {
 				if (Func.isNotBlank(annotationDataErrata.getValue())) {	//质检填了，没填算错
 					List<Statistics> statList = statisticsService.list(
+						Wrappers.<Statistics>query().lambda().ne(Statistics::getUserId, AuthUtil.getUserId())
+							.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
+							.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
+					);
+					boolean temp2 = statisticsService.update(
 						Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
+							.ne(Statistics::getUserId, AuthUtil.getUserId())
 							.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
 							.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
 					);
 					statList.forEach(statistics -> {
-						boolean temp2 = statisticsService.update(
-							Wrappers.<Statistics>update().lambda().set(Statistics::getIsWrong, 1)
-								.eq(Statistics::getSubTaskId, annotationDataErrata.getSubTaskId())
-								.eq(Statistics::getCompositionId, annotationDataErrata.getCompositionId())
-						);
 						statisticsService.calcReliabilityRate(statistics.getUpdateUser());
 					});
 				}else {	//质检没填，填了的算错
@@ -237,45 +271,8 @@ public class AnnotationDataErrataController extends BladeController {
 			annotationDataErrataDTO.getTime());
 
 		if(annotationDataErrataList != null){
-			return R.status(annotationDataErrataService.saveBatch(annotationDataErrataList));
-		}else{
-			return R.success("没有数据保存");
+			return annotationDataErrataService.saveBatch(annotationDataErrataList);
 		}
-
+		return true;
 	}
-
-	/**
-	 * 提交真题标志数据接口
-	 */
-	@PostMapping("/submit_real_set")
-	@ApiOperationSupport(order = 4)
-	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入AnnotationDataVO对象")
-	public R submitRealSet(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
-		// 清理标注数据前后的多余空白字符
-		if (annotationDataVO.getRealSetAnnotationDataList() != null) {
-			annotationDataVO.getRealSetAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
-		}
-		List<RealSetAnnotationData> annotationDataList = annotationDataVO.getRealSetAnnotationDataList();
-		// 获取真题答案
-		RealSetExpert realSetExpert = new RealSetExpert();
-		realSetExpert.setId(annotationDataVO.getExpertId());
-		RealSetExpert realData = realSetExpertClient.detail(realSetExpert).getData();
-
-		// 逐个字段检查正确与否
-		annotationDataList.forEach(realSetAnnotationData -> {
-			int is_true = 2;
-			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
-			if (answer == null){
-				answer = "";
-			}
-			if(realSetAnnotationData.getValue().equals(answer)){
-				is_true = 1;
-			}
-			realSetAnnotationData.setIsTrue(is_true);
-		});
-		// 保存结果
-		return R.status(realSetAnnotationDataService.saveBatch(annotationDataList));
-	}
-
 }

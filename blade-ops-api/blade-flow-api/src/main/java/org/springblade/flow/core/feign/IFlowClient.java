@@ -20,6 +20,7 @@ import org.springblade.core.launch.constant.AppConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.flow.core.entity.SingleFlow;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +46,7 @@ public interface IFlowClient {
 	String START_PROCESS_INSTANCE_BY_ID_PARALLEL = API_PREFIX + "/start-process-instance-by-id-parallel";
 	String START_PROCESS_INSTANCE_BY_KEY = API_PREFIX + "/start-process-instance-by-key";
 	String COMPLETE_TASK = API_PREFIX + "/complete-task";
+	String MK_COMPLETE_TASK = API_PREFIX + "/mk-complete-task";
 	String TASK_VARIABLE = API_PREFIX + "/task-variable";
 	String TASK_VARIABLES = API_PREFIX + "/task-variables";
 	String IS_PROCESS_INSTANCES_FINISHED = API_PREFIX + "/is-process-instances-finished";
@@ -97,6 +99,15 @@ public interface IFlowClient {
 	 */
 	@PostMapping(COMPLETE_TASK)
 	R completeTask(@RequestParam("taskId") String taskId, @RequestParam("processInstanceId") String processInstanceId, @RequestParam("comment") String comment, @RequestBody Map<String, Object> variables);
+
+	/**
+	 * 完成任务
+	 *
+	 * @param singleFlow        流程相关参数
+	 * @return R
+	 */
+	@PostMapping(MK_COMPLETE_TASK)
+	R completeTask(@RequestBody SingleFlow singleFlow);
 
 	/**
 	 * 获取流程变量

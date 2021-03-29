@@ -19,6 +19,7 @@ package org.springblade.flow.core.feign;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.flow.core.entity.SingleFlow;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,11 @@ public class IFlowClientFallback implements IFlowClient {
 
 	@Override
 	public R completeTask(String taskId, String processInstanceId, String comment, Map<String, Object> variables) {
+		return R.fail("远程调用失败");
+	}
+
+	@Override
+	public R completeTask(SingleFlow singleFlow) {
 		return R.fail("远程调用失败");
 	}
 

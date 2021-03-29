@@ -350,7 +350,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 				List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 				if (Func.isNotEmpty(extCompId))
-					flow.setCompositionId(extCompId.get(0).getElementText());
+					flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 				List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 				if (Func.isNotEmpty(extCompType))
 					flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -479,7 +479,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (Func.isNotEmpty(extCompId))
-				flow.setCompositionId(extCompId.get(0).getElementText());
+				flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 			if (Func.isNotEmpty(extCompType))
 				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -606,7 +606,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 						List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 						if (Func.isNotEmpty(extCompId))
-							flow.setCompositionId(extCompId.get(0).getElementText());
+							flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 						List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 						if (Func.isNotEmpty(extCompType))
 							flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -696,7 +696,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 						Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 						List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 						if (Func.isNotEmpty(extCompId))
-							flow.setCompositionId(extCompId.get(0).getElementText());
+							flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 						List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 						if (Func.isNotEmpty(extCompType))
 							flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -936,10 +936,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				if (extCompIdNum.longValue() == -1 && !AuthUtil.getTenantId().equals("000000")) {	//为老模版建的老任务，老数据兼容
 					R<Long> res = compositionClient.getComplementCompositionId(AuthUtil.getTenantId());
 					if (res.isSuccess()){
-						flow.setCompositionId(res.getData().toString());
+						flow.setCompositionId(res.getData());
 					}
 				} else {
-					flow.setCompositionId(extCompIdNum.toString());
+					flow.setCompositionId(extCompIdNum);
 				}
 			}
 			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
@@ -1043,7 +1043,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			Map<String, List<ExtensionElement>> extensionElements = userTask.getExtensionElements();
 			List<ExtensionElement> extCompId = extensionElements.get(ProcessConstant.COMPOSITION_ID);
 			if (Func.isNotEmpty(extCompId))
-				flow.setCompositionId(extCompId.get(0).getElementText());
+				flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 			List<ExtensionElement> extCompType = extensionElements.get(ProcessConstant.COMPOSITION_TYPE);
 			if (Func.isNotEmpty(extCompType))
 				flow.setCompositionType(Integer.valueOf(extCompType.get(0).getElementText()));
@@ -1102,11 +1102,11 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 				boolean t2 = extCompIdNum.longValue() == -1;
 				boolean t3 = !AuthUtil.getTenantId().equals("000000");
 				if (extCompIdNum!=null && extCompIdNum.longValue() == -1 && !AuthUtil.getTenantId().equals("000000")) {	//为老模版建的老任务，老数据兼容
-					flow.setCompositionId(compositionId.toString());
+					flow.setCompositionId(compositionId);
 				}else {
 					if (!compositionId.equals(extCompIdNum))
 						continue;
-					flow.setCompositionId(extCompId.get(0).getElementText());
+					flow.setCompositionId(Long.valueOf(extCompId.get(0).getElementText()));
 				}
 			}
 //			Map<String, Object> processVariables = task.getProcessVariables();	// .includeProcessVariables()有几率取不到一部分任务 flowable6.4.2

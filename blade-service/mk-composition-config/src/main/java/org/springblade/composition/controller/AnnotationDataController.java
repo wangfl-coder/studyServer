@@ -22,24 +22,23 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
-import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
-import org.springblade.composition.dto.AnnotationDataErrataDTO;
+import org.springblade.composition.dto.AnnotationCompleteDTO;
 import org.springblade.composition.entity.*;
 import org.springblade.composition.service.*;
 import org.springblade.composition.vo.AnnotationDataVO;
-import org.springblade.composition.vo.RealSetAnnotationDataVO;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
-import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.entity.SingleFlow;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -75,6 +73,7 @@ public class AnnotationDataController extends BladeController {
 	private final IRealSetExpertClient realSetExpertClient;
 	private final IAutoInspectionService autoInspectionService;
 	private final AnnotationDataErrataService annotationDataErrataService;
+	private final IFlowClient flowClient;
 
 	/**
 	 * 查询标注数据
@@ -112,7 +111,34 @@ public class AnnotationDataController extends BladeController {
 	@ApiOperationSupport(order = 3)
 	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
-	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO, BladeUser bladeUser) {
+	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+		boolean res = submitData(annotationDataVO);
+		return R.status(res);
+	}
+
+	/**
+	 * 批量新增或修改标注数据
+	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
+	 * 每次修改后同时更新mk_adata_expert表中的数据
+	 */
+	@PostMapping("/submit-and-complete")
+	@ApiOperationSupport(order = 3)
+	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationCompleteDTO对象")
+	public R submitAndComplete(@Valid @RequestBody AnnotationCompleteDTO annotationCompleteDTO) {
+		AnnotationDataVO annotationDataVO = Objects.requireNonNull(BeanUtil.copy(annotationCompleteDTO, AnnotationDataVO.class));
+		boolean res = submitData(annotationDataVO);
+		SingleFlow singleFlow = Objects.requireNonNull(BeanUtil.copy(annotationCompleteDTO, SingleFlow.class));
+		R<Boolean> res2 = flowClient.completeTask(singleFlow);
+		if (res2.isSuccess()) {
+			return R.status(res2.getData());
+		}else {
+			return R.fail("完成任务失败");
+		}
+
+	}
+
+	private boolean submitData(AnnotationDataVO annotationDataVO) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getAnnotationDataList() != null) {
 			annotationDataVO.getAnnotationDataList().forEach(annotationData -> annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue())));
@@ -125,7 +151,7 @@ public class AnnotationDataController extends BladeController {
 		List<AnnotationData> oldAnnotationDataList = annotationDataService.list(Wrappers.<AnnotationData>query().lambda()
 			.eq(AnnotationData::getSubTaskId, annotationDataVO.getSubTaskId())
 			.eq(AnnotationData::getCompositionId, annotationDataVO.getCompositionId())
-			.eq(AnnotationData::getCreateUser, bladeUser.getUserId())
+			.eq(AnnotationData::getCreateUser, AuthUtil.getUserId())
 		);
 
 		// 删除原来的标注数据,同时更新修改时间
@@ -154,11 +180,9 @@ public class AnnotationDataController extends BladeController {
 			annotationDataVO.getTime());
 
 		if(annotationDataList != null){
-			return R.status(annotationDataService.saveBatch(annotationDataList));
-		}else{
-			return R.success("没有数据保存");
+			annotationDataService.saveBatch(annotationDataList);
 		}
-
+		return true;
 	}
 
 }

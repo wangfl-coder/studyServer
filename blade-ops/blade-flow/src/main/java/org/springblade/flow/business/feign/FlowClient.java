@@ -16,9 +16,11 @@
  */
 package org.springblade.flow.business.feign;
 
+import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.ValuedDataObject;
+import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ExecutionQuery;
@@ -32,6 +34,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.business.service.FlowBusinessService;
 import org.springblade.flow.core.entity.BladeFlow;
+import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.system.cache.DictCache;
@@ -143,6 +146,20 @@ public class FlowClient implements IFlowClient {
 		// 完成任务
 		taskService.complete(taskId, variables);
 		return R.success("流程提交成功");
+	}
+
+	@Override
+	@PostMapping(MK_COMPLETE_TASK)
+	public R completeTask(@ApiParam("任务信息") @RequestBody SingleFlow flow) {
+		if (!flow.getStatus().equals("finish")) {
+			try {
+				return R.status(flowBusinessService.completeTask(flow));
+			} catch (FlowableObjectNotFoundException e) {
+				return R.fail(e.getMessage());
+			}
+		}else {
+			return R.status(flowBusinessService.changeTaskComment(flow));
+		}
 	}
 
 	@Override
