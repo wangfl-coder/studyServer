@@ -41,7 +41,8 @@ public interface IRealSetExpertClient {
 
 	String API_PREFIX = "/client_real_set";
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
-	String GET_EXPERT_IDS = API_PREFIX + "/mk-adata/expert-ids";
+	String GET_EXPERTS_BY_TASKID = API_PREFIX + "/mk-adata/experts-by-taskid";
+	String GET_EXPERTS_ID = API_PREFIX + "/mk-adata/experts-id";
 	String SAVE_EXPERT = API_PREFIX + "/mk-adata/save-expert";
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
 	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
@@ -57,13 +58,22 @@ public interface IRealSetExpertClient {
 	R<RealSetExpert> detail(@RequestBody RealSetExpert expert);
 
 	/**
+	 * 通过任务id获取学者列表
+	 *
+	 * @param taskId 任务id
+	 * @return
+	 */
+	@GetMapping(GET_EXPERTS_BY_TASKID)
+	R<List<RealSetExpert>> getExpertsByTaskId(@RequestParam Long taskId);
+
+	/**
 	 * 通过任务id获取学者id列表
 	 *
 	 * @param taskId 任务id
 	 * @return
 	 */
-	@GetMapping(GET_EXPERT_IDS)
-	R<List<RealSetExpert>> getExpertIds(@RequestParam Long taskId);
+	@GetMapping(GET_EXPERTS_ID)
+	R<List<String>> getExpertsId(@RequestParam Long taskId);
 
 	/**
 	 * 保存学者信息

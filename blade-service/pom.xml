@@ -27,6 +27,7 @@
         <module>mk-adata-sidecar</module>
         <module>mk-log</module>
         <module>mk-customer-service</module>
+        <module>mq-rabbit</module>
     </modules>
 
     <dependencies>

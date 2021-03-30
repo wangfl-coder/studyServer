@@ -28,6 +28,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.mq.rabbit.IMQRabbitClient;
 import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
@@ -70,6 +71,7 @@ public class TaskController extends BladeController {
 	private TaskMapper taskMapper;
 	private LabelTaskMapper labelTaskMapper;
 	private IRealSetExpertClient realSetExpertClient;
+	private IMQRabbitClient mqRabbitClient;
 
 
 	@GetMapping(value = "/complete/count")
@@ -128,7 +130,7 @@ public class TaskController extends BladeController {
 	}
 
 	@PostMapping(value = "/merge-expert/save")
-	@ApiOperation(value = "添加质检任务")
+	@ApiOperation(value = "添加合并任务")
 	public R mergeExpertSave(@RequestBody MergeExpertTaskDTO mergeExpertTaskDTO) {
 		Boolean result;
 		Task task = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
@@ -140,11 +142,13 @@ public class TaskController extends BladeController {
 		if (labelTasks.size() > 0) {
 			boolean save = taskService.save(mergeTask);
 			try {
-				result = mergeExpertTaskService.startProcess(mergeExpertTaskDTO.getProcessDefinitionId(), labelTasks.size(), 0, mergeTask, labelTasks);
-				return R.status(result);
+				R<List<String>> expertIdsRes = expertClient.getExpertsId(mergeExpertTaskDTO.getAnnotationTaskId());
+				R<Boolean> res = mqRabbitClient.preprocessPureSupPerson(expertIdsRes.getData());
+//				result = mergeExpertTaskService.startProcess(mergeExpertTaskDTO.getProcessDefinitionId(), labelTasks.size(), 0, mergeTask, labelTasks);
+				return R.status(res.getData());
 			} catch (Exception e) {
 				taskService.removeById(mergeTask.getId());
-				return R.fail("创建质检小任务失败");
+				return R.fail("创建合并小任务失败");
 			}
 		}else{
 			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
@@ -167,7 +171,7 @@ public class TaskController extends BladeController {
 		}
 
 		if (res_eb.isSuccess() && flag) {
-			R<List<Expert>> expertsResult = expertClient.getExpertIds(task.getId());
+			R<List<Expert>> expertsResult = expertClient.getExpertsByTaskId(task.getId());
 			if (expertsResult.isSuccess()) {
 				List<Expert> experts = expertsResult.getData();
 				if(expertBaseTaskDTO.getRealSetRate() != null) {
@@ -199,7 +203,7 @@ public class TaskController extends BladeController {
 //			long taskId=L;
 			String defId="AnnotationV2:12:35c81237-7c0f-11eb-96ae-5e380f867c41";
 			Task task = taskService.getById(taskId);
-			R<List<Expert>> expertsResult = expertClient.getExpertIds(taskId);
+			R<List<Expert>> expertsResult = expertClient.getExpertsByTaskId(taskId);
 			if (expertsResult.isSuccess()) {
 				List<Expert> experts = expertsResult.getData();
 //				if(expertBaseTaskDTO.getRealSetRate() != null) {

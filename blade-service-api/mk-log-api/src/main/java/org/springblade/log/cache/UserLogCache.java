@@ -18,14 +18,10 @@ package org.springblade.log.cache;
 
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.SpringUtil;
 import org.springblade.core.tool.utils.StringPool;
-import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.log.entity.UserLog;
 import org.springblade.log.feign.IUserLogClient;
-
-import static org.springblade.core.launch.constant.FlowConstant.TASK_USR_PREFIX;
 
 /**
  * 系统缓存

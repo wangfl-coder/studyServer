@@ -14,27 +14,40 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.adata.mapper;
+package org.springblade.mq.rabbit;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.springblade.adata.entity.RealSetExpert;
+
+import org.springblade.common.constant.LauncherConstant;
+import org.springblade.core.tool.api.R;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-
 /**
- * Mapper 接口
+ * MQRabbit Feign接口类
  *
  * @author Chill
  */
-public interface RealSetExpertMapper extends BaseMapper<RealSetExpert> {
+@FeignClient(
+	value = LauncherConstant.APPLICATION_RABBIT_NAME
+)
+public interface IMQRabbitClient {
+
+	String API_PREFIX = "/client";
+	String PREPROCESS_PURE_SUP_PERSON = API_PREFIX + "/preprocess-pure-sup-person";
+
 
 	/**
-	 * 通过任务id获取学者id列表
-	 * @param taskId
+	 * 预处理学者
+	 *
+	 * @param idList id列表
 	 * @return
 	 */
-	List<String> getExpertsId(@Param("taskId") Long taskId);
+	@PostMapping(PREPROCESS_PURE_SUP_PERSON)
+	R<Boolean> preprocessPureSupPerson(@RequestBody List<String> idList);
 
 }

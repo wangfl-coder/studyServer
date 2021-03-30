@@ -26,6 +26,7 @@
         <module>mk-adata-api</module>
         <module>mk-customer-service-api</module>
         <module>mk-log-api</module>
+        <module>mq-rabbit-api</module>
     </modules>
 
     <dependencies>

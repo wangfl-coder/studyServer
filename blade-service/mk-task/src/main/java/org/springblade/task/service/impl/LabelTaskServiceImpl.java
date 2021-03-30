@@ -189,7 +189,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	// @GlobalTransactional
 	public Map<String, String> startRealSetProcess(String realSetProcessDefinitions,
 											   Task task) {
-		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertIds(task.getId());
+		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertsByTaskId(task.getId());
 		if (!expertsRealSetResult.isSuccess()) {
 			return null;
 		}

@@ -22,6 +22,7 @@ import org.springblade.core.mp.base.BaseService;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.support.Kv;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,6 +46,13 @@ public interface IRealSetExpertService extends BaseService<RealSetExpert> {
 	 * @return
 	 */
 	String fetchList(Map<String, Object> params, Query query);
+
+	/**
+	 * 通过任务id获取学者id列表
+	 * @param taskId
+	 * @return
+	 */
+	List<String> getExpertsId(Long taskId);
 
 	/**
 	 * 导入

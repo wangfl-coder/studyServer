@@ -57,6 +57,7 @@ import java.util.stream.Stream;
 public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMapper, RealSetExpert> implements IRealSetExpertService {
 
 	private final ITemplateClient iTemplateClient;
+	private final RealSetExpertMapper expertMapper;
 
 	@Override
 	public String fetchDetail(String id) {
@@ -165,6 +166,12 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
 		return res;
+	}
+
+	@Override
+	public List<String> getExpertsId(Long taskId) {
+		List<String> expertIds = expertMapper.getExpertsId(taskId);
+		return expertIds;
 	}
 
 	@Override

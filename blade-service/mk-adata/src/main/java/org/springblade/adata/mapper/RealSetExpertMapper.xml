@@ -2,6 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.springblade.adata.mapper.RealSetExpertMapper">
 
-
+    <select id="getExpertsId" resultType="java.lang.String">
+        select expert_id from mk_adata_expert
+        where task_id=#{taskId} and is_deleted=0
+    </select>
 
 </mapper>

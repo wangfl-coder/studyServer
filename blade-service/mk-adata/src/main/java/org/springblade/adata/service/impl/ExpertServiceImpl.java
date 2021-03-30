@@ -76,6 +76,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 	private final IUserClient iUserClient;
 	private final IExpertExtendService expertExtendService;
 	private final IExpertOriginService expertOriginService;
+	private final ExpertMapper expertMapper;
 
 	@Override
 	public String fetchDetail(String id) {
@@ -184,6 +185,12 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		requestBody.add(body);
 		String res = MagicRequest.getInstance().magic(requestBody.toString());
 		return res;
+	}
+
+	@Override
+	public List<String> getExpertsId(Long taskId) {
+		List<String> expertIds = expertMapper.getExpertsId(taskId);
+		return expertIds;
 	}
 
 	@Override

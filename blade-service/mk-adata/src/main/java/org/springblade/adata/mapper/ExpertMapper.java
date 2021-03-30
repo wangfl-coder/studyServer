@@ -62,4 +62,10 @@ public interface ExpertMapper extends BaseMapper<Expert> {
 	 */
 	List<ExpertExcel> exportExpert(@Param("ew") Wrapper<Expert> queryWrapper);
 
+	/**
+	 * 通过任务id获取学者id列表
+	 * @param taskId
+	 * @return
+	 */
+	List<String> getExpertsId(@Param("taskId") Long taskId);
 }

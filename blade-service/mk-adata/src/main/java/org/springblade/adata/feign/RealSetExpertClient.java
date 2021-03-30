@@ -52,9 +52,16 @@ public class RealSetExpertClient implements IRealSetExpertClient {
 	}
 
 	@Override
-	@GetMapping(GET_EXPERT_IDS)
-	public R<List<RealSetExpert>> getExpertIds(@RequestParam Long taskId) {
+	@GetMapping(GET_EXPERTS_BY_TASKID)
+	public R<List<RealSetExpert>> getExpertsByTaskId(@RequestParam Long taskId) {
 		List<RealSetExpert> experts = service.list(Wrappers.<RealSetExpert>query().lambda().eq(RealSetExpert::getTaskId, taskId));
+		return R.data(experts);
+	}
+
+	@Override
+	@GetMapping(GET_EXPERTS_ID)
+	public R<List<String>> getExpertsId(@RequestParam Long taskId) {
+		List<String> experts = service.getExpertsId(taskId);
 		return R.data(experts);
 	}
 

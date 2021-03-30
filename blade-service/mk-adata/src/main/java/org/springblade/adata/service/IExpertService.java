@@ -27,6 +27,7 @@ import org.springblade.core.mp.support.Query;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.system.user.entity.User;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 import java.util.List;
@@ -53,6 +54,13 @@ public interface IExpertService extends BaseService<Expert> {
 	 * @return
 	 */
 	String fetchList(Map<String, Object> params, Query query);
+
+	/**
+	 * 通过任务id获取学者id列表
+	 * @param taskId
+	 * @return
+	 */
+	List<String> getExpertsId(Long taskId);
 
 	/**
 	 * 导入

@@ -418,7 +418,7 @@ public class ExpertController extends BladeController {
 //		expert1.setAffiliationZh("中南大学湘雅三医院");
 //		expert1.setHp("http://www.xy3yy.com/zjfc/fk2019/15670.html");
 //		expert1.setHomepage("http://cpa.cqu.edu.cn/info/1071/3475.htm");
-//		expert1.setGs("http://cpa.cqu.edu.cn/info/1071/3475.htm");
+//		expert1.setGs("http://cpa.cqu.edu.cn/info/1071/3475.htm");s
 //		expert1.setDblp("http://cpa.cqu.edu.cn/info/1071/3475.htm");
 //		expert1.setGender("female");
 //		expert1.setLanguage("chinese");

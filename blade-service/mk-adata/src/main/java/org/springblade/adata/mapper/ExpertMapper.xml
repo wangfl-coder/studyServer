@@ -69,4 +69,8 @@
         SELECT * FROM mk_adata_expert ${ew.customSqlSegment}
     </select>
 
+    <select id="getExpertsId" resultType="java.lang.String">
+        select expert_id from mk_adata_expert
+        where task_id=#{taskId} and is_deleted=0
+    </select>
 </mapper>

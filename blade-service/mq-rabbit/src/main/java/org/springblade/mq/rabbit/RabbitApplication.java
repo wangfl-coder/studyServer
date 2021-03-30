@@ -14,27 +14,22 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.adata.mapper;
+package org.springblade.mq.rabbit;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.springblade.adata.entity.RealSetExpert;
-
-import java.util.List;
-
+import org.springblade.common.constant.LauncherConstant;
+import org.springblade.core.launch.BladeApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Mapper 接口
+ * RabbitApplication
  *
  * @author Chill
  */
-public interface RealSetExpertMapper extends BaseMapper<RealSetExpert> {
+@SpringBootApplication
+public class RabbitApplication {
 
-	/**
-	 * 通过任务id获取学者id列表
-	 * @param taskId
-	 * @return
-	 */
-	List<String> getExpertsId(@Param("taskId") Long taskId);
+	public static void main(String[] args) {
+		BladeApplication.run(LauncherConstant.APPLICATION_RABBIT_NAME, RabbitApplication.class, args);
+	}
 
 }
