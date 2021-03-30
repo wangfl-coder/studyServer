@@ -50,4 +50,9 @@ public interface TaskService extends BaseService<Task> {
 	 * @return
 	 */
 	Integer compositionCount(@Param("taskId") Long taskId);
+
+	/**
+	 * 批量转换
+	 */
+	List<TaskVO> batchCastTaskVO(List<Task> tasks);
 }
