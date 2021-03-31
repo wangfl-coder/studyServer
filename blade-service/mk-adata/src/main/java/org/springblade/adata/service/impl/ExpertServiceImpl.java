@@ -387,50 +387,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 
 	@Override
 	public Expert importDetail(String tenantId, String id, Long taskId) {
-		JSONArray requestBody = new JSONArray();
-		JSONObject body = new JSONObject();
-
-		JSONObject parameters = new JSONObject();
-		JSONArray ids = new JSONArray();
-		ids.add(id);
-		parameters.put("ids", ids);
-
-
-		JSONObject schema = new JSONObject();
-		JSONArray person = new JSONArray();
-		person.add("id");
-		person.add("name");
-		person.add("name_zh");
-		person.add("avatar");
-		person.add("links");
-
-		JSONObject profile_obj = new JSONObject();
-		JSONArray profile = new JSONArray();
-		profile.add("titles");
-		profile.add("phone");
-		profile.add("fax");
-		profile.add("email");
-		profile.add("affiliation");
-		profile.add("affiliation_zh");
-		profile.add("address");
-		profile.add("homepage");
-		profile.add("gender");
-		profile.add("lang");
-		profile.add("edu");
-		profile.add("work");
-		profile.add("bio");
-		profile.add("bio_zh");
-		profile.add("position");
-		profile.add("position_zh");
-		profile_obj.put("profile", profile);
-		person.add(profile_obj);
-		schema.put("person", person);
-
-		body.put("action", "personapi.get");
-		body.put("parameters", parameters);
-		body.put("schema", schema);
-		requestBody.add(body);
-		String res = MagicRequest.getInstance().magic(requestBody.toString());
+		String res = fetchDetail(id);
 
 		JSONObject resObj = JSON.parseObject(res);
 		JSONArray array = resObj.getJSONArray("data");
@@ -438,7 +395,7 @@ public class ExpertServiceImpl extends BaseServiceImpl<ExpertMapper, Expert> imp
 		boolean importSuccess = dataRes.getBoolean("succeed");
 		while (!importSuccess) {	//确保导入成功
 			ThreadUtil.sleep(2000);
-			String res2 = MagicRequest.getInstance().magic(requestBody.toString());
+			String res2 = fetchDetail(id);
 			JSONObject resObj2 = JSON.parseObject(res2);
 			JSONArray array2 = resObj2.getJSONArray("data");
 			JSONObject dataRes2 = array2.getJSONObject(0);

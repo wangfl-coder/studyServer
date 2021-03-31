@@ -102,19 +102,19 @@ public class AnnotationDataController extends BladeController {
 		return R.data(pages);
 	}
 
-	/**
-	 * 批量新增或修改标注数据
-	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
-	 * 每次修改后同时更新mk_adata_expert表中的数据
-	 */
-	@PostMapping("/submit")
-	@ApiOperationSupport(order = 3)
-	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
-	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
-		boolean res = submitData(annotationDataVO);
-		return R.status(res);
-	}
+//	/**
+//	 * 批量新增或修改标注数据
+//	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
+//	 * 每次修改后同时更新mk_adata_expert表中的数据
+//	 */
+//	@PostMapping("/submit")
+//	@ApiOperationSupport(order = 3)
+//	@Transactional(rollbackFor = Exception.class)
+//	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationDataVO对象")
+//	public R submit(@Valid @RequestBody AnnotationDataVO annotationDataVO) {
+//		boolean res = submitData(annotationDataVO);
+//		return R.status(res);
+//	}
 
 	/**
 	 * 批量新增或修改标注数据

@@ -103,6 +103,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTemplateId(task.getTemplateId());
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
+				labelTask.setExpertId(expert.getExpertId());
 				labelTask.setPersonName(expert.getName());
 				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
 				updateById(labelTask);

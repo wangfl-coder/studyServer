@@ -14,7 +14,7 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.mq.rabbit;
+package org.springblade.mq.rabbit.feign;
 
 
 import org.springblade.common.constant.LauncherConstant;

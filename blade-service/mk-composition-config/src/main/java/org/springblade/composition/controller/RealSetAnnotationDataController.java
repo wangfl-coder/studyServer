@@ -110,17 +110,17 @@ public class RealSetAnnotationDataController extends BladeController {
 		return R.data(pages);
 	}
 
-	/**
-	 * 提交真题标志数据接口
-	 */
-	@PostMapping("/submit")
-	@ApiOperationSupport(order = 4)
-	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入RealSetAnnotationDataVO对象")
-	public R submit(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
-		boolean res = submitData(annotationDataVO);
-		return R.status(res);
-	}
+//	/**
+//	 * 提交真题标志数据接口
+//	 */
+//	@PostMapping("/submit")
+//	@ApiOperationSupport(order = 4)
+//	@Transactional(rollbackFor = Exception.class)
+//	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入RealSetAnnotationDataVO对象")
+//	public R submit(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
+//		boolean res = submitData(annotationDataVO);
+//		return R.status(res);
+//	}
 
 	/**
 	 * 批量新增或修改标注数据

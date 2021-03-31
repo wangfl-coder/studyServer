@@ -31,6 +31,8 @@ public class LabelTask extends TenantEntity {
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "专家id")
 	private Long personId;
+	@ApiModelProperty(value = "Aminer专家id")
+	private String expertId;
 	@ApiModelProperty(value = "专家名字")
 	private String personName;
 	@JsonSerialize(using = ToStringSerializer.class)

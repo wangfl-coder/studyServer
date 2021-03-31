@@ -2,19 +2,15 @@ package org.springblade.task.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import jodd.util.StringUtil;
 import lombok.AllArgsConstructor;
 import org.springblade.adata.entity.Expert;
-import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
-import org.springblade.composition.entity.Template;
 import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -22,21 +18,19 @@ import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.constant.BladeConstant;
-import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.DateUtil;
+import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.core.tool.utils.Func;
-import org.springblade.core.tool.utils.Holder;
-import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.feign.IFlowClient;
-import org.springblade.mq.rabbit.IMQRabbitClient;
-import org.springblade.system.cache.SysCache;
-import org.springblade.task.cache.TaskCache;
+import org.springblade.mq.rabbit.feign.IMQRabbitClient;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.MergeExpertTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
 import org.springblade.task.entity.LabelTask;
-import org.springblade.task.entity.QualityInspectionTask;
+import org.springblade.task.entity.MergeExpertTask;
 import org.springblade.task.entity.Task;
+import org.springblade.task.enums.LabelTaskTypeEnum;
 import org.springblade.task.enums.TaskStatusEnum;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.mapper.LabelTaskMapper;
@@ -46,12 +40,13 @@ import org.springblade.task.service.MergeExpertTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springblade.task.vo.TaskVO;
-import org.springblade.task.wrapper.TaskWrapper;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static org.springblade.core.launch.constant.FlowConstant.TASK_USR_PREFIX;
 
 
 @RestController
@@ -133,21 +128,40 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加合并任务")
 	public R mergeExpertSave(@RequestBody MergeExpertTaskDTO mergeExpertTaskDTO) {
 		Boolean result;
-		Task task = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
-//		if (task.getStatus() != TaskStatusEnum.EXPORTED.getNum()) {
+		Task labelTaskExported = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
+//		if (labelTaskExported.getStatus() != TaskStatusEnum.EXPORTED.getNum()) {
 //			return R.fail("这个标注任务并未生效，无法合并");
 //		}
-		Task mergeTask = Objects.requireNonNull(BeanUtil.copy(mergeExpertTaskDTO, Task.class));
-		List<LabelTask> labelTasks = labelTaskService.getByTaskId(mergeTask.getAnnotationTaskId());
+		Task task = Objects.requireNonNull(BeanUtil.copy(mergeExpertTaskDTO, Task.class));
+		List<LabelTask> labelTasks = labelTaskService.getByTaskId(task.getAnnotationTaskId());
 		if (labelTasks.size() > 0) {
-			boolean save = taskService.save(mergeTask);
+			boolean save = taskService.save(task);
 			try {
-				R<List<String>> expertIdsRes = expertClient.getExpertsId(mergeExpertTaskDTO.getAnnotationTaskId());
-				R<Boolean> res = mqRabbitClient.preprocessPureSupPerson(expertIdsRes.getData());
+				List<String> ids = new ArrayList<>();
+				labelTasks.forEach( labelTask -> {
+					MergeExpertTask mergeTask = new MergeExpertTask();
+					mergeTask.setProcessDefinitionId(mergeExpertTaskDTO.getProcessDefinitionId());
+					// 保存
+					mergeTask.setCreateTime(DateUtil.now());
+					mergeTask.setMergeTaskId(task.getId());
+					mergeTask.setPersonId(labelTask.getPersonId());
+					mergeTask.setPersonName(labelTask.getPersonName());
+					mergeTask.setLabelTaskId(labelTask.getId());
+					mergeTask.setLabelProcessInstanceId(labelTask.getProcessInstanceId());
+					mergeTask.setTaskId(labelTask.getTaskId());
+					mergeTask.setTaskType(task.getTaskType());
+					mergeExpertTaskService.save(mergeTask);
+					if (labelTask.getType().equals(LabelTaskTypeEnum.LABEL.getNum())) {
+						String tmp = StringUtil.format("{},{},{},{}", task.getId(), mergeTask.getId(), labelTask.getExpertId(), labelTask.getPersonId());
+						ids.add(tmp);
+					}
+				});
+//				R<List<String>> expertIdsRes = expertClient.getExpertsId(mergeExpertTaskDTO.getAnnotationTaskId());
+				R<Boolean> res = mqRabbitClient.preprocessPureSupPerson(ids);
 //				result = mergeExpertTaskService.startProcess(mergeExpertTaskDTO.getProcessDefinitionId(), labelTasks.size(), 0, mergeTask, labelTasks);
 				return R.status(res.getData());
 			} catch (Exception e) {
-				taskService.removeById(mergeTask.getId());
+				taskService.removeById(task.getId());
 				return R.fail("创建合并小任务失败");
 			}
 		}else{

@@ -16,17 +16,13 @@
  */
 package org.springblade.mq.rabbit.feign;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.utils.Func;
 import org.springblade.mq.rabbit.constant.RabbitConstant;
-import org.springblade.mq.rabbit.IMQRabbitClient;
 import org.springblade.mq.rabbit.message.MessageStruct;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +52,6 @@ public class MQRabbitClient implements IMQRabbitClient {
 				new MessageStruct(id));
 		});
 
-		return R.status(true);
+		return R.data(true);
 	}
 }
