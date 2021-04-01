@@ -16,6 +16,7 @@ import org.springblade.mq.rabbit.magic.MagicRequest;
 import org.springblade.mq.rabbit.message.MessageStruct;
 import org.springblade.mq.rabbit.service.IPurePersonService;
 import org.springblade.mq.rabbit.service.ISupPersonService;
+import org.springblade.task.enums.MergeExpertTaskStatusEnum;
 import org.springblade.task.feign.IMergeExpertTaskClient;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -131,7 +132,7 @@ public class PreprocessPureSupHandler {
 				}
 			}
 
-			mergeExpertTaskClient.changeStatus(Long.valueOf(mergeTaskId));
+			mergeExpertTaskClient.changeStatus(Long.valueOf(mergeTaskId), MergeExpertTaskStatusEnum.PURE_SUPED.getNum());
 			// 通知 MQ 消息已被成功消费,可以ACK了
 			channel.basicAck(deliveryTag, false);
 		} catch (Exception e) {

@@ -18,11 +18,13 @@ import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.BladeUser;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.constant.BladeConstant;
+import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.mq.rabbit.feign.IMQRabbitClient;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.MergeExpertTaskDTO;
@@ -32,6 +34,7 @@ import org.springblade.task.entity.MergeExpertTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.enums.LabelTaskTypeEnum;
 import org.springblade.task.enums.TaskStatusEnum;
+import org.springblade.task.enums.TaskTypeEnum;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.mapper.TaskMapper;
@@ -45,8 +48,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 
 import java.util.*;
-
-import static org.springblade.core.launch.constant.FlowConstant.TASK_USR_PREFIX;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @RestController
@@ -67,6 +69,7 @@ public class TaskController extends BladeController {
 	private LabelTaskMapper labelTaskMapper;
 	private IRealSetExpertClient realSetExpertClient;
 	private IMQRabbitClient mqRabbitClient;
+	private IFlowEngineClient flowEngineClient;
 
 
 	@GetMapping(value = "/complete/count")
@@ -100,8 +103,21 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加质检任务")
 	public R inspectionSave(@RequestBody QualityInspectionDTO qualityInspectionDTO) {
 		Boolean result;
+		R processListRes = flowEngineClient.processList(null, null);
+		if (!processListRes.isSuccess()) {
+			return R.fail("获取流程实例列表失败");
+		}
+		List<LinkedHashMap<String,String>> processList = (List<LinkedHashMap<String,String>>)processListRes.getData();
+		AtomicReference<String> processDefinitionId = new AtomicReference<>();
+		processList.forEach(process -> {
+			if ("Inspection".equals((String)process.get("key"))) {
+				String id = (String)process.get("id");
+				processDefinitionId.set(id);
+			}
+		});
 		List<LabelTask> labelTasks=new ArrayList<>();
 		Task task = Objects.requireNonNull(BeanUtil.copy(qualityInspectionDTO, Task.class));
+		task.setTaskType(TaskTypeEnum.INSPECTION.getNum());
 		//1不去重,2去重
 		if(qualityInspectionDTO.getInspectionType()==1){
 			labelTasks = labelTaskService.queryCompleteTask(task.getAnnotationTaskId());
@@ -111,7 +127,7 @@ public class TaskController extends BladeController {
 		if (labelTasks.size() > 0 && labelTasks.size()>=qualityInspectionDTO.getCount()) {
 			boolean save = taskService.save(task);
 			try {
-				result = qualityInspectionTaskService.startProcess(qualityInspectionDTO.getProcessDefinitionId(), task.getCount(), task.getInspectionType(), task, labelTasks);
+				result = qualityInspectionTaskService.startProcess(processDefinitionId.get(), task.getCount(), task.getInspectionType(), task, labelTasks);
 				return R.status(result);
 			}catch (Exception e){
 				taskService.removeById(task.getId());
@@ -127,31 +143,47 @@ public class TaskController extends BladeController {
 	@PostMapping(value = "/merge-expert/save")
 	@ApiOperation(value = "添加合并任务")
 	public R mergeExpertSave(@RequestBody MergeExpertTaskDTO mergeExpertTaskDTO) {
-		Boolean result;
 		Task labelTaskExported = taskService.getById(mergeExpertTaskDTO.getAnnotationTaskId());
 //		if (labelTaskExported.getStatus() != TaskStatusEnum.EXPORTED.getNum()) {
 //			return R.fail("这个标注任务并未生效，无法合并");
 //		}
+
+		Boolean result;
+		R processListRes = flowEngineClient.processList(null, null);
+		if (!processListRes.isSuccess()) {
+			return R.fail("获取流程实例列表失败");
+		}
+		List<LinkedHashMap<String,String>> processList = (List<LinkedHashMap<String,String>>)processListRes.getData();
+		AtomicReference<String> processDefinitionId = new AtomicReference<>();
+		processList.forEach(process -> {
+			if ("MergeExpert".equals((String)process.get("key"))) {
+				String id = (String)process.get("id");
+				processDefinitionId.set(id);
+			}
+		});
+
 		Task task = Objects.requireNonNull(BeanUtil.copy(mergeExpertTaskDTO, Task.class));
+		task.setTaskType(TaskTypeEnum.MERGE_EXPERT.getNum());
 		List<LabelTask> labelTasks = labelTaskService.getByTaskId(task.getAnnotationTaskId());
 		if (labelTasks.size() > 0) {
 			boolean save = taskService.save(task);
 			try {
 				List<String> ids = new ArrayList<>();
 				labelTasks.forEach( labelTask -> {
-					MergeExpertTask mergeTask = new MergeExpertTask();
-					mergeTask.setProcessDefinitionId(mergeExpertTaskDTO.getProcessDefinitionId());
-					// 保存
-					mergeTask.setCreateTime(DateUtil.now());
-					mergeTask.setMergeTaskId(task.getId());
-					mergeTask.setPersonId(labelTask.getPersonId());
-					mergeTask.setPersonName(labelTask.getPersonName());
-					mergeTask.setLabelTaskId(labelTask.getId());
-					mergeTask.setLabelProcessInstanceId(labelTask.getProcessInstanceId());
-					mergeTask.setTaskId(labelTask.getTaskId());
-					mergeTask.setTaskType(task.getTaskType());
-					mergeExpertTaskService.save(mergeTask);
 					if (labelTask.getType().equals(LabelTaskTypeEnum.LABEL.getNum())) {
+						MergeExpertTask mergeTask = new MergeExpertTask();
+						mergeTask.setProcessDefinitionId(processDefinitionId.get());
+						// 保存
+						mergeTask.setCreateTime(DateUtil.now());
+						mergeTask.setMergeTaskId(task.getId());
+						mergeTask.setPersonId(labelTask.getPersonId());
+						mergeTask.setPersonName(labelTask.getPersonName());
+						mergeTask.setLabelTaskId(labelTask.getId());
+						mergeTask.setLabelProcessInstanceId(labelTask.getProcessInstanceId());
+						mergeTask.setTaskId(labelTask.getTaskId());
+						mergeTask.setTaskType(task.getTaskType());
+						mergeExpertTaskService.save(mergeTask);
+
 						String tmp = StringUtil.format("{},{},{},{}", task.getId(), mergeTask.getId(), labelTask.getExpertId(), labelTask.getPersonId());
 						ids.add(tmp);
 					}
@@ -174,6 +206,7 @@ public class TaskController extends BladeController {
 	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
 		Boolean result;
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
+		task.setTaskType(TaskTypeEnum.LABEL.getNum());
 		boolean save = taskService.save(task);
 		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());
 

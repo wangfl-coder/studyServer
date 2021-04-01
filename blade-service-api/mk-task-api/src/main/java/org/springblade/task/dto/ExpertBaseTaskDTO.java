@@ -33,8 +33,6 @@ public class ExpertBaseTaskDTO extends BaseEntity {
 
 	@ApiModelProperty(value = "任务名字")
 	private String taskName;
-	@ApiModelProperty(value = "任务类型")
-	private Integer taskType;
 	@ApiModelProperty(value = "任务编码")
 	private String code;
 	@ApiModelProperty(value = "任务描述")

@@ -8,7 +8,6 @@ import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
-import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.constant.ProcessConstant;
@@ -18,18 +17,12 @@ import org.springblade.flow.core.utils.FlowUtil;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.task.entity.*;
 import org.springblade.task.mapper.MergeExpertTaskMapper;
-import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.MergeExpertTaskService;
-import org.springblade.task.service.QualityInspectionTaskService;
-import org.springblade.task.service.TaskService;
 import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
-import org.springblade.task.vo.TaskVO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

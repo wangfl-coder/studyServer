@@ -123,22 +123,23 @@ public class AnnotationDataController extends BladeController {
 	 */
 	@PostMapping("/submit-and-complete")
 	@ApiOperationSupport(order = 3)
-	@Transactional(rollbackFor = Exception.class)
+//	@Transactional(rollbackFor = Exception.class)
 	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationCompleteDTO对象")
 	public R submitAndComplete(@Valid @RequestBody AnnotationCompleteDTO annotationCompleteDTO) {
 		AnnotationDataVO annotationDataVO = Objects.requireNonNull(BeanUtil.copy(annotationCompleteDTO, AnnotationDataVO.class));
 		boolean res = submitData(annotationDataVO);
 		SingleFlow singleFlow = Objects.requireNonNull(BeanUtil.copy(annotationCompleteDTO, SingleFlow.class));
-		R<Boolean> res2 = flowClient.completeTask(singleFlow);
+		R res2 = flowClient.completeTask(singleFlow);
 		if (res2.isSuccess()) {
-			return R.status(res2.getData());
+			return R.data(res2.getData());
 		}else {
 			return R.fail("完成任务失败");
 		}
 
 	}
 
-	private boolean submitData(AnnotationDataVO annotationDataVO) {
+	@Transactional(rollbackFor = Exception.class)
+	public boolean submitData(AnnotationDataVO annotationDataVO) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getAnnotationDataList() != null) {
 			annotationDataVO.getAnnotationDataList().forEach(annotationData -> annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue())));

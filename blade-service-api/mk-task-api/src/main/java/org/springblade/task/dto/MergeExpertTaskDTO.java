@@ -21,8 +21,6 @@ public class MergeExpertTaskDTO {
 	private String ebId;
 	@ApiModelProperty(value = "合并任务名字")
 	private String taskName;
-	@ApiModelProperty(value = "任务类型")
-	private Integer taskType;
 	@ApiModelProperty(value = "合并任务编码")
 	private String code;
 	@ApiModelProperty(value = "合并任务描述")
@@ -38,8 +36,6 @@ public class MergeExpertTaskDTO {
 	private Long annotationTaskId;
 	@ApiModelProperty(value = "质检类型")
 	private Integer inspectionType;
-	@ApiModelProperty(value = "流程定义id")
-	private String processDefinitionId;
 	@ApiModelProperty(value = "时间")
 	private Integer time;
 

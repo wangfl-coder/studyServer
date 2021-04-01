@@ -109,7 +109,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_SINGLE_LABELTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeSingleLabelTask(LabelTask labelTask) {
 		// 默认至少有一个要标注的人
 		Long templateId = labelTask.getTemplateId();
@@ -129,7 +128,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_REALSET_LABELTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeRealSetLabelTask(LabelTask labelTask, Map<String, String> compositionLabelMap) {
 		Long templateId = labelTask.getTemplateId();
 		List<Composition> compositionList = templateService.allCompositions(templateId);
@@ -153,7 +151,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeSingleCompositionTask(Integer type, Long subTaskId, Long templateId, Long compositionId) {
 
 			Statistics statistics = new Statistics();

@@ -27,31 +27,21 @@ import org.springblade.composition.service.IStatisticsService;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Condition;
-import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
-import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.StringUtil;
-import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.log.entity.UserLog;
 import org.springblade.system.cache.DictBizCache;
-import org.springblade.system.cache.DictCache;
-import org.springblade.system.enums.DictEnum;
 import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
-import org.springblade.system.user.entity.UserInfo;
-import org.springblade.system.user.entity.UserOauth;
 import org.springblade.system.user.enums.UserStatusEnum;
 import org.springblade.system.user.feign.IUserClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
-import static org.springblade.core.launch.constant.FlowConstant.TASK_USR_PREFIX;
 
 /**
  * 服务实现类

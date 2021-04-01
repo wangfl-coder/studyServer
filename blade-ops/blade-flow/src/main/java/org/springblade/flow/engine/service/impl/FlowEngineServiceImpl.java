@@ -126,6 +126,32 @@ public class FlowEngineServiceImpl extends ServiceImpl<FlowMapper, FlowModel> im
 	}
 
 	@Override
+	public List<FlowProcess> selectProcessList(String category, Integer mode) {
+		ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery().latestVersion().orderByProcessDefinitionKey().asc();
+		// 通用流程
+		if (mode == FlowModeEnum.COMMON.getMode()) {
+			processDefinitionQuery.processDefinitionWithoutTenantId();
+		}
+		// 定制流程
+		else if (!AuthUtil.isAdministrator()) {
+			processDefinitionQuery.processDefinitionTenantId(AuthUtil.getTenantId());
+		}
+		if (StringUtils.isNotEmpty(category)) {
+			processDefinitionQuery.processDefinitionCategory(category);
+		}
+		List<ProcessDefinition> processDefinitionList = processDefinitionQuery.list();
+		List<FlowProcess> flowProcessList = new ArrayList<>();
+		processDefinitionList.forEach(processDefinition -> {
+			String deploymentId = processDefinition.getDeploymentId();
+			Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
+			FlowProcess flowProcess = new FlowProcess((ProcessDefinitionEntityImpl) processDefinition);
+			flowProcess.setDeploymentTime(deployment.getDeploymentTime());
+			flowProcessList.add(flowProcess);
+		});
+		return flowProcessList;
+	}
+
+	@Override
 	public IPage<FlowExecution> selectFollowPage(IPage<FlowExecution> page, String processInstanceId, String processDefinitionKey) {
 		ProcessInstanceQuery processInstanceQuery = runtimeService.createProcessInstanceQuery();
 		if (StringUtil.isNotBlank(processInstanceId)) {

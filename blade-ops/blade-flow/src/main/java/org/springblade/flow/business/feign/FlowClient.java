@@ -23,10 +23,8 @@ import org.flowable.bpmn.model.ValuedDataObject;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
-import org.flowable.engine.runtime.ExecutionQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
-import org.flowable.task.api.TaskQuery;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -37,8 +35,6 @@ import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.TaskUtil;
-import org.springblade.system.cache.DictCache;
-import org.springblade.system.enums.DictEnum;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -153,12 +149,12 @@ public class FlowClient implements IFlowClient {
 	public R completeTask(@ApiParam("任务信息") @RequestBody SingleFlow flow) {
 		if (!flow.getStatus().equals("finish")) {
 			try {
-				return R.status(flowBusinessService.completeTask(flow));
+				return R.data(flowBusinessService.completeTask(flow));
 			} catch (FlowableObjectNotFoundException e) {
-				return R.fail(e.getMessage());
+				return R.data(e.getMessage());
 			}
 		}else {
-			return R.status(flowBusinessService.changeTaskComment(flow));
+			return R.data(flowBusinessService.changeTaskComment(flow));
 		}
 	}
 

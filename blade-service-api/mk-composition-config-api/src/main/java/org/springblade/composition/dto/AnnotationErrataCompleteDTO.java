@@ -56,6 +56,13 @@ public class AnnotationErrataCompleteDTO {
 	private Long templateId;
 
 	/**
+	 * 组合id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "组合id")
+	private Long compositionId;
+
+	/**
 	 * 组合类型
 	 */
 	@ApiModelProperty(value = "组合类型")

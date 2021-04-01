@@ -50,6 +50,13 @@ public class RealSetAnnotationCompleteDTO {
 	private Integer time;
 
 	/**
+	 * 学者id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "学者id")
+	private Long expertId;
+
+	/**
 	 * 模板id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
@@ -64,6 +71,12 @@ public class RealSetAnnotationCompleteDTO {
 	private Long compositionId;
 
 	/**
+	 * 组合类型
+	 */
+	@ApiModelProperty(value = "组合类型")
+	private Integer compositionType;
+
+	/**
 	 * sub_task_id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
@@ -71,11 +84,40 @@ public class RealSetAnnotationCompleteDTO {
 	private Long subTaskId;
 
 	/**
-	 * 学者id
+	 * 流程分类名
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "学者id")
-	private Long expertId;
+	@ApiModelProperty(value = "流程分类名")
+	private String categoryName;
+
+	/**
+	 * 是否通过代号
+	 */
+	@ApiModelProperty(value = "是否通过代号")
+	private String flag;
+
+	/**
+	 * 流程实例ID
+	 */
+	@ApiModelProperty(value = "流程实例ID")
+	private String processInstanceId;
+
+	/**
+	 * 任务执行人角色Id
+	 */
+	@ApiModelProperty(value = "任务执行人角色Id")
+	private Long roleId;
+
+	/**
+	 * 流程任务编号
+	 */
+	@ApiModelProperty(value = "流程任务编号")
+	private String taskId;
+
+	/**
+	 * 任务状态
+	 */
+	@ApiModelProperty(value = "任务状态")
+	private String status;
 
 
 }

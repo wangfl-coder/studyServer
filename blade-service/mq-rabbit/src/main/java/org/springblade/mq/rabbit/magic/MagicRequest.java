@@ -24,7 +24,7 @@ public class MagicRequest {
 	private String API_LOGIN = "https://api.aminer.cn/api/auth/signin";
 
 	private OkHttpClient client = new OkHttpClient.Builder()
-		.connectTimeout(Duration.ofHours(6)) // timeout: 6 hours
+		.readTimeout(Duration.ofHours(6)) // timeout: 6 hours
 		.build();
 //	private String username = "zhangff_love@sina.com";
 //	private String password = "123456";

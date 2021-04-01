@@ -37,9 +37,9 @@ public class MergeExpertTaskClient implements IMergeExpertTaskClient{
 
 	@Override
 	@GetMapping(CHANGE_STATUS)
-	public R changeStatus(@RequestParam Long id) {
+	public R changeStatus(@RequestParam Long id, @RequestParam Integer status) {
 		UpdateWrapper<MergeExpertTask> mergeExpertTaskUpdateWrapper = new UpdateWrapper<>();
-		mergeExpertTaskUpdateWrapper.eq("id",id).set("status",2);
+		mergeExpertTaskUpdateWrapper.eq("id",id).set("status",status);
 		boolean update = taskService.update(mergeExpertTaskUpdateWrapper);
 		return R.status(update);
 	}

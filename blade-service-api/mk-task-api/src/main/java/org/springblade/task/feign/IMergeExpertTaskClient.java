@@ -28,7 +28,7 @@ public interface IMergeExpertTaskClient {
 	R<MergeExpertTask> getById(@RequestParam Long id);
 
 	@GetMapping(CHANGE_STATUS)
-	R changeStatus(@RequestParam Long id);
+	R changeStatus(@RequestParam Long id, @RequestParam Integer status);
 
 //	@GetMapping(GET_SUBTASK_COUNT)
 //	R<Integer> getSubMergeExpertTaskCount(@RequestParam("id") Long id);

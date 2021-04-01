@@ -257,6 +257,9 @@ public class ExpertController extends BladeController {
 	@ApiOperation(value = "标注数据生效到aminer", notes = "标注数据生效到aminer")
 	public R exportExperts(Long taskId){
 		List<Expert> experts = expertMapper.queryExportExperts(taskId);
+		if (experts.isEmpty()) {
+			return R.fail("没有待生效专家");
+		}
 
 //		ArrayList<Expert> experts = new ArrayList<>();
 //		Expert expert1 = new Expert();
@@ -379,12 +382,7 @@ public class ExpertController extends BladeController {
 				}
 			}
 		}//);
-		R<Task> taskRes = taskClient.getById(taskId);
-		if (taskRes.isSuccess()) {
-			Task task = taskRes.getData();
-			task.setStatus(TaskStatusEnum.EXPORTED.getNum());
-			taskClient.saveTask(task);
-		}
+		taskClient.changeStatus(taskId, TaskStatusEnum.EXPORTED.getNum());
 		return R.status(true);
 	}
 
@@ -397,7 +395,9 @@ public class ExpertController extends BladeController {
 	public R exportExpertsByFields(Long taskId, String fields){
 		List<String> listField = Func.toStrList(fields);
 		List<Expert> experts = expertMapper.queryExportExperts(taskId);
-
+		if (experts.isEmpty()) {
+			return R.fail("没有待生效专家");
+		}
 
 //		ArrayList<Expert> experts = new ArrayList<>();
 //		Expert expert1 = new Expert();
@@ -525,12 +525,7 @@ public class ExpertController extends BladeController {
 				}
 			}
 		}//);
-		R<Task> taskRes = taskClient.getById(taskId);
-		if (taskRes.isSuccess()) {
-			Task task = taskRes.getData();
-			task.setStatus(TaskStatusEnum.EXPORTED.getNum());
-			taskClient.saveTask(task);
-		}
+		taskClient.changeStatus(taskId, TaskStatusEnum.EXPORTED.getNum());
 		return R.status(true);
 	}
 

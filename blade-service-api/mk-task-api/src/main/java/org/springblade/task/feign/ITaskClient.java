@@ -13,19 +13,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ITaskClient {
 	String API_PREFIX = "/client";
 	String GET_TASK_BY_ID = API_PREFIX + "/get-task-by-id";
-	String SAVE_TASK = API_PREFIX + "/save-task";
+	String UPDATE_TASK = API_PREFIX + "/save-task";
 	String GET_TASK_BY_TEMPLATE = API_PREFIX + "/get-task-by-template";
 	String GET_SUBTASK_COUNT = API_PREFIX + "/get-subtask-count";
+	String CHANGE_STATUS = API_PREFIX + "/change-task-status";
 
 
-	@PostMapping(SAVE_TASK)
-	R saveTask(@RequestBody Task task);
+	@PostMapping(UPDATE_TASK)
+	R updateTask(@RequestBody Task task);
 
 	@GetMapping(GET_TASK_BY_ID)
 	R<Task> getById(@RequestParam Long id);
 
 	@GetMapping(GET_TASK_BY_TEMPLATE)
 	R<Task> getByTemplate(@RequestParam Long templateId);
+
+	@GetMapping(CHANGE_STATUS)
+	R changeStatus(@RequestParam Long id, @RequestParam Integer status);
 
 //	@GetMapping(GET_SUBTASK_COUNT)
 //	R<Integer> getSubTaskCount(@RequestParam("id") Long id);
