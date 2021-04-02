@@ -207,6 +207,22 @@ public class StatisticsClient implements IStatisticsClient {
 	}
 
 	@Override
+	public R<Boolean> ifNeedToUpdateStatisticIswrong(Long compositionId, Long subTaskId, Long userId) {
+		LambdaQueryWrapper<Statistics> queryWrapper = Wrappers.lambdaQuery();
+		queryWrapper.eq(Statistics::getCompositionId,compositionId)
+			.eq(Statistics::getSubTaskId,subTaskId)
+			.eq(Statistics::getUserId,userId);
+		Statistics statistics = statisticsService.getOne(queryWrapper);
+		if (statistics != null){
+			statistics.setIsWrong(0);
+			Boolean is_success = statisticsService.saveOrUpdate(statistics);
+			//return R.success("修改成功");
+			return R.data(is_success);
+		}
+		return R.data(false);
+	}
+
+	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public R<Kv> queryBasicInfoStatus(Long labelTaskId, Long templateId, Long compositionId) {
 //		Statistics statistics_query = new Statistics();

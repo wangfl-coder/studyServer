@@ -45,6 +45,7 @@ public interface IStatisticsClient {
 	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
 	String MARK_AS_COMPLETE = API_PREFIX + "/statistics/mark-as-complete";
 	String IF_NEED_TO_REMOVE_BASICINFO_STATISTICS = API_PREFIX + "/statistics/if-need-to-remove-basicinfo-statistics";
+	String IF_NEED_TO_UPDATE_STATISITIC_ISWRONG = API_PREFIX + "/statistics/is-need-to-update-statistic-iswrong";
 
 	/**
 	 * 初始化任务统计
@@ -84,4 +85,10 @@ public interface IStatisticsClient {
 	 */
 	@GetMapping(IF_NEED_TO_REMOVE_BASICINFO_STATISTICS)
 	R ifNeedToRemoveBasicInfoStatistics(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
+
+	/**
+	 * 更新statistics中的is_wrong
+	 */
+	@GetMapping(IF_NEED_TO_UPDATE_STATISITIC_ISWRONG)
+	R<Boolean> ifNeedToUpdateStatisticIswrong(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId);
 }
