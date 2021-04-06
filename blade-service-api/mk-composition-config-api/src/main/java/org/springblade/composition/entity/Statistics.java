@@ -116,7 +116,7 @@ public class Statistics extends TenantEntity {
 	private Integer isWrong;
 
 	/**
-	 * 反馈状态 0.未反馈 1.已提交未处理 2.已提交处理中 3.已提交处理完毕
+	 * 反馈状态 0.未审核 1.审核通过 2.驳回
 	 */
 	@ApiModelProperty(value = "0.未反馈 1.已提交未处理 2.已提交处理中 3.已提交处理完毕")
 	private Integer feedbackStatus;

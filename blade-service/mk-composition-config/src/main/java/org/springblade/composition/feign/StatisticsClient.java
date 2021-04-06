@@ -17,6 +17,7 @@
 package org.springblade.composition.feign;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
@@ -207,7 +208,7 @@ public class StatisticsClient implements IStatisticsClient {
 	}
 
 	@Override
-	public R<Boolean> ifNeedToUpdateStatisticIswrong(Long compositionId, Long subTaskId, Long userId) {
+	public R<Boolean> ifNeedToUpdateStatisticIsWrongFeedbackStatus(Long compositionId, Long subTaskId, Long userId) {
 		LambdaQueryWrapper<Statistics> queryWrapper = Wrappers.lambdaQuery();
 		queryWrapper.eq(Statistics::getCompositionId,compositionId)
 			.eq(Statistics::getSubTaskId,subTaskId)
@@ -215,12 +216,25 @@ public class StatisticsClient implements IStatisticsClient {
 		Statistics statistics = statisticsService.getOne(queryWrapper);
 		if (statistics != null){
 			statistics.setIsWrong(0);
+			statistics.setFeedbackStatus(1);
 			Boolean is_success = statisticsService.saveOrUpdate(statistics);
 			//return R.success("修改成功");
 			return R.data(is_success);
 		}
 		return R.data(false);
 	}
+
+	@Override
+	public R<Boolean> ifNeedToUpdateStatisticFeedbackStatus(Integer status, Long compositionId, Long subTaskId, Long userId) {
+		LambdaUpdateWrapper<Statistics> updateWrapper = Wrappers.lambdaUpdate();
+		updateWrapper.eq(Statistics::getCompositionId,compositionId)
+			.eq(Statistics::getSubTaskId,subTaskId)
+			.eq(Statistics::getUserId,userId).set(Statistics::getFeedbackStatus,status);
+		return R.data(statisticsService.update(updateWrapper));
+
+	}
+
+
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
