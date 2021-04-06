@@ -30,7 +30,7 @@
 
 
     <select id="selectFeedbackPage" resultMap="feedbackResultMap">
-        select * from blade_feedback where is_deleted = 0
+        select * from mk_feedback where is_deleted = 0
     </select>
 
 </mapper>
