@@ -61,6 +61,24 @@
             <groupId>org.springblade</groupId>
             <artifactId>blade-starter-excel</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-log-api</artifactId>
+            <version>2.7.0.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-task</artifactId>
+            <version>2.7.0.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springblade</groupId>
+            <artifactId>mk-task-api</artifactId>
+            <version>2.7.0.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
         <!--<dependency>
             <groupId>org.springblade</groupId>
             <artifactId>blade-starter-transaction</artifactId>
