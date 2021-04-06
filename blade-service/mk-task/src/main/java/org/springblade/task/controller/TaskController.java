@@ -20,12 +20,13 @@ import org.springblade.core.secure.BladeUser;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.constant.BladeConstant;
-import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.taskLog.entity.TaskLog;
+//import org.springblade.log.feign.ITaskLogClient;
 import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.mq.rabbit.feign.IMQRabbitClient;
 import org.springblade.system.entity.Menu;
@@ -47,6 +48,7 @@ import org.springblade.task.service.MergeExpertTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.service.TaskService;
 import org.springblade.task.vo.TaskVO;
+import org.springblade.taskLog.feign.ITaskLogClient;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -75,6 +77,7 @@ public class TaskController extends BladeController {
 	private IRealSetExpertClient realSetExpertClient;
 	private IMQRabbitClient mqRabbitClient;
 	private IFlowEngineClient flowEngineClient;
+	private ITaskLogClient iTaskLogclient;
 
 
 	@GetMapping(value = "/complete/count")
@@ -89,6 +92,7 @@ public class TaskController extends BladeController {
 		}
 		return R.data(count);
 	}
+
 
 	@GetMapping(value = "/inspection/count")
 	@ApiOperation(value = "查询可以质检的标注子任务数量")
@@ -226,11 +230,13 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加标注任务")
 	public R save(@RequestBody ExpertBaseTaskDTO expertBaseTaskDTO) {
 		Boolean result;
+		Boolean taskse = null;
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
 		task.setTenantId(AuthUtil.getTenantId());
 		task.setTaskType(TaskTypeEnum.LABEL.getNum());
 		boolean save = taskService.save(task);
 		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());
+
 
 		boolean flag = true;
 		// 导入真题数据库中的所有专家
@@ -238,9 +244,10 @@ public class TaskController extends BladeController {
 			R res_real_set_eb = realSetExpertClient.importExpertBase(expertBaseTaskDTO.getRealSetEbId(), task.getId());
 			flag = res_real_set_eb.isSuccess();
 		}
-
+//res_eb.isSuccess() && flag
 		if (res_eb.isSuccess() && flag) {
 			R<List<Expert>> expertsResult = expertClient.getExpertsByTaskId(task.getId());
+//			expertsResult.isSuccess()
 			if (expertsResult.isSuccess()) {
 				List<Expert> experts = expertsResult.getData();
 				if(expertBaseTaskDTO.getRealSetRate() != null) {
@@ -254,7 +261,14 @@ public class TaskController extends BladeController {
 				task.setCount(experts.size());
 				task.setRealSetEbId(expertBaseTaskDTO.getRealSetEbId());
 				task.setStatus(TaskStatusEnum.IMPORTED.getNum());
-				taskService.saveOrUpdate(task);
+				Boolean tasksave = taskService.saveOrUpdate(task);
+				if (tasksave) {
+					Long id = task.getId();
+					Task tasks = taskService.getById(id);
+					TaskLog tasklog2 = Objects.requireNonNull(BeanUtil.copy(tasks, TaskLog.class));
+					taskse = saveLog(tasklog2);
+				}
+
 			} else {
 				return R.fail("读取专家列表失败");
 			}
@@ -263,7 +277,7 @@ public class TaskController extends BladeController {
 			return R.fail("导入智库失败");
 		}
 		statisticsClient.initializeLabelTask(task.getId());
-		return R.status(result);
+		return R.data(taskse);
 	}
 
 	@PostMapping(value = "/fix")
@@ -418,6 +432,32 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "删除任务")
 	public R delete(@RequestParam String ids){
 		return R.status(taskService.deleteLogic(Func.toLongList(ids)));
+	}
+
+//	private ITaskLogClient iTaskLogClient;
+//	@PostMapping(value = "/save1")
+//	public R save(TaskLog taskLog){
+//		return R.data(iTaskLogClient.save(taskLog));
+//	}
+
+	public boolean saveLog(TaskLog taskLog) {
+//		TaskLog taskLog = new TaskLog();
+		int action=1;
+//		String tenant_id =task.getTenantId();
+//		Long task_id = task.getAnnotationTaskId();
+//		Integer is_deleted = task.getIsDeleted();
+//		Long create_user = task.getCreateUser();
+//		Long create_dept = task.getCreateDept();
+		String action_log ="导入真题";
+		taskLog.setActionLog(action_log);
+//		taskLog.setCreateDept(create_dept);
+//		taskLog.setCreateUser(create_user);
+//		taskLog.setIsDeleted(is_deleted);
+//		taskLog.setTaskId(task_id);
+//		taskLog.setTenantId(tenant_id);
+		taskLog.setAction(action);
+		boolean savelog = iTaskLogclient.save(taskLog);
+		return savelog;
 	}
 
 

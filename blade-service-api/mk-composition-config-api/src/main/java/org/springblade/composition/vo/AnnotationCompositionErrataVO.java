@@ -77,7 +77,7 @@ public class AnnotationCompositionErrataVO implements Serializable {
 	 * 专家名
 	 */
 	@ApiModelProperty(value = "专家名")
-	private String personName;
+	private String expertName;
 
 	/**
 	 * 真集专家名

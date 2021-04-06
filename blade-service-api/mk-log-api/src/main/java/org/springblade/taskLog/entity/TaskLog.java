@@ -14,65 +14,44 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.common.constant;
+package org.springblade.taskLog.entity;
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springblade.core.mp.base.BaseEntity;
 
 /**
- * 通用常量
+ * 实体类
  *
- * @author Chill
+ * @author BladeX
+ * @since 2021-03-23
  */
-public interface CommonConstant {
+@Data
+@TableName("mk_log_task")
+@EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "TaskLog对象", description = "TaskLog对象")
+public class TaskLog extends BaseEntity {
 
-	String MKAPP_LOG_NAME = "mk-log";
-	/**
-	 * sword 系统名
-	 */
-	String SWORD_NAME = "sword";
-
-	/**
-	 * saber 系统名
-	 */
-	String SABER_NAME = "saber";
+	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 顶级父节点id
-	 */
-	Long TOP_PARENT_ID = 0L;
-
+	* 操作方式
+	*/
+		@ApiModelProperty(value = "操作方式")
+		private Integer action;
 	/**
-	 * 顶级父节点名称
-	 */
-	String TOP_PARENT_NAME = "顶级";
-
+	* 任务ID
+	*/
+		@ApiModelProperty(value = "任务ID")
+		private Integer taskId;
 	/**
-	 * 未封存状态值
-	 */
-	Integer NOT_SEALED_ID = 0;
-
-	/**
-	 * 默认密码
-	 */
-	String DEFAULT_PASSWORD = "123456";
-
-	/**
-	 * 默认密码参数值
-	 */
-	String DEFAULT_PARAM_PASSWORD = "account.initPassword";
-
-	/**
-	 * 默认排序字段
-	 */
-	String SORT_FIELD = "sort";
-
-	/**
-	 * 数据权限类型
-	 */
-	Integer DATA_SCOPE_CATEGORY = 1;
-
-	/**
-	 * 接口权限类型
-	 */
-	Integer API_SCOPE_CATEGORY = 2;
+	* 操作描述
+	*/
+		@ApiModelProperty(value = "操作描述")
+		private String actionLog;
 
 
 }

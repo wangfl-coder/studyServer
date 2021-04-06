@@ -30,12 +30,13 @@ import org.springblade.core.mp.support.Condition;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.StringUtil;
-import org.springblade.log.entity.UserLog;
+import org.springblade.taskLog.entity.UserLog;
 import org.springblade.system.cache.DictBizCache;
 import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
 import org.springblade.system.user.enums.UserStatusEnum;
 import org.springblade.system.user.feign.IUserClient;
+import org.springblade.taskLog.feign.IUserLogClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 	private final ILogBalanceService logBalanceService;
 	private final ILogPointsService logPointsService;
 	private final IUserClient userClient;
+	private final IUserLogClient userLogClient;
 
 	@Override
 	public List<TaskComposition> taskCompositionCount(String startTime, String endTime, String taskId, Integer status, Integer taskType, Integer statisticsType){
@@ -140,8 +142,10 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 			Integer requiredIAARate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "iaa_required_rate"));
 			if (iaaRate < requiredIAARate.intValue()) {
 				UserLog userLog = Objects.requireNonNull(BeanUtil.copy(user, UserLog.class));
+				userLog.setId(null);
 				userLog.setType(1);
 				userLog.setRemark(StringUtil.format("用户{}因为多人标注正确率过低：{}%被封停无法再接任务", user.getAccount(), iaaRate));
+				userLogClient.saveUserLog(userLog);
 				user.setStatus(UserStatusEnum.BLOCKED.getNum());
 				CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 				userClient.updateUser(user);
@@ -153,22 +157,15 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 			Integer requiredSIRate = Integer.valueOf(DictBizCache.getValue("required_reliability_rate", "sampling_inspection_required_rate"));
 			if (siRate < requiredSIRate.intValue()) {
 				UserLog userLog = Objects.requireNonNull(BeanUtil.copy(user, UserLog.class));
+				userLog.setId(null);
 				userLog.setType(1);
 				userLog.setRemark(StringUtil.format("用户{}因为人工抽检正确率过低：{}%被封停无法再接任务", user.getAccount(), siRate));
+				userLogClient.saveUserLog(userLog);
 				user.setStatus(UserStatusEnum.BLOCKED.getNum());
 				CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 				userClient.updateUser(user);
 			}
 		}
-
-
-
-
-
-
-
-
-
 
 		return true;
 	}

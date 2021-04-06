@@ -14,65 +14,56 @@
  *  this software without specific prior written permission.
  *  Author: Chill 庄骞 (smallchill@163.com)
  */
-package org.springblade.common.constant;
+package org.springblade.taskLog.service;
+
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springblade.core.mp.base.BaseService;
+import org.springblade.taskLog.entity.UserLog;
 
 /**
- * 通用常量
+ * 服务类
  *
  * @author Chill
  */
-public interface CommonConstant {
-
-	String MKAPP_LOG_NAME = "mk-log";
-	/**
-	 * sword 系统名
-	 */
-	String SWORD_NAME = "sword";
+public interface IUserLogService extends BaseService<UserLog> {
 
 	/**
-	 * saber 系统名
+	 * 自定义分页
+	 *
+	 * @param page
+	 * @param userLog
+	 * @param deptId
+	 * @param tenantId
+	 * @return
 	 */
-	String SABER_NAME = "saber";
+	IPage<UserLog> selectUserPage(IPage<UserLog> page, UserLog userLog, Long deptId, String tenantId);
 
 	/**
-	 * 顶级父节点id
+	 * getUserLogByAccount
+	 *
+	 * @param tenantId
+	 * @param account
+	 * @return
 	 */
-	Long TOP_PARENT_ID = 0L;
+	UserLog getUserLogByAccount(String tenantId, String account);
 
 	/**
-	 * 顶级父节点名称
+	 * getUserLogByEmail
+	 *
+	 * @param tenantId
+	 * @param email
+	 * @return
 	 */
-	String TOP_PARENT_NAME = "顶级";
+	UserLog getUserLogByEmail(String tenantId, String email);
 
 	/**
-	 * 未封存状态值
+	 * getUserLogByMobile
+	 *
+	 * @param tenantId
+	 * @param mobile
+	 * @return
 	 */
-	Integer NOT_SEALED_ID = 0;
-
-	/**
-	 * 默认密码
-	 */
-	String DEFAULT_PASSWORD = "123456";
-
-	/**
-	 * 默认密码参数值
-	 */
-	String DEFAULT_PARAM_PASSWORD = "account.initPassword";
-
-	/**
-	 * 默认排序字段
-	 */
-	String SORT_FIELD = "sort";
-
-	/**
-	 * 数据权限类型
-	 */
-	Integer DATA_SCOPE_CATEGORY = 1;
-
-	/**
-	 * 接口权限类型
-	 */
-	Integer API_SCOPE_CATEGORY = 2;
-
+	UserLog getUserLogByMobile(String tenantId, String mobile);
 
 }
