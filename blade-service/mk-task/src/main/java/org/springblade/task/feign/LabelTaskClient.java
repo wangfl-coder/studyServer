@@ -82,9 +82,10 @@ public class LabelTaskClient implements ILabelTaskClient {
 
 	@Override
 	@GetMapping(QUERY_LABEL_TASK_ALL)
-	public R<List<LabelTask>> queryLabelTaskAll(Long taskId) {
+	public R<List<LabelTask>> queryLabelTaskAll(Long taskId, Integer taskType) {
 		QueryWrapper<LabelTask> labelTaskQueryWrapper = new QueryWrapper<>();
-		labelTaskQueryWrapper.eq("task_id",taskId);
+		labelTaskQueryWrapper.eq("task_id",taskId)
+							 .eq("type", taskType);
 		List<LabelTask> list = labelTaskService.list(labelTaskQueryWrapper);
 		return R.data(list);
 	}

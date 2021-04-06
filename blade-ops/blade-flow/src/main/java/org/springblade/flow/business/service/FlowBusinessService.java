@@ -17,8 +17,10 @@
 package org.springblade.flow.business.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.ibatis.annotations.Param;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.entity.SingleFlow;
+import org.springblade.task.vo.CompositionClaimCountVO;
 
 import java.util.List;
 
@@ -122,5 +124,19 @@ public interface FlowBusinessService {
 	 */
 	boolean todoTimeoutHandler();
 
+	/**
+	 * 返回当前用户所有组合及分别可接的组合数
+	 * @param roleAlias  角色列表
+	 * @param userId  用户Id
+	 * @return
+	 */
+	List<CompositionClaimCountVO> getCompositionClaimCountByRoleAlias(List<String> roleAlias, Long userId);
 
+	/**
+	 * 返回当前用户所有组合及分别可接的组合数
+	 * @param roleAlias  角色列表
+	 * @param userId  用户Id
+	 * @return
+	 */
+	String claimOneByCompositionId(List<String> roleAlias, Long userId, Long compositionId);
 }

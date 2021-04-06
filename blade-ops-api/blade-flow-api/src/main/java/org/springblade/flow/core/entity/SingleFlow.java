@@ -36,7 +36,8 @@ public class SingleFlow extends BladeFlow{
 	@ApiModelProperty(value = "标注流程实例id")
 	private String labelProcessInstanceId;
 	@ApiModelProperty(value = "组合id")
-	private String compositionId;
+	@JsonSerialize(using = ToStringSerializer.class)
+	private Long compositionId;
 	@ApiModelProperty(value = "组合类型")
 	private Integer compositionType;
 	@ApiModelProperty(value = "组合字段")

@@ -21,6 +21,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Param;
 import org.springblade.flow.engine.entity.FlowModel;
 import org.springblade.system.entity.Role;
+import org.springblade.task.vo.CompositionClaimCountVO;
+import org.springblade.task.vo.CompositionClaimListVO;
 
 import java.util.List;
 
@@ -89,4 +91,35 @@ public interface FlowMapper extends BaseMapper<FlowModel> {
 	 * @param processInstanceId 流程实例Id
 	 */
 	int getRoleAliasCountByProcessInstanceId(@Param("processInstanceId")String processInstanceId, @Param("roleAlias")List<String> roleAlias);
+
+	/**
+	 * 返回当前用户所有组合及分别可接的组合数
+	 * @param roleAlias  角色列表
+	 * @param compositionList  zuhe
+	 * @return
+	 */
+	List<CompositionClaimCountVO> getCompositionClaimCountByRoleAlias(@Param("roleAlias")List<String> roleAlias, @Param("compositionList")List<String> compositionList);
+
+	/**
+	 * 返回当前用户所有组合及分别可接的任务列表
+	 * @param roleAlias  角色列表
+	 * @param userId  用户Id
+	 * @return
+	 */
+	List<CompositionClaimListVO> compositionClaimList(@Param("roleAlias")List<String> roleAlias, @Param("userId")Long userId);
+
+	/**
+	 * 返回角色列表对应的可接的所有组合
+	 * @param roleAlias  角色列表
+	 * @return
+	 */
+	List<String> getCompositionsByRoleAlias(@Param("roleAlias")List<String> roleAlias);
+
+	/**
+	 * 返回一个可签的TaskId
+	 * @param roleAlias  角色列表
+	 * @param compositionList  zuhe
+	 * @return
+	 */
+	String claimOneByCompositionId(@Param("roleAlias")List<String> roleAlias, @Param("compositionId")Long compositionId, @Param("compositionList")List<String> compositionList);
 }

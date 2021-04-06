@@ -41,6 +41,7 @@ public interface LauncherConstant {
 	String MKAPP_ADATA_SIDECAR_NAME = MKAPP_NAME_PREFIX + "adata-sidecar";
 	String MKAPP_LOG_NAME = MKAPP_NAME_PREFIX + "log";
 
+
 	/**
 	 * demo
 	 */
@@ -55,6 +56,11 @@ public interface LauncherConstant {
 	 * xxljob
 	 */
 	String APPLICATION_XXLJOB_ADMIN_NAME = APPLICATION_NAME_PREFIX + "xxljob-admin";
+
+	/**
+	 * rabbit
+	 */
+	String APPLICATION_RABBIT_NAME = APPLICATION_NAME_PREFIX + "rabbit";
 
 	/**
 	 * nacos dev 地址

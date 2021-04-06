@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工作流远程调用接口.
@@ -42,6 +42,7 @@ public interface IFlowEngineClient {
 	String API_PREFIX = "/client";
 	String DEPLOY_MODEL_BY_TEMPLATE = API_PREFIX + "/deploy-model-by-template";
 	String FLOW_HISTORY = API_PREFIX + "/flow-history";
+	String FLOW_PROCESS_LIST = API_PREFIX + "/flow-process-list";
 
 
 	/**
@@ -63,4 +64,14 @@ public interface IFlowEngineClient {
 	 */
 	@GetMapping(FLOW_HISTORY)
 	 R<List<BladeFlow>> historyFlow(@RequestParam String processInstanceId, String startActivityId, String endActivityId);
+
+	/**
+	 * 获取流程实例列表
+	 *
+	 * @param category 类型
+	 * @param mode     通用还是租户
+	 * @return R
+	 */
+	@GetMapping(FLOW_PROCESS_LIST)
+	R processList(@RequestParam(required = false) String category, @RequestParam(required = false, defaultValue = "1") Integer mode);
 }

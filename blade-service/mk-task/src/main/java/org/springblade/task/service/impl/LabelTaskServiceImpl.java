@@ -1,6 +1,5 @@
 package org.springblade.task.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -10,7 +9,6 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.enums.RealSetExpertStatusEnum;
 import org.springblade.adata.feign.IRealSetExpertClient;
-import org.springblade.composition.entity.AnnotationData;
 import org.springblade.composition.entity.Composition;
 import org.springblade.composition.entity.Template;
 import org.springblade.composition.feign.IStatisticsClient;
@@ -21,10 +19,7 @@ import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.DateUtil;
-import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
-import org.springblade.core.tool.utils.StringUtil;
-import org.springblade.system.cache.SysCache;
 import org.springblade.task.enums.LabelTaskTypeEnum;
 import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.CompositionClaimListVO;
@@ -34,14 +29,12 @@ import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.FlowUtil;
-import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.service.LabelTaskService;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.vo.RoleClaimCountVO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,12 +96,15 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setTemplateId(task.getTemplateId());
 				labelTask.setTaskId(task.getId());
 				labelTask.setPersonId(expert.getId());
+				labelTask.setExpertId(expert.getExpertId());
 				labelTask.setPersonName(expert.getName());
 				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
 				updateById(labelTask);
 
 				Random random = Holder.RANDOM;
 				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
+				if (template.getRealSetProcessDefinitions().equals("{}"))
+					insertRealSet = false;
 				if (insertRealSet && finalNoHomepage) {		//需要添加真集又不需要标主页，直接加到流水线中
 					Map<String, String> compositionLabelMap = startRealSetProcess(template.getRealSetProcessDefinitions(), task);
 					if (compositionLabelMap != null) {
@@ -185,28 +181,20 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
-	// @GlobalTransactional
 	public Map<String, String> startRealSetProcess(String realSetProcessDefinitions,
 											   Task task) {
-		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertIds(task.getId());
-		if (!expertsRealSetResult.isSuccess()) {
+		R<RealSetExpert> expertRes = realSetExpertClient.getAnAvailRealSetExpert(task.getId());
+		if (!expertRes.isSuccess()) {
 			return null;
 		}
-		List<RealSetExpert> expertsRealSet = expertsRealSetResult.getData();
-//		Random random = Holder.RANDOM;
-//		RealSetExpert expert = expertsRealSet.get(random.nextInt(expertsRealSet.size()));
-		Optional<RealSetExpert> expertRes = expertsRealSet.stream().filter(elem -> elem.getStatus().equals(1)).findAny();
-		if (!expertRes.isPresent()) {
-			return null;
-		}
-		RealSetExpert expert = expertRes.get();
+		RealSetExpert expert = expertRes.getData();
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 
 		JSONObject realSetJSONObject = JSONObject.parseObject(realSetProcessDefinitions);
 		Map<String, String> resultMap = new HashMap<>();
 		realSetJSONObject.entrySet().forEach(entry -> {
 			LabelTask labelTask = new LabelTask();
+			labelTask.setTenantId(task.getTenantId());
 			labelTask.setProcessDefinitionId((String)entry.getValue());
 			// 保存任务
 			labelTask.setCreateTime(DateUtil.now());
@@ -230,8 +218,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				throw new ServiceException("开启流程失败");
 			}
 		});
-		expert.setStatus(RealSetExpertStatusEnum.USED.getNum());	//已使用
-		realSetExpertClient.saveExpert(expert);
 		return resultMap;
 	}
 
@@ -366,7 +352,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public List<CompositionClaimListVO> compositionClaimList(List<String> roleAliases) {
-		return baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
+		List<CompositionClaimListVO> res = baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
+		return res;
 	}
 
 	private Kv createProcessVariables(Task task, LabelTask labelTask) {

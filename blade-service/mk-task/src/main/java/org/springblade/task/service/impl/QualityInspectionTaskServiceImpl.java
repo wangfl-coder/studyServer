@@ -1,11 +1,8 @@
 package org.springblade.task.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springblade.adata.entity.Expert;
 import org.springblade.core.log.exception.ServiceException;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.secure.utils.AuthUtil;
@@ -25,12 +22,10 @@ import org.springblade.task.entity.Task;
 import org.springblade.task.mapper.QualityInspectionTaskMapper;
 import org.springblade.task.service.QualityInspectionTaskService;
 import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j

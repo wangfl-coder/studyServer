@@ -38,6 +38,7 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.task.entity.LabelTask;
+import org.springblade.task.enums.TaskTypeEnum;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -73,7 +74,7 @@ public class StatisticsClient implements IStatisticsClient {
 	@GetMapping(STATISTICS_INITIALIZE_LABELTASK)
 	@Transactional(rollbackFor = Exception.class)
 	public R initializeLabelTask(Long taskId) {
-		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId);
+		R<List<LabelTask>> labelTaskListResult = labelTaskClient.queryLabelTaskAll(taskId, TaskTypeEnum.LABEL.getNum());
 		if (labelTaskListResult.isSuccess()){
 			List<LabelTask> labelTaskList = labelTaskListResult.getData();
 			// 默认至少有一个要标注的人
@@ -109,7 +110,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_SINGLE_LABELTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeSingleLabelTask(LabelTask labelTask) {
 		// 默认至少有一个要标注的人
 		Long templateId = labelTask.getTemplateId();
@@ -129,7 +129,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_REALSET_LABELTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeRealSetLabelTask(LabelTask labelTask, Map<String, String> compositionLabelMap) {
 		Long templateId = labelTask.getTemplateId();
 		List<Composition> compositionList = templateService.allCompositions(templateId);
@@ -137,12 +136,14 @@ public class StatisticsClient implements IStatisticsClient {
 		compositionList.forEach(composition ->{
 			if (composition.getAnnotationType() == 2) {
 				Statistics statistics = new Statistics();
+				statistics.setTenantId(labelTask.getTenantId());
 				String compositionId = composition.getId().toString();
 				String subTaskId = compositionLabelMap.get(compositionId);
 				statistics.setSubTaskId(Long.valueOf(subTaskId));
 				statistics.setCompositionId(composition.getId());
 				statistics.setTemplateId(templateId);
 				statistics.setType(2);
+				statistics.setStatus(1);
 				boolean res = statisticsService.save(statistics);
 				int k = 0;
 			}
@@ -153,7 +154,6 @@ public class StatisticsClient implements IStatisticsClient {
 
 	@Override
 	@PostMapping(STATISTICS_INITIALIZE_SINGLE_COMPOSITIONTASK)
-	@Transactional(rollbackFor = Exception.class)
 	public R initializeSingleCompositionTask(Integer type, Long subTaskId, Long templateId, Long compositionId) {
 
 			Statistics statistics = new Statistics();

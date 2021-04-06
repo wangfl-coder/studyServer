@@ -57,6 +57,15 @@ public interface FlowEngineService extends IService<FlowModel> {
 	/**
 	 * 流程管理列表
 	 *
+	 * @param category 分类
+	 * @param mode     形态
+	 * @return
+	 */
+	List<FlowProcess> selectProcessList(String category, Integer mode);
+
+	/**
+	 * 流程管理列表
+	 *
 	 * @param page                 分页工具
 	 * @param processInstanceId    流程实例id
 	 * @param processDefinitionKey 流程key

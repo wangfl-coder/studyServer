@@ -17,7 +17,10 @@
 package org.springblade.adata.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.RealSetExpert;
+
+import java.util.List;
 
 
 /**
@@ -26,5 +29,12 @@ import org.springblade.adata.entity.RealSetExpert;
  * @author Chill
  */
 public interface RealSetExpertMapper extends BaseMapper<RealSetExpert> {
+
+	/**
+	 * 通过任务id获取学者id列表
+	 * @param taskId
+	 * @return
+	 */
+	List<String> getExpertsId(@Param("taskId") Long taskId);
 
 }

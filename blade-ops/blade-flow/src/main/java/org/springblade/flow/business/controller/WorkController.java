@@ -21,19 +21,12 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import liquibase.pro.packaged.C;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
-import org.springblade.adata.entity.Expert;
-import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
-import org.springblade.adata.feign.IRealSetExpertClient;
 import org.springblade.common.cache.CacheNames;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.redis.cache.BladeRedis;
@@ -53,20 +46,16 @@ import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;
 import org.springblade.system.user.enums.UserStatusEnum;
 import org.springblade.system.user.feign.IUserClient;
-import org.springblade.task.entity.LabelTask;
-import org.springblade.task.entity.Task;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springblade.task.feign.ITaskClient;
 import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.CompositionClaimListVO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
 
 /**
  * 流程事务通用接口
@@ -134,7 +123,7 @@ public class WorkController {
 //			return null;
 //		}
 		User user = UserCache.getUser(AuthUtil.getUserId());
-		if (user.getStatus() == UserStatusEnum.BLOCKED.getNum()) {
+		if (user.getStatus().equals(UserStatusEnum.BLOCKED.getNum())) {
 			return R.fail("错误率过高，无法接任务，请联系管理员");
 		}
 		String redisCode = this.bladeRedis.get(CacheNames.FLOW_CLAIMONE_KEY + AuthUtil.getUserId());
@@ -292,42 +281,44 @@ public class WorkController {
 	@ApiOperation(value = "返回当前用户所有组合及分别可接的任务数")
 	public R<List<CompositionClaimCountVO>> compositionClaimCount(BladeUser user) {
 		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
-		R<List<CompositionClaimListVO>> res = labelTaskClient.compositionClaimList(roleAlias);
-		if (res.isSuccess()) {
-			Map<String, Object> processVariablesMap = new HashMap<>();
-
-			List<CompositionClaimListVO> list = res.getData();
-			List<CompositionClaimListVO> resList = new ArrayList<>();
-			for(CompositionClaimListVO compositionClaimListVO: list) {
-				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
-				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
-				if (processVariables == null) {
-					try {
-						processVariables = runtimeService.getVariables(processInstanceId);
-						processVariablesMap.put(processInstanceId, processVariables);
-					}catch(FlowableObjectNotFoundException e){
-						e.printStackTrace();
-					}
-				}
-				if (processVariables != null && processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
-					continue;
-				}else {
-					resList.add(compositionClaimListVO);
-				}
-			}
-			Map<String, List<CompositionClaimListVO>> dataPerComposition = resList.stream()
-				.collect(groupingBy(CompositionClaimListVO::getCompositionId));
-			List<CompositionClaimCountVO> result = new ArrayList<>();
-			for (Map.Entry<String, List<CompositionClaimListVO>> entry : dataPerComposition.entrySet()) {
-				CompositionClaimCountVO compositionClaimCountVO = new CompositionClaimCountVO();
-				compositionClaimCountVO.setCompositionId(entry.getKey());
-				compositionClaimCountVO.setName(entry.getValue().get(0).getName());
-				compositionClaimCountVO.setCount(entry.getValue().size());
-				result.add(compositionClaimCountVO);
-			}
-			return R.data(result);
-		} else {
-			return R.fail("获取组合信息错误");
-		}
+		List<CompositionClaimCountVO> result = flowBusinessService.getCompositionClaimCountByRoleAlias(roleAlias, AuthUtil.getUserId());
+		return R.data(result);
+//		R<List<CompositionClaimListVO>> res = labelTaskClient.compositionClaimList(roleAlias);
+//		if (res.isSuccess()) {
+//			Map<String, Object> processVariablesMap = new HashMap<>();
+//
+//			List<CompositionClaimListVO> list = res.getData();
+//			List<CompositionClaimListVO> resList = new ArrayList<>();
+//			for(CompositionClaimListVO compositionClaimListVO: list) {
+//				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
+//				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
+//				if (processVariables == null) {
+//					try {
+//						processVariables = runtimeService.getVariables(processInstanceId);
+//						processVariablesMap.put(processInstanceId, processVariables);
+//					}catch(FlowableObjectNotFoundException e){
+//						e.printStackTrace();
+//					}
+//				}
+//				if (processVariables != null && processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
+//					continue;
+//				}else {
+//					resList.add(compositionClaimListVO);
+//				}
+//			}
+//			Map<String, List<CompositionClaimListVO>> dataPerComposition = resList.stream()
+//				.collect(groupingBy(CompositionClaimListVO::getCompositionId));
+//			List<CompositionClaimCountVO> result = new ArrayList<>();
+//			for (Map.Entry<String, List<CompositionClaimListVO>> entry : dataPerComposition.entrySet()) {
+//				CompositionClaimCountVO compositionClaimCountVO = new CompositionClaimCountVO();
+//				compositionClaimCountVO.setCompositionId(entry.getKey());
+//				compositionClaimCountVO.setName(entry.getValue().get(0).getName());
+//				compositionClaimCountVO.setCount(entry.getValue().size());
+//				result.add(compositionClaimCountVO);
+//			}
+//			return R.data(result);
+//		} else {
+//			return R.fail("获取组合信息错误");
+//		}
 	}
 }

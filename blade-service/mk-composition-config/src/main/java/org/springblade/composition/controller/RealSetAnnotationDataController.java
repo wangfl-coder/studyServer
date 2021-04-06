@@ -28,6 +28,9 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.feign.IExpertClient;
 import org.springblade.adata.feign.IRealSetExpertClient;
+import org.springblade.composition.dto.AnnotationDataErrataDTO;
+import org.springblade.composition.dto.AnnotationErrataCompleteDTO;
+import org.springblade.composition.dto.RealSetAnnotationCompleteDTO;
 import org.springblade.composition.entity.*;
 import org.springblade.composition.service.*;
 import org.springblade.composition.vo.AnnotationDataVO;
@@ -42,6 +45,8 @@ import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
+import org.springblade.flow.core.entity.SingleFlow;
+import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.task.feign.ILabelTaskClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -76,6 +81,7 @@ public class RealSetAnnotationDataController extends BladeController {
 	private final IRealSetExpertClient realSetExpertClient;
 	private final IAutoInspectionService autoInspectionService;
 	private final AnnotationDataErrataService annotationDataErrataService;
+	private final IFlowClient flowClient;
 
 	/**
 	 * 查询标注数据
@@ -104,14 +110,42 @@ public class RealSetAnnotationDataController extends BladeController {
 		return R.data(pages);
 	}
 
+//	/**
+//	 * 提交真题标志数据接口
+//	 */
+//	@PostMapping("/submit")
+//	@ApiOperationSupport(order = 4)
+//	@Transactional(rollbackFor = Exception.class)
+//	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入RealSetAnnotationDataVO对象")
+//	public R submit(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
+//		boolean res = submitData(annotationDataVO);
+//		return R.status(res);
+//	}
+
 	/**
-	 * 提交真题标志数据接口
+	 * 批量新增或修改标注数据
+	 * 每次都会逻辑删除之前的数据，不需要id，通过sub_task_id与field来查询删除数据
+	 * 每次修改后同时更新mk_adata_expert表中的数据
 	 */
-	@PostMapping("/submit")
-	@ApiOperationSupport(order = 4)
+	@PostMapping("/submit-and-complete")
+	@ApiOperationSupport(order = 3)
+//	@Transactional(rollbackFor = Exception.class)
+	@ApiOperation(value = "批量新增或修改", notes = "传入AnnotationCompleteDTO对象")
+	public R submitAndComplete(@Valid @RequestBody RealSetAnnotationCompleteDTO realSetAnnotationCompleteDTO) {
+		RealSetAnnotationDataVO realSetAnnotationDataVO = Objects.requireNonNull(BeanUtil.copy(realSetAnnotationCompleteDTO, RealSetAnnotationDataVO.class));
+		boolean res = submitData(realSetAnnotationDataVO);
+		SingleFlow singleFlow = Objects.requireNonNull(BeanUtil.copy(realSetAnnotationCompleteDTO, SingleFlow.class));
+		R res2 = flowClient.completeTask(singleFlow);
+		if (res2.isSuccess()) {
+			return R.data(res2.getData());
+		}else {
+			return R.fail("完成任务失败");
+		}
+
+	}
+
 	@Transactional(rollbackFor = Exception.class)
-	@ApiOperation(value = "真题标注数据批量新增或修改", notes = "传入RealSetAnnotationDataVO对象")
-	public R submit(@Valid @RequestBody RealSetAnnotationDataVO annotationDataVO) {
+	public boolean submitData(RealSetAnnotationDataVO annotationDataVO) {
 		// 清理标注数据前后的多余空白字符
 		if (annotationDataVO.getRealSetAnnotationDataList() != null) {
 			annotationDataVO.getRealSetAnnotationDataList().forEach(annotationData -> {annotationData.setValue(StringUtil.trimWhitespace(annotationData.getValue()));});
@@ -122,26 +156,6 @@ public class RealSetAnnotationDataController extends BladeController {
 		realSetExpert.setId(annotationDataVO.getExpertId());
 		RealSetExpert realData = realSetExpertClient.detail(realSetExpert).getData();
 
-		// 逐个字段检查正确与否
-//		AtomicInteger isCompositionTrue = new AtomicInteger(1);
-//		Long timestamp=System.currentTimeMillis();
-//		AtomicInteger totalTime = new AtomicInteger();
-//		annotationDataList.forEach(realSetAnnotationData -> {
-//			realSetAnnotationData.setRealSetId(timestamp);
-//			int is_true = 2;
-//			String answer = String.valueOf(BeanUtil.getProperty(realData,realSetAnnotationData.getField()));
-//			if (answer == null){
-//				answer = "";
-//			}
-//			if(realSetAnnotationData.getValue().equals(answer)){
-//				is_true = 1;
-//			}
-//			if(is_true==2){
-//				isCompositionTrue.set(2);
-//			}
-//			totalTime.addAndGet(realSetAnnotationData.getTime());
-//			realSetAnnotationData.setIsTrue(is_true);
-//		});
 		List<AnnotationDataErrata> annotationDataErrataList = new ArrayList<>();
 		// 每次提交的通过时间戳生成一个唯一id
 		Long timestamp=System.currentTimeMillis();
@@ -219,24 +233,12 @@ public class RealSetAnnotationDataController extends BladeController {
 					break;
 				}
 			};
-//			if (!wrote) {    //	被标过但不是当前的人
-//				Statistics new_stat = new Statistics();
-//				new_stat.setTime(annotationDataVO.getTime());
-//				new_stat.setStatus(2);
-//				new_stat.setUserId(AuthUtil.getUserId());
-//				new_stat.setCompositionId(annotationDataVO.getCompositionId());
-//				new_stat.setSubTaskId(subTaskId);
-//				new_stat.setTemplateId(annotationDataVO.getTemplateId());
-//				new_stat.setType(1);
-//				statisticsService.saveOrUpdate(new_stat);
-//			}
 		}
 
 		// 保存结果
 		AutoInspection autoInspection = Objects.requireNonNull(BeanUtil.copy(annotationDataList.get(0), AutoInspection.class));
 		autoInspection.setIsCompositionTrue(isCompositionTrue);
 		autoInspectionService.save(autoInspection);
-		return R.status(true);
+		return true;
 	}
-
 }

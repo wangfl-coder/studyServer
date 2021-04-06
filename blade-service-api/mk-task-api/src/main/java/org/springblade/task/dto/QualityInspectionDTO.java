@@ -21,8 +21,6 @@ public class QualityInspectionDTO {
 	private String ebId;
 	@ApiModelProperty(value = "质检任务名字")
 	private String taskName;
-	@ApiModelProperty(value = "任务类型")
-	private Integer taskType;
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "模版id")
 	private Long templateId;
@@ -43,8 +41,6 @@ public class QualityInspectionDTO {
 	private Integer count;
 	@ApiModelProperty(value = "质检类型")
 	private Integer inspectionType;
-	@ApiModelProperty(value = "流程定义id")
-	private String processDefinitionId;
 	@ApiModelProperty(value = "时间")
 	private Integer time;
 	@ApiModelProperty(value = "质检截图")

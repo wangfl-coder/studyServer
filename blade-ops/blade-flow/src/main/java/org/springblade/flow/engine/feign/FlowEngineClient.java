@@ -16,27 +16,15 @@
  */
 package org.springblade.flow.engine.feign;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.flowable.engine.HistoryService;
-import org.flowable.engine.IdentityService;
-import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
-import org.flowable.engine.history.HistoricProcessInstance;
-import org.flowable.engine.runtime.ProcessInstance;
-import org.flowable.task.api.Task;
 import org.springblade.composition.dto.TemplateDTO;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
-import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.Func;
-import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.flow.core.entity.BladeFlow;
-import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.feign.IFlowEngineClient;
-import org.springblade.flow.core.utils.TaskUtil;
+import org.springblade.flow.engine.entity.FlowProcess;
 import org.springblade.flow.engine.service.FlowEngineService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -126,5 +114,10 @@ public class FlowEngineClient implements IFlowEngineClient {
 	@GetMapping(FLOW_HISTORY)
 	public R<List<BladeFlow>> historyFlow(@RequestParam String processInstanceId, String startActivityId, String endActivityId) {
 		return R.data(flowEngineService.historyFlowList(processInstanceId, startActivityId, endActivityId));
+	}
+
+	@GetMapping(FLOW_PROCESS_LIST)
+	public R processList(@RequestParam(required = false) String category, @RequestParam(required = false, defaultValue = "1") Integer mode) {
+		return R.data(flowEngineService.selectProcessList(category, mode));
 	}
 }

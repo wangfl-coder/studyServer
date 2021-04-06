@@ -112,9 +112,15 @@ public class Statistics extends TenantEntity {
 	/**
 	 * 是否正确 大于0为错误 数字代表为什么错 1.质检员 2.真题 3.多人对比
 	 */
-	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "大于0为错误 数字代表为什么错 1.质检员 2.真题 3.多人对比")
 	private Integer isWrong;
+
+	/**
+	 * 反馈状态 0.未反馈 1.已提交未处理 2.已提交处理中 3.已提交处理完毕
+	 */
+	@ApiModelProperty(value = "0.未反馈 1.已提交未处理 2.已提交处理中 3.已提交处理完毕")
+	private Integer feedbackStatus;
+
 
 //	/**
 //	 * 积分
