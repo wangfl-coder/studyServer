@@ -44,6 +44,11 @@ public interface ProcessConstant {
 	String QUALITY_INSPECTION_KEY = "Inspection";
 
 	/**
+	 * 合并专家流程标识
+	 */
+	String MERGE_EXPERT_KEY = "MergeExpert";
+
+	/**
 	 * 同意标识
 	 */
 	String PASS_KEY = "pass";

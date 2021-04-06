@@ -17,6 +17,7 @@
 package org.springblade.adata.feign;
 
 import org.springblade.adata.entity.Expert;
+import org.springblade.adata.entity.ExpertMerge;
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -36,9 +37,9 @@ import java.util.List;
 @FeignClient(
 	value = LauncherConstant.MKAPP_ADATA_NAME
 )
-public interface IExpertClient {
+public interface IExpertMergeClient {
 
-	String API_PREFIX = "/client";
+	String API_PREFIX = "/client_expert_merge";
 	String GET_EXPERT = API_PREFIX + "/mk-adata/expert";
 	String GET_EXPERTS_BY_TASKID = API_PREFIX + "/mk-adata/experts-by-taskid";
 	String GET_EXPERTS_ID = API_PREFIX + "/mk-adata/experts-id";
@@ -55,7 +56,7 @@ public interface IExpertClient {
 	 * @return
 	 */
 	@PostMapping(GET_EXPERT)
-	R<Expert> detail(@RequestBody Expert expert);
+	R<ExpertMerge> detail(@RequestBody ExpertMerge expert);
 
 	/**
 	 * 通过任务id获取学者列表
@@ -64,7 +65,7 @@ public interface IExpertClient {
 	 * @return
 	 */
 	@GetMapping(GET_EXPERTS_BY_TASKID)
-	R<List<Expert>> getExpertsByTaskId(@RequestParam Long taskId);
+	R<List<ExpertMerge>> getExpertsByTaskId(@RequestParam Long taskId);
 
 	/**
 	 * 通过任务id获取学者id列表
@@ -82,7 +83,7 @@ public interface IExpertClient {
 	 * @return
 	 */
 	@PostMapping(SAVE_EXPERT)
-	R saveExpert(@RequestBody Expert expert);
+	R saveExpert(@RequestBody ExpertMerge expert);
 
 	/**
 	 * 导入智库中所有学者
@@ -100,5 +101,5 @@ public interface IExpertClient {
 	 * 获取Aminer学者信息
 	 */
 	@GetMapping(FETCH_EXPERT_DETAIL)
-	R<Expert> fetchExpertDetail(@RequestParam("tenantId") String tenantId, @RequestParam("expertId") String expertId, @RequestParam("taskId") Long taskId);
+	R<ExpertMerge> fetchExpertDetail(@RequestParam("tenantId") String tenantId, @RequestParam("expertId") String expertId, @RequestParam("taskId") Long taskId);
 }

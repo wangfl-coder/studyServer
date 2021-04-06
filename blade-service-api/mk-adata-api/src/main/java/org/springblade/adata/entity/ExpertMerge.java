@@ -209,4 +209,10 @@ public class ExpertMerge extends TenantEntity {
 	@ApiModelProperty("交付质检时间")
 	private Integer deliverInspectionTime;
 
+	/**
+	 * 被标注学者id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "被标注学者id")
+	private Long labelPersonId;
 }

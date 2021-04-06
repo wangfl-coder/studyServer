@@ -35,41 +35,27 @@ public class MergeExpertTaskServiceImpl extends BaseServiceImpl<MergeExpertTaskM
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	// @GlobalTransactional
-	public boolean startProcess(String processDefinitionId,Integer count,Integer mergeType,Task task, List<LabelTask> labelTasks) {
-		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.QUALITY_INSPECTION_KEY);
+	public boolean startProcess(Integer mergeType,Task task, List<MergeExpertTask> mergeExpertTasks) {
+		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.MERGE_EXPERT_KEY);
 
-		labelTasks.forEach( labelTask -> {
-			MergeExpertTask mergeExpertTask = new MergeExpertTask();
-			mergeExpertTask.setProcessDefinitionId(processDefinitionId);
-			if (Func.isEmpty(mergeExpertTask.getId())) {
-				// 保存leave
-				mergeExpertTask.setCreateTime(DateUtil.now());
-				boolean save = save(mergeExpertTask);
-				// 启动流程
-				Kv variables = Kv.create()
-					.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
-					.set("taskUser", TaskUtil.getTaskUser(mergeExpertTask.getTaskUser()))
-					.set("type", mergeType)
-					.set("priority", task.getPriority());
-				R<BladeFlow> result = flowClient.startProcessInstanceById(processDefinitionId, FlowUtil.getBusinessKey(businessTable, String.valueOf(mergeExpertTask.getId())), variables);
-				if (result.isSuccess()) {
-					log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
-					// 返回流程id写入leave
-					mergeExpertTask.setProcessInstanceId(result.getData().getProcessInstanceId());
-					mergeExpertTask.setMergeTaskId(task.getId());
-					mergeExpertTask.setPersonId(labelTask.getPersonId());
-					mergeExpertTask.setPersonName(labelTask.getPersonName());
-					mergeExpertTask.setLabelTaskId(labelTask.getId());
-					mergeExpertTask.setLabelProcessInstanceId(labelTask.getProcessInstanceId());
-					mergeExpertTask.setTaskId(labelTask.getTaskId());
-					mergeExpertTask.setTaskType(task.getTaskType());
-					mergeExpertTask.setMergeType(mergeType);
-					updateById(mergeExpertTask);
-				} else {
-					throw new ServiceException("开启流程失败");
-				}
-			} else {
+		mergeExpertTasks.forEach( mergeExpertTask -> {
+			// 启动流程
+			Kv variables = Kv.create()
+				.set(ProcessConstant.TASK_VARIABLE_CREATE_USER, AuthUtil.getUserName())
+				.set("taskUser", TaskUtil.getTaskUser(mergeExpertTask.getTaskUser()))
+				.set("type", mergeType)
+				.set("priority", task.getPriority());
+			R<BladeFlow> result = flowClient.startProcessInstanceById(mergeExpertTask.getProcessDefinitionId(), FlowUtil.getBusinessKey(businessTable, String.valueOf(mergeExpertTask.getId())), variables);
+			if (result.isSuccess()) {
+				log.debug("流程已启动,流程ID:" + result.getData().getProcessInstanceId());
+				// 返回流程id写入leave
+				mergeExpertTask.setProcessInstanceId(result.getData().getProcessInstanceId());
+				mergeExpertTask.setMergeTaskId(task.getId());
+				mergeExpertTask.setTaskType(task.getTaskType());
+				mergeExpertTask.setMergeType(mergeType);
 				updateById(mergeExpertTask);
+			} else {
+				throw new ServiceException("开启流程失败");
 			}
 		});
 		return true;
@@ -89,7 +75,6 @@ public class MergeExpertTaskServiceImpl extends BaseServiceImpl<MergeExpertTaskM
 	public List<ExpertQualityInspectionTaskVO> personIdToProcessInstance(String expertId) {
 		return baseMapper.personIdToProcessInstance(expertId);
 	}
-
 
 	@Override
 	public Kv compositions(Long id) {

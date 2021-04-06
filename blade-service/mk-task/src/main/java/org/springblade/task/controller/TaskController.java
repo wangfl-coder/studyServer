@@ -2,6 +2,7 @@ package org.springblade.task.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -27,6 +28,8 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.mq.rabbit.feign.IMQRabbitClient;
+import org.springblade.system.entity.Menu;
+import org.springblade.system.entity.Post;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
 import org.springblade.task.dto.MergeExpertTaskDTO;
 import org.springblade.task.dto.QualityInspectionDTO;
@@ -50,6 +53,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -199,6 +203,22 @@ public class TaskController extends BladeController {
 			}
 		}else{
 			return R.fail("获取标注完成的任务失败，或者没有标注完成的任务");
+		}
+	}
+
+	@PostMapping(value = "/merge-expert/start-process")
+	@ApiOperation(value = "添加质检任务")
+	public R mergeExpertStartProcess(@RequestParam("taskId") Long taskId) {
+		Task task = taskService.getById(taskId);
+		List<MergeExpertTask> mergeTasks = mergeExpertTaskService.list(Wrappers.<MergeExpertTask>query().lambda().eq(MergeExpertTask::getTaskId, taskId));
+		List<MergeExpertTask> mergeTasksTodo = mergeTasks.stream().filter(x -> Func.equals(x.getStatus(), 2)).collect(Collectors.toList());
+		Boolean result;
+		try {
+			result = mergeExpertTaskService.startProcess(0, task, mergeTasksTodo);
+			return R.status(result);
+		}catch (Exception e){
+			taskService.removeById(task.getId());
+			return R.fail("创建质检小任务失败");
 		}
 	}
 

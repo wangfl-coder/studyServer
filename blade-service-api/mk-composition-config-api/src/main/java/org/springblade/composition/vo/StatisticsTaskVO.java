@@ -16,43 +16,37 @@
  */
 package org.springblade.composition.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.springblade.composition.entity.AnnotationData;
-import org.springblade.composition.entity.AnnotationDataErrata;
+import org.springblade.composition.entity.Statistics;
+import org.springblade.core.tenant.mp.TenantEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.io.Serializable;
 import java.util.Date;
 
-
 /**
- * 视图实体类
+ * 实体类
  *
  * @author Chill
  */
 @Data
-@ApiModel(value = "AnnotationCompositionErrataVO对象", description = "标注组合勘误视图对象")
-public class AnnotationCompositionErrataVO implements Serializable {
+@ApiModel(value = "StatisticsTaskVO", description = "StatisticsTaskVO对象")
+public class StatisticsTaskVO extends Statistics {
+
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 标注子任务id
-	 */
-	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "标注子任务id")
-	private Long subTaskId;
 
 	/**
-	 * 组合id
+	 * 任务id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
-	@ApiModelProperty(value = "组合id")
-	private Long compositionId;
+	@ApiModelProperty(value = "任务id")
+	private Long taskId;
 
 	/**
 	 * 组合名
@@ -65,39 +59,21 @@ public class AnnotationCompositionErrataVO implements Serializable {
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "专家id")
-	private Long personId;
-
-	/**
-	 * Aminer专家id
-	 */
-	@ApiModelProperty(value = "Aminer专家id")
-	private String expertId;
+	private Long expertId;
 
 	/**
 	 * 专家名
 	 */
 	@ApiModelProperty(value = "专家名")
-	private String personName;
+	private String expertName;
 
-	/**
-	 * 真集专家名
-	 */
-	@ApiModelProperty(value = "真集专家名")
-	private String realSetExpertName;
-
-	/**
-	 * 更新时间
-	 */
-	@ApiModelProperty(value = "更新时间")
-	private Date updateTime;
-
-	/**
-	 * 数据来源
-	 * 1、基本信息标注
-	 * 2、真题标注
-	 * 3、多人对比
-	 */
-	@ApiModelProperty(value = "数据来源")
-	private Integer source;
+	@DateTimeFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@JsonFormat(
+		pattern = "yyyy-MM-dd HH:mm:ss"
+	)
+	@ApiModelProperty("标注时间")
+	private Date labelTime;
 
 }

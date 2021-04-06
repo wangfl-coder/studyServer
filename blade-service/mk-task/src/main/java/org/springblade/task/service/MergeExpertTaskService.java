@@ -12,7 +12,7 @@ import org.springblade.task.vo.TaskVO;
 import java.util.List;
 
 public interface MergeExpertTaskService extends BaseService<MergeExpertTask> {
-	boolean startProcess(String processDefinitionId, Integer count, Integer inspectionType,Task task, List<LabelTask> labelTasks);
+	boolean startProcess(Integer inspectionType,Task task, List<MergeExpertTask> labelTasks);
 
 	int completeCount(Long taskId);
 

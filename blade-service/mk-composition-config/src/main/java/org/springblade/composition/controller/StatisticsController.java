@@ -16,6 +16,8 @@
  */
 package org.springblade.composition.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
@@ -310,6 +312,22 @@ public class StatisticsController extends BladeController {
 	@ApiOperation(value = "分页查询列表", notes = "传入param")
 	public R<IPage<Statistics>> list(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {
 		IPage<Statistics> pages = statisticsService.page(Condition.getPage(query), Condition.getQueryWrapper(param, Statistics.class).orderByDesc("update_time"));
+		return R.data(pages);
+	}
+
+	@GetMapping("/list-wrong")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "subTaskId", value = "子任务id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "templateId", value = "模版id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "compositionId", value = "组合id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "userId", value = "用户id", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "status", value = "子任务状态", paramType = "query", dataType = "integer"),
+		@ApiImplicitParam(name = "feedbackStatus", value = "反馈状态", paramType = "query", dataType = "integer")
+	})
+	@ApiOperation(value = "分页查询列表", notes = "传入param")
+	public R<IPage<Statistics>> listWrong(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {
+		LambdaQueryWrapper<Statistics> queryWrapper = Condition.getQueryWrapper(param, Statistics.class).lambda().gt(Statistics::getIsWrong, 0).orderByDesc(Statistics::getUpdateTime);
+		IPage<Statistics> pages = statisticsService.page(Condition.getPage(query), queryWrapper);
 		return R.data(pages);
 	}
 }
