@@ -54,7 +54,7 @@ public interface ILabelTaskClient {
 	R<Integer> completeCount(@RequestParam(value = "taskId") Long taskId);
 
 	@GetMapping(QUERY_LABEL_TASK_ALL)
-	R<List<LabelTask>> queryLabelTaskAll(@RequestParam(value = "taskId") Long taskId);
+	R<List<LabelTask>> queryLabelTaskAll(@RequestParam(value = "taskId") Long taskId, @RequestParam(value = "taskType") Integer taskType);
 
 	@GetMapping(QUERY_LABEL_TASK_BY_PERSON_ID)
 	R<List<LabelTask>> queryLabelTaskByPersonId(@RequestParam(value = "personId") Long personId);

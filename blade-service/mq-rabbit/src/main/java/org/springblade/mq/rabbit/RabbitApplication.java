@@ -17,15 +17,18 @@
 package org.springblade.mq.rabbit;
 
 import org.springblade.common.constant.LauncherConstant;
+import org.springblade.core.cloud.feign.EnableBladeFeign;
 import org.springblade.core.launch.BladeApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.SpringCloudApplication;
 
 /**
  * RabbitApplication
  *
  * @author Chill
  */
-@SpringBootApplication
+@EnableBladeFeign
+@SpringCloudApplication
 public class RabbitApplication {
 
 	public static void main(String[] args) {

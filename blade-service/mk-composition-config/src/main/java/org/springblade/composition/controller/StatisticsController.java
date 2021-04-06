@@ -304,7 +304,8 @@ public class StatisticsController extends BladeController {
 		@ApiImplicitParam(name = "templateId", value = "模版id", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "compositionId", value = "组合id", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "userId", value = "用户id", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "status", value = "子任务状态", paramType = "query", dataType = "integer")
+		@ApiImplicitParam(name = "status", value = "子任务状态", paramType = "query", dataType = "integer"),
+		@ApiImplicitParam(name = "feedbackStatus", value = "反馈状态", paramType = "query", dataType = "integer")
 	})
 	@ApiOperation(value = "分页查询列表", notes = "传入param")
 	public R<IPage<Statistics>> list(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {

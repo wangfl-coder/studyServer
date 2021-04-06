@@ -143,7 +143,7 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 				userLog.setType(1);
 				userLog.setRemark(StringUtil.format("用户{}因为多人标注正确率过低：{}%被封停无法再接任务", user.getAccount(), iaaRate));
 				user.setStatus(UserStatusEnum.BLOCKED.getNum());
-				CacheUtil.clear(USER_CACHE);
+				CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 				userClient.updateUser(user);
 			}
 		}
@@ -156,7 +156,7 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 				userLog.setType(1);
 				userLog.setRemark(StringUtil.format("用户{}因为人工抽检正确率过低：{}%被封停无法再接任务", user.getAccount(), siRate));
 				user.setStatus(UserStatusEnum.BLOCKED.getNum());
-				CacheUtil.clear(USER_CACHE);
+				CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 				userClient.updateUser(user);
 			}
 		}

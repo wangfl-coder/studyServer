@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
 import jodd.util.ThreadUtil;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.jackson.JsonUtil;

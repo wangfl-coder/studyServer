@@ -59,7 +59,7 @@ public interface IRealSetExpertService extends BaseService<RealSetExpert> {
 	 * @param id
 	 * @return
 	 */
-	Boolean importDetail(String id, Long taskId);
+	Boolean importDetail(String tenantId, String id, Long taskId);
 
 
 	/**

@@ -47,6 +47,7 @@ public interface IRealSetExpertClient {
 	String REMOVE_EXPERT = API_PREFIX + "/mk-adata/remove-expert";
 	String SAVE_EXPERT_BASE = API_PREFIX + "/mk-adata/expert-base-import";
 	String IS_INFO_COMPLETE = API_PREFIX + "/mk-adata/is-info-complete";
+	String GET_AN_AVAIL_REALSET_EXPERT = API_PREFIX + "/mk-adata/get-an-avail-realset-expert";
 
 	/**
 	 * 获取学者信息
@@ -90,4 +91,9 @@ public interface IRealSetExpertClient {
 	@GetMapping(SAVE_EXPERT_BASE)
 	R importExpertBase(@RequestParam("ebId") String expertBaseId, @RequestParam("taskId") Long taskId);
 
+	/**
+	 * 获取一个可用的真题学者
+	 */
+	@GetMapping(GET_AN_AVAIL_REALSET_EXPERT)
+	R<RealSetExpert> getAnAvailRealSetExpert(@RequestParam("taskId") Long taskId);
 }

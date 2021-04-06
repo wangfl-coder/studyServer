@@ -16,6 +16,7 @@ import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
 import org.springblade.core.secure.BladeUser;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.constant.BladeConstant;
 import org.springblade.core.tool.utils.BeanUtil;
@@ -211,6 +212,7 @@ public class TaskController extends BladeController {
 		Boolean result;
 		Boolean taskse = null;
 		Task task = Objects.requireNonNull(BeanUtil.copy(expertBaseTaskDTO, Task.class));
+		task.setTenantId(AuthUtil.getTenantId());
 		task.setTaskType(TaskTypeEnum.LABEL.getNum());
 		boolean save = taskService.save(task);
 		R res_eb = expertClient.importExpertBase(task.getEbId(), task.getId());

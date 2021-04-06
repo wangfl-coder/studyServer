@@ -83,7 +83,7 @@ public class BladeTokenEndPoint {
 	@GetMapping("/oauth/clear-cache")
 	public Kv clearCache() {
 		CacheUtil.clear(BIZ_CACHE);
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		CacheUtil.clear(DICT_CACHE);
 		CacheUtil.clear(FLOW_CACHE);
 		CacheUtil.clear(SYS_CACHE);

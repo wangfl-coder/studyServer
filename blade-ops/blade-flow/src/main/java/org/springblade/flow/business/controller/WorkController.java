@@ -123,7 +123,7 @@ public class WorkController {
 //			return null;
 //		}
 		User user = UserCache.getUser(AuthUtil.getUserId());
-		if (user.getStatus() == UserStatusEnum.BLOCKED.getNum()) {
+		if (user.getStatus().equals(UserStatusEnum.BLOCKED.getNum())) {
 			return R.fail("错误率过高，无法接任务，请联系管理员");
 		}
 		String redisCode = this.bladeRedis.get(CacheNames.FLOW_CLAIMONE_KEY + AuthUtil.getUserId());
@@ -281,42 +281,44 @@ public class WorkController {
 	@ApiOperation(value = "返回当前用户所有组合及分别可接的任务数")
 	public R<List<CompositionClaimCountVO>> compositionClaimCount(BladeUser user) {
 		List<String> roleAlias = SysCache.getRoleAliases(user.getRoleId());
-		R<List<CompositionClaimListVO>> res = labelTaskClient.compositionClaimList(roleAlias);
-		if (res.isSuccess()) {
-			Map<String, Object> processVariablesMap = new HashMap<>();
-
-			List<CompositionClaimListVO> list = res.getData();
-			List<CompositionClaimListVO> resList = new ArrayList<>();
-			for(CompositionClaimListVO compositionClaimListVO: list) {
-				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
-				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
-				if (processVariables == null) {
-					try {
-						processVariables = runtimeService.getVariables(processInstanceId);
-						processVariablesMap.put(processInstanceId, processVariables);
-					}catch(FlowableObjectNotFoundException e){
-						e.printStackTrace();
-					}
-				}
-				if (processVariables != null && processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
-					continue;
-				}else {
-					resList.add(compositionClaimListVO);
-				}
-			}
-			Map<String, List<CompositionClaimListVO>> dataPerComposition = resList.stream()
-				.collect(groupingBy(CompositionClaimListVO::getCompositionId));
-			List<CompositionClaimCountVO> result = new ArrayList<>();
-			for (Map.Entry<String, List<CompositionClaimListVO>> entry : dataPerComposition.entrySet()) {
-				CompositionClaimCountVO compositionClaimCountVO = new CompositionClaimCountVO();
-				compositionClaimCountVO.setCompositionId(entry.getKey());
-				compositionClaimCountVO.setName(entry.getValue().get(0).getName());
-				compositionClaimCountVO.setCount(entry.getValue().size());
-				result.add(compositionClaimCountVO);
-			}
-			return R.data(result);
-		} else {
-			return R.fail("获取组合信息错误");
-		}
+		List<CompositionClaimCountVO> result = flowBusinessService.getCompositionClaimCountByRoleAlias(roleAlias, AuthUtil.getUserId());
+		return R.data(result);
+//		R<List<CompositionClaimListVO>> res = labelTaskClient.compositionClaimList(roleAlias);
+//		if (res.isSuccess()) {
+//			Map<String, Object> processVariablesMap = new HashMap<>();
+//
+//			List<CompositionClaimListVO> list = res.getData();
+//			List<CompositionClaimListVO> resList = new ArrayList<>();
+//			for(CompositionClaimListVO compositionClaimListVO: list) {
+//				String processInstanceId = compositionClaimListVO.getProcessInstanceId();
+//				Map<String, Object> processVariables = (Map<String, Object>)processVariablesMap.get(processInstanceId);
+//				if (processVariables == null) {
+//					try {
+//						processVariables = runtimeService.getVariables(processInstanceId);
+//						processVariablesMap.put(processInstanceId, processVariables);
+//					}catch(FlowableObjectNotFoundException e){
+//						e.printStackTrace();
+//					}
+//				}
+//				if (processVariables != null && processVariables.containsKey(compositionClaimListVO.getName()+"-"+ AuthUtil.getUserId()+"-done")) {
+//					continue;
+//				}else {
+//					resList.add(compositionClaimListVO);
+//				}
+//			}
+//			Map<String, List<CompositionClaimListVO>> dataPerComposition = resList.stream()
+//				.collect(groupingBy(CompositionClaimListVO::getCompositionId));
+//			List<CompositionClaimCountVO> result = new ArrayList<>();
+//			for (Map.Entry<String, List<CompositionClaimListVO>> entry : dataPerComposition.entrySet()) {
+//				CompositionClaimCountVO compositionClaimCountVO = new CompositionClaimCountVO();
+//				compositionClaimCountVO.setCompositionId(entry.getKey());
+//				compositionClaimCountVO.setName(entry.getValue().get(0).getName());
+//				compositionClaimCountVO.setCount(entry.getValue().size());
+//				result.add(compositionClaimCountVO);
+//			}
+//			return R.data(result);
+//		} else {
+//			return R.fail("获取组合信息错误");
+//		}
 	}
 }

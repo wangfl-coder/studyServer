@@ -32,6 +32,7 @@ import org.springblade.composition.entity.Composition;
 import org.springblade.composition.feign.ITemplateClient;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Query;
+import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.support.Kv;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.StringUtil;
@@ -175,7 +176,7 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 	}
 
 	@Override
-	public Boolean importDetail(String id, Long taskId) {
+	public Boolean importDetail(String tenantId, String id, Long taskId) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -223,6 +224,7 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 
 		JSONObject resObj = JSON.parseObject(res);
 		RealSetExpert expert = new RealSetExpert();
+		expert.setTenantId(tenantId);
 		JSONArray dataArray = resObj.getJSONArray("data");
 		JSONObject tempObj = dataArray.getJSONObject(0);
 		JSONArray data = tempObj.getJSONArray("data");
@@ -355,7 +357,7 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 	 * @param taskId
 	 * @return
 	 */
-	public int getExperts(String ebId, Long taskId, int offset, int size) {
+	public int getExperts(String tenantId, String ebId, Long taskId, int offset, int size) {
 		JSONArray requestBody = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -397,7 +399,7 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 		}
 		for (int i = 0; i < experts.size(); i++) {
 			String expert_id = experts.getJSONObject(i).getString("id");
-			importDetail(expert_id, taskId);
+			importDetail(tenantId, expert_id, taskId);
 		}
 		return total;
 	}
@@ -410,8 +412,9 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 		if (ebId == null) {
 			return false;
 		}
+		String tenantId = AuthUtil.getTenantId();
 		// 首先导入智库下20个学者，并且得到这个智库下一共有多少学者
-		int total = getExperts(ebId, taskId, 0, 20);
+		int total = getExperts(tenantId, ebId, taskId, 0, 20);
 
 		// 循环导入剩下的学者
 		int number = (total-1) / 20;
@@ -419,7 +422,7 @@ public class RealSetExpertServiceImpl extends BaseServiceImpl<RealSetExpertMappe
 			.limit(number)
 			.collect(Collectors.toList());
 		numbers.parallelStream().forEach(i -> {
-			getExperts(ebId, taskId, i * 20, 20);
+			getExperts(tenantId, ebId, taskId, i * 20, 20);
 		});
 		return true;
 	}
