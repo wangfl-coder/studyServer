@@ -16,12 +16,14 @@
  */
 package org.springblade.feedback.controller;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import com.github.xiaoymin.knife4j.annotations.Ignore;
+import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
+import org.springblade.composition.feign.IStatisticsClient;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
@@ -31,8 +33,10 @@ import org.springblade.feedback.entity.Feedback;
 import org.springblade.feedback.service.IFeedbackService;
 import org.springblade.feedback.vo.FeedbackVO;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 /**
  *  控制器
@@ -47,6 +51,8 @@ import javax.validation.Valid;
 public class FeedbackController extends BladeController {
 
 	private final IFeedbackService feedbackService;
+
+	private IStatisticsClient iStatisticsClient;
 
 	/**
 	 * 详情
@@ -125,5 +131,27 @@ public class FeedbackController extends BladeController {
 		return R.status(feedbackService.deleteLogic(Func.toLongList(ids)));
 	}
 
+	/**
+	 * 申述成功
+	 */
+	@GetMapping("/feedback-success")
+	@ApiOperation(value = "申述成功")
+	public R<Boolean> setStatusSuccess(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId){
+		return iStatisticsClient.ifNeedToUpdateStatisticIsWrongFeedbackStatus(compositionId,subTaskId,userId);
+
+	}
+
+
+
+	/**
+	 * 申述失败
+	 */
+	@GetMapping("/feedback-fail")
+	@ApiOperation(value = "申述失败")
+	public R<Boolean> setStatusFail(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId){
+		//0未审核、1已通过、2已驳回
+		return iStatisticsClient.ifNeedToUpdateStatisticFeedbackStatus(2,compositionId,subTaskId,userId);
+
+	}
 
 }

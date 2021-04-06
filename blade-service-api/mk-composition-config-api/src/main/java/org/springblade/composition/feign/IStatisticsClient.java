@@ -17,6 +17,7 @@
 package org.springblade.composition.feign;
 
 
+import feign.Param;
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.Map;
 
@@ -45,6 +47,8 @@ public interface IStatisticsClient {
 	String QUERY_BASICINFO_STATUS = API_PREFIX + "/query-basicinfo-status";
 	String MARK_AS_COMPLETE = API_PREFIX + "/statistics/mark-as-complete";
 	String IF_NEED_TO_REMOVE_BASICINFO_STATISTICS = API_PREFIX + "/statistics/if-need-to-remove-basicinfo-statistics";
+	String IF_NEED_TO_UPDATE_STATISITIC_ISWRONG_FEEDBACKSTATUS = API_PREFIX + "/statistics/is-need-to-update-statistic-iswrong-feedbackstatus";
+	String IF_NEED_TO_UPDATE_STATISTIC_FEEDBACK_STATUS = API_PREFIX + "statistics/is-need-to-update-statistic-feedback-status";
 
 	/**
 	 * 初始化任务统计
@@ -84,4 +88,21 @@ public interface IStatisticsClient {
 	 */
 	@GetMapping(IF_NEED_TO_REMOVE_BASICINFO_STATISTICS)
 	R ifNeedToRemoveBasicInfoStatistics(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
+
+	/**
+	 * 更新statistics中的is_wrong
+	 */
+	@GetMapping(IF_NEED_TO_UPDATE_STATISITIC_ISWRONG_FEEDBACKSTATUS)
+	R<Boolean> ifNeedToUpdateStatisticIsWrongFeedbackStatus(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId);
+
+	/**
+	 * 更新statistics中feedback_status，0未审核、1已通过、2已驳回
+	 * @param compositionId
+	 * @param subTaskId
+	 * @param userId
+	 * @param status
+	 * @return
+	 */
+	@GetMapping(IF_NEED_TO_UPDATE_STATISTIC_FEEDBACK_STATUS)
+	R<Boolean> ifNeedToUpdateStatisticFeedbackStatus(@RequestParam(required = false) Integer status, @RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId);
 }

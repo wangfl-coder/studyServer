@@ -24,6 +24,8 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.taskLog.entity.TaskLog;
+//import org.springblade.log.feign.ITaskLogClient;
 import org.springblade.flow.core.feign.IFlowEngineClient;
 import org.springblade.mq.rabbit.feign.IMQRabbitClient;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
@@ -46,8 +48,6 @@ import org.springblade.task.vo.TaskVO;
 import org.springblade.taskLog.feign.ITaskLogClient;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import org.springblade.taskLog.entity.TaskLog;
 
 
 import java.util.*;
@@ -414,10 +414,13 @@ public class TaskController extends BladeController {
 		return R.status(taskService.deleteLogic(Func.toLongList(ids)));
 	}
 
+//	private ITaskLogClient iTaskLogClient;
+//	@PostMapping(value = "/save1")
+//	public R save(TaskLog taskLog){
+//		return R.data(iTaskLogClient.save(taskLog));
+//	}
 
-	@PostMapping(value = "/savelog")
-	@ApiOperation(value = "新增", notes = "传入log")
-	public boolean saveLog(@RequestBody TaskLog taskLog) {
+	public boolean saveLog(TaskLog taskLog) {
 //		TaskLog taskLog = new TaskLog();
 		int action=1;
 //		String tenant_id =task.getTenantId();
