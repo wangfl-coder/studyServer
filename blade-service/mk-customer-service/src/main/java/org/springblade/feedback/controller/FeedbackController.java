@@ -16,7 +16,9 @@
  */
 package org.springblade.feedback.controller;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.Ignore;
 import io.swagger.annotations.*;
@@ -130,6 +132,21 @@ public class FeedbackController extends BladeController {
 	}
 
 	/**
+	 * 申述成功
+	 */
+	@GetMapping("/feeback-success")
+	@ApiOperation(value = "申述成功")
+	public R<Boolean> setStatusSuccess(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId){
+		//更新feedback的status，0未审核、1已通过、2已驳回
+		LambdaUpdateWrapper<Feedback> updateWrapper = Wrappers.lambdaUpdate();
+		updateWrapper.eq(Feedback::getCompositionId,compositionId)
+			.eq(Feedback::getSubTaskId,subTaskId).set(Feedback::getStatus,1);
+		feedbackService.update(updateWrapper);
+		return setStatisticsIsWrong(compositionId,subTaskId,userId);
+
+	}
+
+	/**
 	 * 更新statistics表的isWrong字段
 	 */
 
@@ -137,6 +154,20 @@ public class FeedbackController extends BladeController {
 	@ApiOperation(value = "修改statistics的is_wrong字段")
 	public R<Boolean> setStatisticsIsWrong(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId){
 		return iStatisticsClient.ifNeedToUpdateStatisticIswrong(compositionId,subTaskId,userId);
+	}
+
+	/**
+	 * 申述失败
+	 */
+	@GetMapping("/feeback-fail")
+	@ApiOperation(value = "申述失败")
+	public R<Boolean> setStatusFail(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId){
+		//更新feedback的status，0未审核、1已通过、2已驳回
+		LambdaUpdateWrapper<Feedback> updateWrapper = Wrappers.lambdaUpdate();
+		updateWrapper.eq(Feedback::getCompositionId,compositionId)
+			.eq(Feedback::getSubTaskId,subTaskId).set(Feedback::getStatus,2);
+		return R.data(feedbackService.update(updateWrapper));
+
 	}
 
 }

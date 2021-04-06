@@ -23,6 +23,7 @@ package org.springblade.common.constant;
  */
 public interface CommonConstant {
 
+	String MKAPP_LOG_NAME = "mk-log";
 	/**
 	 * sword 系统名
 	 */

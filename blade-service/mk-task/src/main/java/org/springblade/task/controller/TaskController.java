@@ -28,6 +28,8 @@ import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.Holder;
 import org.springblade.flow.core.constant.ProcessConstant;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.log.entity.TaskLog;
+import org.springblade.log.feign.ITaskLogClient;
 import org.springblade.system.cache.SysCache;
 import org.springblade.task.cache.TaskCache;
 import org.springblade.task.dto.ExpertBaseTaskDTO;
@@ -38,6 +40,7 @@ import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.enums.TaskStatusEnum;
 import org.springblade.task.feign.ILabelTaskClient;
+import org.springblade.task.feign.ITaskClient;
 import org.springblade.task.mapper.LabelTaskMapper;
 import org.springblade.task.mapper.TaskMapper;
 import org.springblade.task.service.LabelTaskService;
@@ -347,5 +350,10 @@ public class TaskController extends BladeController {
 		return R.status(taskService.deleteLogic(Func.toLongList(ids)));
 	}
 
+	private ITaskLogClient iTaskLogClient;
+	@PostMapping(value = "/save1")
+	public R save(TaskLog taskLog){
+		return R.data(iTaskLogClient.save(taskLog));
+	}
 
 }
