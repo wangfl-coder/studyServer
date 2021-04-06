@@ -30,7 +30,7 @@ import org.springblade.core.mp.support.Condition;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.utils.BeanUtil;
 import org.springblade.core.tool.utils.StringUtil;
-import org.springblade.log.entity.UserLog;
+import org.springblade.taskLog.entity.UserLog;
 import org.springblade.system.cache.DictBizCache;
 import org.springblade.system.user.cache.UserCache;
 import org.springblade.system.user.entity.User;

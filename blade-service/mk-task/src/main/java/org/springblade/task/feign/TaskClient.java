@@ -8,6 +8,7 @@ import org.springblade.core.tool.api.R;
 import org.springblade.task.entity.MergeExpertTask;
 import org.springblade.task.entity.Task;
 import org.springblade.task.service.TaskService;
+import org.springblade.taskLog.entity.TaskLog;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -51,6 +52,12 @@ public class TaskClient implements ITaskClient{
 		boolean update = taskService.update(taskUpdateWrapper);
 		return R.status(update);
 	}
+
+
+//	@Override
+//	public R save(Task task) {
+//		return R.data(ITaskClient.byid(task));
+//	}
 
 //	@Override
 //	@GetMapping(GET_SUBTASK_COUNT)

@@ -22,7 +22,6 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import jodd.util.ThreadUtil;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springblade.adata.entity.Expert;
 import org.springblade.adata.entity.ExpertExtend;
@@ -41,11 +40,9 @@ import org.springblade.adata.vo.UserRemarkVO;
 import org.springblade.adata.wrapper.ExpertWrapper;
 import org.springblade.adata.wrapper.RealSetExpertWrapper;
 import org.springblade.core.boot.ctrl.BladeController;
-import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.excel.util.ExcelUtil;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.mp.support.Query;
-import org.springblade.core.oss.model.BladeFile;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
@@ -55,22 +52,20 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.entity.BladeFlow;
 import org.springblade.flow.core.feign.IFlowEngineClient;
-import org.springblade.system.user.entity.User;
-import org.springblade.system.user.entity.UserOauth;
 import org.springblade.task.entity.Task;
 import org.springblade.task.enums.TaskStatusEnum;
 import org.springblade.task.feign.ITaskClient;
+import org.springblade.taskLog.feign.ITaskLogClient;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import static org.springblade.core.cache.constant.CacheConstant.PARAM_CACHE;
-
+import org.springblade.taskLog.entity.TaskLog;
 
 
 /**
@@ -92,6 +87,8 @@ public class ExpertController extends BladeController {
 	private final IFlowEngineClient flowEngineClient;
 	private final ITaskClient taskClient;
 	private final ExpertMapper expertMapper;
+	private ITaskLogClient iTaskLogclient;
+	private ITaskClient iTaskClient;
 
 	/**
 	 * 详情
@@ -182,8 +179,31 @@ public class ExpertController extends BladeController {
 	@ApiOperationSupport(order = 7)
 	@ApiOperation(value = "逻辑删除", notes = "传入expert")
 	public R remove(@ApiParam(value = "主键集合") @RequestParam String ids) {
-		boolean temp = expertService.deleteLogic(Func.toLongList(ids));
-		return R.status(temp);
+		//String ids1 ="1341578650071363586";
+		/*
+		*
+		* 生成mk-log删除日志
+		*  */
+		boolean temp = false;
+		boolean taskse =false;
+		List<Long> expertidList = Arrays.asList(ids.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+		for(Long data:expertidList) {
+			Expert experts = expertService.getById(data);
+			List id = new ArrayList();
+			id.add(data);
+			boolean temps =  expertService.deleteLogic(id);
+			if (temps) {
+				temp=true;
+				TaskLog tasklog2 = Objects.requireNonNull(BeanUtil.copy(experts, TaskLog.class));
+				taskse = saveLogs(tasklog2);
+			}
+			else {
+				temp=false;
+			}
+		}
+//		boolean temp = expertService.deleteLogic(Func.toLongList(ids));
+
+		return R.data(taskse);
 	}
 
 	/**
@@ -382,8 +402,15 @@ public class ExpertController extends BladeController {
 				}
 			}
 		}//);
+		R<Task> tasks = iTaskClient.getById(taskId);
+		TaskLog tasklog2 = Objects.requireNonNull(BeanUtil.copy(tasks, TaskLog.class));
+		boolean taskse = saveLog(tasklog2);
+//		if (taskse !=null){
+//			return R.success("新增生效日志成功");
+//		}
+
 		taskClient.changeStatus(taskId, TaskStatusEnum.EXPORTED.getNum());
-		return R.status(true);
+		return R.data(taskse);
 	}
 
 	/**
@@ -394,6 +421,11 @@ public class ExpertController extends BladeController {
 	@ApiOperation(value = "标注数据按字段生效到aminer", notes = "标注数据按字段生效到aminer")
 	public R exportExpertsByFields(Long taskId, String fields){
 		List<String> listField = Func.toStrList(fields);
+//		taskId = 1349597777881055234L;
+//		Long taskIds = 1349597777881055234L;
+//		R<Task> tasks = iTaskClient.getById(taskIds);
+//		TaskLog tasklog2 = Objects.requireNonNull(BeanUtil.copy(tasks, TaskLog.class));
+//		R taskse = Detail(tasklog2);
 		List<Expert> experts = expertMapper.queryExportExperts(taskId);
 		if (experts.isEmpty()) {
 			return R.fail("没有待生效专家");
@@ -525,8 +557,21 @@ public class ExpertController extends BladeController {
 				}
 			}
 		}//);
+		/*
+		*
+		* 张兴浩
+		* 标注数据生效到aminer后增加生效日志
+		*
+		* */
+		//Long taskIds = 1349597777881055234L;
+		R<Task> tasks = iTaskClient.getById(taskId);
+		TaskLog tasklog2 = Objects.requireNonNull(BeanUtil.copy(tasks, TaskLog.class));
+		boolean taskse = saveLog(tasklog2);
+//		if (taskse !=null){
+//			return R.success("新增生效日志成功");
+//		}
 		taskClient.changeStatus(taskId, TaskStatusEnum.EXPORTED.getNum());
-		return R.status(true);
+		return R.data(taskse);
 	}
 
 	@GetMapping("/flow-remark")
@@ -579,6 +624,33 @@ public class ExpertController extends BladeController {
 		ExpertImporter expertImporter = new ExpertImporter(expertService, isCovered == 1);
 		ExcelUtil.save(file, expertImporter, ExpertExcel.class);
 		return R.success("操作成功");
+	}
+	/**
+	 * 导出成功后生成的日志信息
+	 * @return
+	 */
+//	@PostMapping(value = "/blog-detail")
+//	@ApiOperation(value = "新增", notes = "传入log")
+	public boolean saveLog(TaskLog taskLog) {
+		int action=2;
+		String action_log ="生效";
+		taskLog.setActionLog(action_log);
+		taskLog.setAction(action);
+		boolean savelog = iTaskLogclient.save(taskLog);
+		return savelog;
+	}
+	/**
+	 * 逻辑删除expert成功后生成的日志信息
+	 */
+//	@PostMapping(value = "/blogs-detail")
+//	@ApiOperation(value = "新增", notes = "传入log")
+	public boolean saveLogs(TaskLog taskLog) {
+		int action=4;
+		String action_log ="逻辑删除expert";
+		taskLog.setActionLog(action_log);
+		taskLog.setAction(action);
+		boolean savelog = iTaskLogclient.save(taskLog);
+		return savelog;
 	}
 
 }

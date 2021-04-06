@@ -17,6 +17,7 @@ public interface ITaskClient {
 	String GET_TASK_BY_TEMPLATE = API_PREFIX + "/get-task-by-template";
 	String GET_SUBTASK_COUNT = API_PREFIX + "/get-subtask-count";
 	String CHANGE_STATUS = API_PREFIX + "/change-task-status";
+	String API = "/task";
 
 
 	@PostMapping(UPDATE_TASK)
@@ -30,6 +31,7 @@ public interface ITaskClient {
 
 	@GetMapping(CHANGE_STATUS)
 	R changeStatus(@RequestParam Long id, @RequestParam Integer status);
+
 
 //	@GetMapping(GET_SUBTASK_COUNT)
 //	R<Integer> getSubTaskCount(@RequestParam("id") Long id);
