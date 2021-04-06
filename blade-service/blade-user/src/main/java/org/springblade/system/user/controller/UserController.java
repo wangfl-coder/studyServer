@@ -133,7 +133,7 @@ public class UserController {
 	@ApiOperation(value = "新增或修改", notes = "传入User")
 	@PreAuth(RoleConstant.HAS_ROLE_ADMIN)
 	public R submit(@Valid @RequestBody User user) {
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.status(userService.submit(user));
 	}
 
@@ -144,7 +144,7 @@ public class UserController {
 	@ApiOperationSupport(order = 5)
 	@ApiOperation(value = "修改", notes = "传入User")
 	public R update(@Valid @RequestBody User user) {
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.status(userService.updateUser(user));
 	}
 
@@ -156,7 +156,7 @@ public class UserController {
 	@ApiOperation(value = "删除", notes = "传入id集合")
 	@PreAuth(RoleConstant.HAS_ROLE_ADMIN)
 	public R remove(@RequestParam String ids) {
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.status(userService.removeUser(ids));
 	}
 
@@ -202,7 +202,7 @@ public class UserController {
 	@ApiOperationSupport(order = 10)
 	@ApiOperation(value = "修改基本信息", notes = "传入User")
 	public R updateInfo(@Valid @RequestBody User user) {
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.status(userService.updateUserInfo(user));
 	}
 

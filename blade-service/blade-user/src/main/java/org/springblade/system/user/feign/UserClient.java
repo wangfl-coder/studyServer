@@ -103,13 +103,14 @@ public class UserClient implements IUserClient {
 	@Override
 	@PostMapping(UPDATE_USER)
 	public R<Boolean> updateUser(@RequestBody User user) {
-		CacheUtil.clear(USER_CACHE);
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.data(service.updateUser(user));
 	}
 
 	@Override
 	@PostMapping(REMOVE_USER)
 	public R<Boolean> removeUser(String tenantIds) {
+		CacheUtil.clear(USER_CACHE, Boolean.TRUE);
 		return R.data(service.remove(Wrappers.<User>query().lambda().in(User::getTenantId, Func.toStrList(tenantIds))));
 	}
 

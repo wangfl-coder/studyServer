@@ -103,6 +103,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 				Random random = Holder.RANDOM;
 				boolean insertRealSet = random.nextInt(100) < task.getRealSetRate() ? true : false;
+				if (template.getRealSetProcessDefinitions().equals("{}"))
+					insertRealSet = false;
 				if (insertRealSet && finalNoHomepage) {		//需要添加真集又不需要标主页，直接加到流水线中
 					Map<String, String> compositionLabelMap = startRealSetProcess(template.getRealSetProcessDefinitions(), task);
 					if (compositionLabelMap != null) {
@@ -179,28 +181,20 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
-	// @GlobalTransactional
 	public Map<String, String> startRealSetProcess(String realSetProcessDefinitions,
 											   Task task) {
-		R<List<RealSetExpert>> expertsRealSetResult = realSetExpertClient.getExpertsByTaskId(task.getId());
-		if (!expertsRealSetResult.isSuccess()) {
+		R<RealSetExpert> expertRes = realSetExpertClient.getAnAvailRealSetExpert(task.getId());
+		if (!expertRes.isSuccess()) {
 			return null;
 		}
-		List<RealSetExpert> expertsRealSet = expertsRealSetResult.getData();
-//		Random random = Holder.RANDOM;
-//		RealSetExpert expert = expertsRealSet.get(random.nextInt(expertsRealSet.size()));
-		Optional<RealSetExpert> expertRes = expertsRealSet.stream().filter(elem -> elem.getStatus().equals(1)).findAny();
-		if (!expertRes.isPresent()) {
-			return null;
-		}
-		RealSetExpert expert = expertRes.get();
+		RealSetExpert expert = expertRes.getData();
 		String businessTable = FlowUtil.getBusinessTable(ProcessConstant.LABEL_KEY);
 
 		JSONObject realSetJSONObject = JSONObject.parseObject(realSetProcessDefinitions);
 		Map<String, String> resultMap = new HashMap<>();
 		realSetJSONObject.entrySet().forEach(entry -> {
 			LabelTask labelTask = new LabelTask();
+			labelTask.setTenantId(task.getTenantId());
 			labelTask.setProcessDefinitionId((String)entry.getValue());
 			// 保存任务
 			labelTask.setCreateTime(DateUtil.now());
@@ -224,8 +218,6 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				throw new ServiceException("开启流程失败");
 			}
 		});
-		expert.setStatus(RealSetExpertStatusEnum.USED.getNum());	//已使用
-		realSetExpertClient.saveExpert(expert);
 		return resultMap;
 	}
 
@@ -360,7 +352,8 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 
 	@Override
 	public List<CompositionClaimListVO> compositionClaimList(List<String> roleAliases) {
-		return baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
+		List<CompositionClaimListVO> res = baseMapper.compositionClaimList(roleAliases, AuthUtil.getUserId());
+		return res;
 	}
 
 	private Kv createProcessVariables(Task task, LabelTask labelTask) {

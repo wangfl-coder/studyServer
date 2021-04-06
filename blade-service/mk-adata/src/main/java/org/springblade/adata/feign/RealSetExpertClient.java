@@ -23,6 +23,7 @@ import org.springblade.adata.entity.RealSetExpert;
 import org.springblade.adata.service.IExpertService;
 import org.springblade.adata.service.IRealSetExpertService;
 import org.springblade.core.mp.support.Condition;
+import org.springblade.core.redis.lock.RedisLock;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Notice Feign
@@ -78,5 +80,17 @@ public class RealSetExpertClient implements IRealSetExpertClient {
 		return R.status(res);
 	}
 
-
+	@Override
+	@RedisLock(value="lock:realset:get_an_avail_realset_expert")
+	@GetMapping(GET_AN_AVAIL_REALSET_EXPERT)
+	public R<RealSetExpert> getAnAvailRealSetExpert(@RequestParam("taskId") Long taskId) {
+		List<RealSetExpert> experts = service.list(Wrappers.<RealSetExpert>query().lambda().eq(RealSetExpert::getTaskId, taskId));
+		Optional<RealSetExpert> expertRes = experts.stream().filter(elem -> elem.getStatus().equals(1)).findAny();
+		if (!expertRes.isPresent()) {
+			return R.fail("无可用专家");
+		}
+		RealSetExpert expert = expertRes.get();
+		boolean temp2 = service.update(Wrappers.<RealSetExpert>update().lambda().set(RealSetExpert::getStatus, 2).eq(RealSetExpert::getId, expert.getId()));
+		return R.data(expert);
+	}
 }

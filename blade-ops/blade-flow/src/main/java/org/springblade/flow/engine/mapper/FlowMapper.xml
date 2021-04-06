@@ -29,6 +29,17 @@
         <result column="role_alias" property="roleAlias"/>
         <result column="is_deleted" property="isDeleted"/>
     </resultMap>
+    <resultMap id="compositionClaimListResultMap" type="org.springblade.task.vo.CompositionClaimListVO">
+        <result column="id" property="compositionId"/>
+        <result column="name" property="name"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+    </resultMap>
+
+    <resultMap id="compositionClaimCountResultMap" type="org.springblade.task.vo.CompositionClaimCountVO">
+        <id column="id" property="compositionId"/>
+        <result column="name" property="name"/>
+        <result column="count(c.id)" property="count"/>
+    </resultMap>
 
     <update id="updateStatistic">
         update bladex.mk_statistics s
@@ -114,5 +125,95 @@
             #{item}
         </foreach>
         ) u
+    </select>
+
+    <select id="getCompositionClaimCountByRoleAlias" resultMap="compositionClaimCountResultMap">
+        SELECT c.id,c.name,count(c.id) FROM
+        bladex.mk_task_label tl
+        inner join bladex_flow.ACT_HI_TASKINST flow
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+        inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        ON id.TASK_ID_=flow.ID_
+        inner join bladex.mk_template_composition tc
+        ON tl.template_id=tc.template_id
+        inner join bladex.mk_composition c
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="roleAlias" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.name=flow.NAME_
+        AND not exists (
+            select PROC_INST_ID_ from bladex_flow.ACT_RU_VARIABLE
+            where PROC_INST_ID_=tl.process_instance_id and NAME_ in
+            <foreach item="item" index="index" collection="compositionList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        )
+        group by c.id
+    </select>
+
+    <select id="compositionClaimList" resultMap="compositionClaimListResultMap">
+        SELECT c.id,c.name,tl.process_instance_id FROM
+            bladex.mk_task_label tl
+            inner join bladex_flow.ACT_HI_TASKINST flow
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+            inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        ON id.TASK_ID_=flow.ID_
+            inner join bladex.mk_template_composition tc
+        ON tl.template_id=tc.template_id
+            inner join bladex.mk_composition c
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="roleAlias" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.name=flow.NAME_
+    </select>
+
+    <select id="getCompositionsByRoleAlias" resultType="java.lang.String">
+        SELECT c.name FROM
+        bladex.mk_task_label tl
+        inner join bladex_flow.ACT_HI_TASKINST flow
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+        inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        ON id.TASK_ID_=flow.ID_
+        inner join bladex.mk_template_composition tc
+        ON tl.template_id=tc.template_id
+        inner join bladex.mk_composition c
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="roleAlias" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.name=flow.NAME_
+        GROUP BY c.id
+    </select>
+
+    <select id="claimOneByCompositionId" resultType="java.lang.String">
+        SELECT flow.ID_ FROM
+        bladex.mk_task_label tl
+        inner join bladex_flow.ACT_HI_TASKINST flow
+        ON tl.process_instance_id = flow.PROC_INST_ID_
+        inner join bladex_flow.ACT_HI_IDENTITYLINK id
+        ON id.TASK_ID_=flow.ID_
+        inner join bladex.mk_template_composition tc
+        ON tl.template_id=tc.template_id
+        inner join bladex.mk_composition c
+        ON tc.composition_id=c.id
+        WHERE ISNULL(flow.ASSIGNEE_) AND tc.is_deleted=0 AND id.GROUP_ID_ in
+        <foreach item="item" index="index" collection="roleAlias" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.name=flow.NAME_
+        AND c.id=#{compositionId}
+        AND not exists (
+        select PROC_INST_ID_ from bladex_flow.ACT_RU_VARIABLE
+        where PROC_INST_ID_=tl.process_instance_id and NAME_ in
+        <foreach item="item" index="index" collection="compositionList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+        order by flow.LAST_UPDATED_TIME_ desc limit 1
     </select>
 </mapper>
