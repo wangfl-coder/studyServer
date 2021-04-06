@@ -63,7 +63,6 @@ public class UserLogController {
 	@ApiOperationSupport(order = 1)
 	@ApiOperation(value = "查看详情", notes = "传入id")
 	@GetMapping("/detail")
-	@PreAuth(RoleConstant.HAS_ROLE_ADMIN)
 	public R<UserLogVO> detail(UserLog user) {
 		UserLog detail = userLogService.getOne(Condition.getQueryWrapper(user));
 		return R.data(UserLogWrapper.build().entityVO(detail));
@@ -90,7 +89,6 @@ public class UserLogController {
 	})
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "列表", notes = "传入account和realName")
-	@PreAuth(RoleConstant.HAS_ROLE_ADMIN)
 	public R<IPage<UserLogVO>> list(@ApiIgnore @RequestParam Map<String, Object> user, Query query, BladeUser bladeUser) {
 		QueryWrapper<UserLog> queryWrapper = Condition.getQueryWrapper(user, UserLog.class);
 		IPage<UserLog> pages = userLogService.page(Condition.getPage(query), (!bladeUser.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID)) ? queryWrapper.lambda().eq(UserLog::getTenantId, bladeUser.getTenantId()) : queryWrapper);
@@ -107,7 +105,6 @@ public class UserLogController {
 	})
 	@ApiOperationSupport(order = 3)
 	@ApiOperation(value = "列表", notes = "传入account和realName")
-	@PreAuth(RoleConstant.HAS_ROLE_ADMIN)
 	public R<IPage<UserLogVO>> page(@ApiIgnore UserLog user, Query query, Long deptId, BladeUser bladeUser) {
 		IPage<UserLog> pages = userLogService.selectUserPage(Condition.getPage(query), user, deptId, (bladeUser.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID) ? StringPool.EMPTY : bladeUser.getTenantId()));
 		return R.data(UserLogWrapper.build().pageVO(pages));
@@ -130,7 +127,6 @@ public class UserLogController {
 	@ApiOperationSupport(order = 5)
 	@ApiOperation(value = "修改", notes = "传入UserLog")
 	public R update(@Valid @RequestBody UserLog userLog) {
-//		CacheUtil.clear(USER_CACHE);
 		return R.status(userLogService.updateById(userLog));
 	}
 
@@ -141,7 +137,6 @@ public class UserLogController {
 	@ApiOperationSupport(order = 4)
 	@ApiOperation(value = "新增或修改", notes = "传入UserLog")
 	public R submit(@Valid @RequestBody UserLog user) {
-//		CacheUtil.clear(USER_CACHE);
 		return R.status(userLogService.saveOrUpdate(user));
 	}
 
@@ -153,7 +148,6 @@ public class UserLogController {
 	@ApiOperationSupport(order = 6)
 	@ApiOperation(value = "删除", notes = "传入id集合")
 	public R remove(@RequestParam String ids) {
-//		CacheUtil.clear(USER_CACHE);
 		return R.status(userLogService.deleteLogic(Func.toLongList(ids)));
 	}
 
