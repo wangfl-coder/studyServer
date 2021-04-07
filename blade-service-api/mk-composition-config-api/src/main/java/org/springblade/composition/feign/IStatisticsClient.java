@@ -17,7 +17,7 @@
 package org.springblade.composition.feign;
 
 
-import feign.Param;
+
 import org.springblade.common.constant.LauncherConstant;
 import org.springblade.core.tool.api.R;
 import org.springblade.core.tool.support.Kv;
@@ -90,13 +90,13 @@ public interface IStatisticsClient {
 	R ifNeedToRemoveBasicInfoStatistics(@RequestParam Long labelTaskId, @RequestParam Long templateId, @RequestParam Long compositionId);
 
 	/**
-	 * 更新statistics中的is_wrong
+	 * 更新statistics中的is_wrong为0和feedback_status为3
 	 */
 	@GetMapping(IF_NEED_TO_UPDATE_STATISITIC_ISWRONG_FEEDBACKSTATUS)
 	R<Boolean> ifNeedToUpdateStatisticIsWrongFeedbackStatus(@RequestParam Long compositionId, @RequestParam Long subTaskId, @RequestParam Long userId);
 
 	/**
-	 * 更新statistics中feedback_status，0未审核、1已通过、2已驳回
+	 * 更新statistics中feedback_status，1.未审核、2.审核中、3.已通过、4.已驳回
 	 * @param compositionId
 	 * @param subTaskId
 	 * @param userId

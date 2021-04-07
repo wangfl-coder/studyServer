@@ -216,13 +216,15 @@ public class StatisticsClient implements IStatisticsClient {
 		Statistics statistics = statisticsService.getOne(queryWrapper);
 		if (statistics != null){
 			statistics.setIsWrong(0);
-			statistics.setFeedbackStatus(1);
+			//1.未审核、2.审核中、3.已通过、2.已驳回
+			statistics.setFeedbackStatus(3);
 			Boolean is_success = statisticsService.saveOrUpdate(statistics);
 			//return R.success("修改成功");
 			return R.data(is_success);
 		}
 		return R.data(false);
 	}
+
 
 	@Override
 	public R<Boolean> ifNeedToUpdateStatisticFeedbackStatus(Integer status, Long compositionId, Long subTaskId, Long userId) {
