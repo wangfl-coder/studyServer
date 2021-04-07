@@ -23,6 +23,8 @@ import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.UserInspectionDTO;
 import org.springblade.composition.dto.statistics.*;
 import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
+import org.springblade.composition.vo.StatisticsTaskVO;
 
 import java.util.List;
 
@@ -183,4 +185,40 @@ public interface StatisticsMapper extends BaseMapper<Statistics> {
 	 * @return
 	 */
 	Integer userTotalCount(@Param("annotationType")Integer annotationType, @Param("userId")Long userId, @Param("refreshTime")String refreshTime);
+
+	/**
+	 * 获取用户错误列表
+	 * @param userId
+	 * @param compositionName
+	 * @param offset
+	 * @param pageSize
+	 *
+	 * @return
+	 */
+	List<StatisticsTaskVO> getUserWrongList(@Param("userId")Long userId,
+											@Param("isWrong")Integer isWrong,
+											@Param("compositionName")String compositionName,
+											@Param("expertId")String expertId,
+											@Param("personId")Long personId,
+											@Param("personName")String personName,
+											@Param("startTime")String startTime,
+											@Param("endTime")String endTime,
+											@Param("offset")Integer offset,
+											@Param("pageSize")Integer pageSize);
+
+	/**
+	 * 获取用户错误总数
+	 * @param userId
+	 * @param compositionName
+	 *
+	 * @return
+	 */
+	List<StatisticsTaskVO> getUserWrongListAll(@Param("userId")Long userId,
+							  @Param("isWrong")Integer isWrong,
+							  @Param("compositionName")String compositionName,
+							  @Param("expertId")String expertId,
+							  @Param("personId")Long personId,
+							  @Param("personName")String personName,
+							  @Param("startTime")String startTime,
+							  @Param("endTime")String endTime);
 }

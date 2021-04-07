@@ -160,6 +160,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
 				labelTask.setTemplateId(task.getTemplateId());
 				labelTask.setTaskId(task.getId());
+				labelTask.setExpertId(expert.getExpertId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
 				labelTask.setType(LabelTaskTypeEnum.LABEL.getNum());	//标注
@@ -208,6 +209,7 @@ public class LabelTaskServiceImpl extends BaseServiceImpl<LabelTaskMapper, Label
 				labelTask.setProcessInstanceId(result.getData().getProcessInstanceId());
 				labelTask.setTemplateId(task.getTemplateId());
 				labelTask.setTaskId(task.getId());
+				labelTask.setExpertId(expert.getExpertId());
 				labelTask.setPersonId(expert.getId());
 				labelTask.setPersonName(expert.getName());
 				labelTask.setType(LabelTaskTypeEnum.REAL_SET.getNum());	//真集

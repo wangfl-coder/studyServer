@@ -30,6 +30,9 @@ public class SingleFlow extends BladeFlow{
 	@ApiModelProperty(value = "质检任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long inspectionTaskId;
+	@ApiModelProperty(value = "合并专家任务id")
+	@JsonSerialize(using = ToStringSerializer.class)
+	private Long mergeExpertTaskId;
 	@ApiModelProperty(value = "标注子任务id")
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long labelTaskId;

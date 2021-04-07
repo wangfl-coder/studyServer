@@ -24,11 +24,14 @@ import org.springblade.composition.mapper.StatisticsMapper;
 import org.springblade.composition.service.ILogBalanceService;
 import org.springblade.composition.service.ILogPointsService;
 import org.springblade.composition.service.IStatisticsService;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
+import org.springblade.composition.vo.StatisticsTaskVO;
 import org.springblade.core.cache.utils.CacheUtil;
 import org.springblade.core.mp.base.BaseServiceImpl;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.secure.utils.AuthUtil;
 import org.springblade.core.tool.utils.BeanUtil;
+import org.springblade.core.tool.utils.Func;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.taskLog.entity.UserLog;
 import org.springblade.system.cache.DictBizCache;
@@ -40,6 +43,7 @@ import org.springblade.taskLog.feign.IUserLogClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.springblade.core.cache.constant.CacheConstant.USER_CACHE;
@@ -168,5 +172,80 @@ public class StatisticsServiceImpl extends BaseServiceImpl<StatisticsMapper, Sta
 		}
 
 		return true;
+	}
+
+	@Override
+	public List<StatisticsTaskVO> getUserWrongList(Map<String, Object> statistics, Integer offset, Integer pageSize) {
+		Long userId = null;
+		if (Func.isNotEmpty(statistics.get("userId"))) {
+			userId = Long.valueOf((String)statistics.get("userId"));
+		}else {
+			userId = null;
+		}
+		String labelerIdStr = (String)statistics.get("labelerId");
+		Integer isWrong = null;
+		if (Func.isNotEmpty(statistics.get("isWrong"))) {
+			isWrong = Integer.valueOf((String)statistics.get("isWrong"));
+		}else {
+			isWrong = null;
+		}
+		String compositionName = (String)statistics.get("compositionName");
+		String expertId = (String)statistics.get("expertId");
+		Long personId = null;
+		if (Func.isNotEmpty(statistics.get("personId"))) {
+			personId = Long.valueOf((String)statistics.get("personId"));
+		}else {
+			personId = null;
+		}
+		String personName = (String)statistics.get("personName");
+		String startTime = (String)statistics.get("startTime");
+		String endTime = (String)statistics.get("endTime");
+		List<StatisticsTaskVO> list = statisticsMapper.getUserWrongList(userId,
+			isWrong,
+			compositionName,
+			expertId,
+			personId,
+			personName,
+			startTime,
+			endTime,
+			offset,
+			pageSize);
+		return list;
+	}
+
+	@Override
+	public List<StatisticsTaskVO> getUserWrongListAll(Map<String, Object> statistics) {
+		Long userId = null;
+		if (Func.isNotEmpty(statistics.get("userId"))) {
+			userId = Long.valueOf((String)statistics.get("userId"));
+		}else {
+			userId = null;
+		}
+		String labelerIdStr = (String)statistics.get("labelerId");
+		Integer isWrong = null;
+		if (Func.isNotEmpty(statistics.get("isWrong"))) {
+			isWrong = Integer.valueOf((String)statistics.get("isWrong"));
+		}else {
+			isWrong = null;
+		}
+		String compositionName = (String)statistics.get("compositionName");
+		String expertId = (String)statistics.get("expertId");
+		Long personId = null;
+		if (Func.isNotEmpty(statistics.get("personId"))) {
+			personId = Long.valueOf((String)statistics.get("personId"));
+		}else {
+			personId = null;
+		}
+		String personName = (String)statistics.get("personName");
+		String startTime = (String)statistics.get("startTime");
+		String endTime = (String)statistics.get("endTime");
+		return statisticsMapper.getUserWrongListAll(userId,
+			isWrong,
+			compositionName,
+			expertId,
+			personId,
+			personName,
+			startTime,
+			endTime);
 	}
 }

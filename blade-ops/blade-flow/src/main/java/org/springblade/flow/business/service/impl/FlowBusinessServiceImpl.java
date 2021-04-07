@@ -55,6 +55,8 @@ import org.springblade.flow.engine.utils.FlowCache;
 
 import org.springblade.system.cache.SysCache;
 import org.springblade.system.entity.Role;
+import org.springblade.task.entity.MergeExpertTask;
+import org.springblade.task.feign.IMergeExpertTaskClient;
 import org.springblade.task.vo.CompositionClaimCountVO;
 import org.springblade.task.vo.CompositionClaimListVO;
 import org.springblade.task.vo.ExpertLabelTaskVO;
@@ -85,6 +87,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 	private final ILabelTaskClient labelTaskClient;
 	private final ITaskClient taskClient;
 	private final IQualityInspectionTaskClient qualityInspectionTaskClient;
+	private final IMergeExpertTaskClient mergeExpertTaskClient;
 	private final IExpertClient expertClient;
 	private final FlowMapper flowMapper;
 	private final IStatisticsClient statisticsClient;
@@ -135,16 +138,6 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 		TaskQuery claimRoleWithoutTenantIdQuery = taskService.createTaskQuery().taskWithoutTenantId().taskCandidateGroupIn(Func.toStrList(taskGroup))
 			.includeProcessVariables().active().orderByTaskPriority().desc().orderByTaskCreateTime().desc();
 
-//ws0204
-//		List<String> roleAliases = Func.toStrList(taskGroup);
-//		int idx = 0;
-//		for (String roleAlias : roleAliases) {
-//			claimRoleWithoutTenantIdQuery.processVariableNotExists(roleAlias+"-"+AuthUtil.getUserId());
-//			idx++;
-//			if (idx > 8)
-//				break;
-//		}
-
 		// 构建列表数据
 		buildFlowTaskList(bladeFlow, flowList, claimUserQuery, page, FlowEngineConstant.STATUS_CLAIM);
 //		buildFlowTaskList(bladeFlow, flowList, claimRoleWithTenantIdQuery, page, FlowEngineConstant.STATUS_CLAIM);
@@ -157,20 +150,10 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 //		long count = claimRoleWithoutTenantIdQuery.count();
 		int count = flowList.size();
 		page.setTotal(count);
-		// 设置总数u
-//		List<String> taskGroupList = Func.toStrList(taskGroup);
-//		R res = labelTaskClient.queryLabelTaskClaimCount(taskGroupList);
-//		Integer total = (Integer)res.getData();
-//		if(bladeFlow.getCategoryName().equals("标注流程")){
-//			page.setTotal(total);
-//		} else if(bladeFlow.getCategoryName().equals("质检流程")){
-//			page.setTotal(count-total);
-//		}
+
 		// 设置数据
 		page.setRecords(flowList);
-//		int start = Func.toInt((page.getCurrent() - 1) * page.getSize());
-//		long end = (start + page.getSize()) > flowList.size() ? flowList.size() : (start + page.getSize());
-//		page.setRecords(flowList.subList(start, (int)end));
+
 		return page;
 	}
 
@@ -357,7 +340,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			}
 			flow.setStatus(FlowEngineConstant.STATUS_FINISH);
 
-			if (bladeFlow.getCategoryName().equals("标注流程")) {
+			if ("标注流程".equals(bladeFlow.getCategoryName())) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(historicProcessInstance.getId()).getData();
 				if(labelTask.getId() != null) {
 					flow.setTemplateId(labelTask.getTemplateId());
@@ -366,7 +349,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setSubTaskId(labelTask.getId());
 					flowList.add(flow);
 				}
-			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+			} else if ("质检流程".equals(bladeFlow.getCategoryName())) {
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(historicProcessInstance.getId()).getData();
 				if(qualityInspectionTask.getId() != null) {
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -378,8 +361,18 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
 					flowList.add(flow);
 				}
+			} else if ("合并专家流程".equals(bladeFlow.getCategoryName())) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(historicProcessInstance.getId()).getData();
+				if(mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
+					flowList.add(flow);
+				}
 			}
-
 		});
 
 		// 计算总数
@@ -497,6 +490,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
 					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					flowList.add(flow);
+				}
+			} else if ("合并专家流程".equals(bladeFlow.getCategoryName())) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(historicProcessInstance.getId()).getData();
+				if(mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
 					flowList.add(flow);
 				}
 			}
@@ -939,7 +943,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
 			if (Func.isNotEmpty(inspectionType))
 				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
-			if (bladeFlow.getCategoryName().equals("标注流程")) {
+			if ("标注流程".equals(bladeFlow.getCategoryName())) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 				if (labelTask!=null && labelTask.getId() != null) {
 					flow.setTemplateId(labelTask.getTemplateId());
@@ -948,7 +952,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setSubTaskId(labelTask.getId());
 					flowList.add(flow);
 				}
-			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+			} else if ("质检流程".equals(bladeFlow.getCategoryName())) {
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 				if (qualityInspectionTask!=null && qualityInspectionTask.getId() != null) {
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -959,6 +963,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
 					flow.setLabelProcessInstanceId(qualityInspectionTask.getLabelProcessInstanceId());
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					flowList.add(flow);
+				}
+			} else if ("合并专家流程".equals(bladeFlow.getCategoryName())) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(historicProcessInstance.getId()).getData();
+				if(mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
 					flowList.add(flow);
 				}
 			}
@@ -1041,7 +1056,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			List<ExtensionElement> inspectionType = extensionElements.get(ProcessConstant.INSPECTION_TYPE);
 			if (Func.isNotEmpty(inspectionType))
 				flow.setInspectionType(Integer.valueOf(inspectionType.get(0).getElementText()));
-			if (bladeFlow.getCategoryName().equals("标注流程")) {
+			if ("标注流程".equals(bladeFlow.getCategoryName())) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 				if (labelTask != null && labelTask.getId() != null) {
 					flow.setTemplateId(labelTask.getTemplateId());
@@ -1050,7 +1065,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setSubTaskId(labelTask.getId());
 					flowList.add(flow);
 				}
-			} else if (bladeFlow.getCategoryName().equals("质检流程")) {
+			} else if ("质检流程".equals(bladeFlow.getCategoryName())) {
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 				if (qualityInspectionTask != null && qualityInspectionTask.getId() != null) {
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -1061,6 +1076,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
 					flow.setLabelProcessInstanceId(qualityInspectionTask.getLabelProcessInstanceId());
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					flowList.add(flow);
+				}
+			} else if ("合并专家流程".equals(bladeFlow.getCategoryName())) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(historicProcessInstance.getId()).getData();
+				if(mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
 					flowList.add(flow);
 				}
 			}
@@ -1131,7 +1157,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setProcessInstanceId(task.getProcessInstanceId());
 
 
-			if (categoryName.equals("标注流程")) {
+			if ("标注流程".equals(categoryName)) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 //					log.error("processInstanceId:"+task.getProcessInstanceId());
 //					log.error("taskId:"+task.getId());
@@ -1146,7 +1172,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					}
 					return flow;
 				}
-			} else if (categoryName.equals("质检流程")) {
+			} else if ("质检流程".equals(categoryName)) {
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 				if(qualityInspectionTask.getId()!=null){
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -1156,6 +1182,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
 					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					return flow;
+				}
+			}else if ("合并专家流程".equals(categoryName)) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(task.getProcessInstanceId()).getData();
+				if (mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
 					return flow;
 				}
 			}
@@ -1225,7 +1262,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 			flow.setProcessInstanceId(task.getProcessInstanceId());
 
 
-			if (categoryName.equals("标注流程")) {
+			if ("标注流程".equals(categoryName)) {
 				LabelTask labelTask = labelTaskClient.queryLabelTask(task.getProcessInstanceId()).getData();
 //					log.error("processInstanceId:"+task.getProcessInstanceId());
 //					log.error("taskId:"+task.getId());
@@ -1240,7 +1277,7 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					}
 					return flow;
 				}
-			} else if (categoryName.equals("质检流程")) {
+			} else if ("质检流程".equals(categoryName)) {
 				QualityInspectionTask qualityInspectionTask = qualityInspectionTaskClient.queryQualityInspectionTask(task.getProcessInstanceId()).getData();
 				if(qualityInspectionTask.getId()!=null){
 					flow.setTemplateId(qualityInspectionTask.getTemplateId());
@@ -1250,6 +1287,17 @@ public class FlowBusinessServiceImpl implements FlowBusinessService {
 					flow.setInspectionTaskId(qualityInspectionTask.getInspectionTaskId());
 					flow.setLabelTaskId(qualityInspectionTask.getLabelTaskId());
 					flow.setAnnotationTaskId(qualityInspectionTask.getTaskId());
+					return flow;
+				}
+			} else if ("合并专家流程".equals(categoryName)) {
+				MergeExpertTask mergeExpertTask = mergeExpertTaskClient.queryMergeExpertTask(task.getProcessInstanceId()).getData();
+				if (mergeExpertTask.getId() != null) {
+					flow.setPersonId(mergeExpertTask.getPersonId());
+					flow.setPersonName(mergeExpertTask.getPersonName());
+					flow.setSubTaskId(mergeExpertTask.getId());
+					flow.setMergeExpertTaskId(mergeExpertTask.getMergeTaskId());
+					flow.setLabelTaskId(mergeExpertTask.getLabelTaskId());
+					flow.setAnnotationTaskId(mergeExpertTask.getTaskId());
 					return flow;
 				}
 			}

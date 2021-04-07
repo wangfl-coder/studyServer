@@ -9,7 +9,7 @@ public enum MergeExpertTaskStatusEnum {
 
 	DEFAULT(1),
 	PURE_SUPED(2),
-	EXPORTED(3);
+	STARTED(3);
 //	EXPORTED(4);
 
 	final int num;

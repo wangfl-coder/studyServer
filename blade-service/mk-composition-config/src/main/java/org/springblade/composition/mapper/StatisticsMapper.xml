@@ -424,4 +424,80 @@
             and s.update_time &gt; #{refreshTime}
         </if>
     </select>
+
+    <select id="getUserWrongList" resultType="org.springblade.composition.vo.StatisticsTaskVO">
+        select s.*,c.name as composition_name,tl.expert_id,tl.person_id,tl.person_name,
+        if(s.is_wrong=2,
+            (select update_time from mk_annotation_data_errata err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1),
+            (select update_time from mk_annotation_data err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1))
+        as label_time from mk_statistics s
+        inner join mk_task_label tl on s.sub_task_id=tl.id
+        inner join mk_composition c on s.composition_id=c.id
+        <if test="isWrong!=null">
+            where s.is_wrong=#{isWrong}
+        </if>
+        <if test="isWrong==null">
+            where s.is_wrong>0
+        </if>
+        <if test="userId!=null">
+            and s.user_id=#{userId}
+        </if>
+        <if test="compositionName!=null">
+            and c.name=#{compositionName}
+        </if>
+        <if test="expertId!=null">
+            and tl.expert_id=#{expertId}
+        </if>
+        <if test="personId!=null">
+            and tl.person_id=#{personId}
+        </if>
+        <if test="personName!=null">
+            and tl.person_name=#{personName}
+        </if>
+        <if test="startTime!=null">
+            and label_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and label_time &lt; #{endTime}
+        </if>
+        order by label_time desc
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="getUserWrongListAll" resultType="org.springblade.composition.vo.StatisticsTaskVO">
+        select s.*,c.name as composition_name,tl.expert_id,tl.person_id,tl.person_name,
+        if(s.is_wrong=2,
+        (select update_time from mk_annotation_data_errata err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1),
+        (select update_time from mk_annotation_data err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1))
+        as label_time from mk_statistics s
+        inner join mk_task_label tl on s.sub_task_id=tl.id
+        inner join mk_composition c on s.composition_id=c.id
+        <if test="isWrong!=null">
+            where s.is_wrong=#{isWrong}
+        </if>
+        <if test="isWrong==null">
+            where s.is_wrong>0
+        </if>
+        <if test="userId!=null">
+            and s.user_id=#{userId}
+        </if>
+        <if test="compositionName!=null">
+            and c.name=#{compositionName}
+        </if>
+        <if test="expertId!=null">
+            and tl.expert_id=#{expertId}
+        </if>
+        <if test="personId!=null">
+            and tl.person_id=#{personId}
+        </if>
+        <if test="personName!=null">
+            and tl.person_name=#{personName}
+        </if>
+        <if test="startTime!=null">
+            and label_time &gt; #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and label_time &lt; #{endTime}
+        </if>
+    </select>
 </mapper>

@@ -16,6 +16,7 @@ import org.springblade.flow.core.feign.IFlowClient;
 import org.springblade.flow.core.utils.FlowUtil;
 import org.springblade.flow.core.utils.TaskUtil;
 import org.springblade.task.entity.*;
+import org.springblade.task.enums.MergeExpertTaskStatusEnum;
 import org.springblade.task.mapper.MergeExpertTaskMapper;
 import org.springblade.task.service.MergeExpertTaskService;
 import org.springblade.task.vo.ExpertQualityInspectionTaskVO;
@@ -53,6 +54,7 @@ public class MergeExpertTaskServiceImpl extends BaseServiceImpl<MergeExpertTaskM
 				mergeExpertTask.setMergeTaskId(task.getId());
 				mergeExpertTask.setTaskType(task.getTaskType());
 				mergeExpertTask.setMergeType(mergeType);
+				mergeExpertTask.setStatus(MergeExpertTaskStatusEnum.STARTED.getNum());
 				updateById(mergeExpertTask);
 			} else {
 				throw new ServiceException("开启流程失败");

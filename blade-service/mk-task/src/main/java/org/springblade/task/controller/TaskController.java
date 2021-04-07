@@ -25,6 +25,7 @@ import org.springblade.core.tool.utils.DateUtil;
 import org.springblade.core.tool.utils.StringUtil;
 import org.springblade.core.tool.utils.Func;
 import org.springblade.flow.core.feign.IFlowClient;
+import org.springblade.task.enums.MergeExpertTaskStatusEnum;
 import org.springblade.taskLog.entity.TaskLog;
 //import org.springblade.log.feign.ITaskLogClient;
 import org.springblade.flow.core.feign.IFlowEngineClient;
@@ -67,7 +68,6 @@ public class TaskController extends BladeController {
 	private TaskService taskService;
 	private IExpertClient expertClient;
 	private LabelTaskService labelTaskService;
-	private ILabelTaskClient iLabelTaskClient;
 	private QualityInspectionTaskService qualityInspectionTaskService;
 	private MergeExpertTaskService mergeExpertTaskService;
 	private IStatisticsClient statisticsClient;
@@ -214,8 +214,8 @@ public class TaskController extends BladeController {
 	@ApiOperation(value = "添加质检任务")
 	public R mergeExpertStartProcess(@RequestParam("taskId") Long taskId) {
 		Task task = taskService.getById(taskId);
-		List<MergeExpertTask> mergeTasks = mergeExpertTaskService.list(Wrappers.<MergeExpertTask>query().lambda().eq(MergeExpertTask::getTaskId, taskId));
-		List<MergeExpertTask> mergeTasksTodo = mergeTasks.stream().filter(x -> Func.equals(x.getStatus(), 2)).collect(Collectors.toList());
+		List<MergeExpertTask> mergeTasks = mergeExpertTaskService.list(Wrappers.<MergeExpertTask>query().lambda().eq(MergeExpertTask::getMergeTaskId, taskId));
+		List<MergeExpertTask> mergeTasksTodo = mergeTasks.stream().filter(x -> Func.equals(x.getStatus(), MergeExpertTaskStatusEnum.PURE_SUPED.getNum())).collect(Collectors.toList());
 		Boolean result;
 		try {
 			result = mergeExpertTaskService.startProcess(0, task, mergeTasksTodo);

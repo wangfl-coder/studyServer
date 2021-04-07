@@ -19,6 +19,7 @@ package org.springblade.composition.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,8 @@ import org.springblade.composition.mapper.StatisticsMapper;
 import org.springblade.composition.service.ICompositionService;
 import org.springblade.composition.service.IStatisticsService;
 import org.springblade.composition.service.ITemplateService;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
+import org.springblade.composition.vo.StatisticsTaskVO;
 import org.springblade.composition.vo.statistics.*;
 import org.springblade.core.boot.ctrl.BladeController;
 import org.springblade.core.mp.support.Condition;
@@ -320,14 +323,23 @@ public class StatisticsController extends BladeController {
 		@ApiImplicitParam(name = "subTaskId", value = "子任务id", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "templateId", value = "模版id", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "compositionId", value = "组合id", paramType = "query", dataType = "string"),
-		@ApiImplicitParam(name = "userId", value = "用户id", paramType = "query", dataType = "string"),
 		@ApiImplicitParam(name = "status", value = "子任务状态", paramType = "query", dataType = "integer"),
-		@ApiImplicitParam(name = "feedbackStatus", value = "反馈状态", paramType = "query", dataType = "integer")
+		@ApiImplicitParam(name = "feedbackStatus", value = "反馈状态", paramType = "query", dataType = "integer"),
+		@ApiImplicitParam(name = "userId", value = "标注员ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "isWrong", value = "错误来源 1.质检员 2.真题 3.多人对比", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "compositionName", value = "组合ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "expertId", value = "Aminer专家ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "personId", value = "专家ID", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "personName", value = "专家名", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", dataType = "string"),
+		@ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", dataType = "string")
 	})
 	@ApiOperation(value = "分页查询列表", notes = "传入param")
-	public R<IPage<Statistics>> listWrong(@ApiIgnore @RequestParam(required = false) Map<String, Object> param, Query query) {
-		LambdaQueryWrapper<Statistics> queryWrapper = Condition.getQueryWrapper(param, Statistics.class).lambda().gt(Statistics::getIsWrong, 0).orderByDesc(Statistics::getUpdateTime);
-		IPage<Statistics> pages = statisticsService.page(Condition.getPage(query), queryWrapper);
-		return R.data(pages);
+	public R<IPage<StatisticsTaskVO>> listWrong(@ApiIgnore @RequestParam Map<String, Object> param, Query query) {
+		List<StatisticsTaskVO> recordList = statisticsService.getUserWrongList(param, (query.getCurrent()-1)*query.getSize(), query.getSize());
+		int total = statisticsService.getUserWrongListAll(param).size();
+		IPage<StatisticsTaskVO> statisticsTaskVO = new Page(query.getCurrent(), query.getSize(), total);
+		statisticsTaskVO.setRecords(recordList);
+		return R.data(statisticsTaskVO);
 	}
 }

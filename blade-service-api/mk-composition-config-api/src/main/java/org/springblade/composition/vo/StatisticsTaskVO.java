@@ -55,17 +55,24 @@ public class StatisticsTaskVO extends Statistics {
 	private String compositionName;
 
 	/**
+	 * Aminer专家id
+	 */
+	@JsonSerialize(using = ToStringSerializer.class)
+	@ApiModelProperty(value = "Aminer专家id")
+	private String expertId;
+
+	/**
 	 * 专家id
 	 */
 	@JsonSerialize(using = ToStringSerializer.class)
 	@ApiModelProperty(value = "专家id")
-	private Long expertId;
+	private Long personId;
 
 	/**
 	 * 专家名
 	 */
 	@ApiModelProperty(value = "专家名")
-	private String expertName;
+	private String personName;
 
 	@DateTimeFormat(
 		pattern = "yyyy-MM-dd HH:mm:ss"

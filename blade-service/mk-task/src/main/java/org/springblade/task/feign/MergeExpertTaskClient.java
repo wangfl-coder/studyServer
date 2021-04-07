@@ -1,11 +1,13 @@
 package org.springblade.task.feign;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.AllArgsConstructor;
 import org.springblade.core.mp.support.Condition;
 import org.springblade.core.tenant.annotation.NonDS;
 import org.springblade.core.tool.api.R;
 import org.springblade.task.entity.MergeExpertTask;
+import org.springblade.task.entity.QualityInspectionTask;
 import org.springblade.task.service.MergeExpertTaskService;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -20,6 +22,14 @@ import static org.springblade.task.feign.IMergeExpertTaskClient.CHANGE_STATUS;
 public class MergeExpertTaskClient implements IMergeExpertTaskClient{
 
 	private final MergeExpertTaskService taskService;
+
+	@Override
+	public R<MergeExpertTask> queryMergeExpertTask(String processInstanceId) {
+		QueryWrapper<MergeExpertTask> taskQueryWrapper = new QueryWrapper<>();
+		taskQueryWrapper.eq("process_instance_id",processInstanceId);
+		MergeExpertTask task = taskService.getOne(taskQueryWrapper);
+		return R.data(task);
+	}
 
 	@Override
 	@PostMapping(SAVE_TASK)

@@ -16,12 +16,16 @@
  */
 package org.springblade.composition.service;
 
+import org.apache.ibatis.annotations.Param;
 import org.springblade.adata.entity.Expert;
 import org.springblade.composition.dto.statistics.TaskComposition;
 import org.springblade.composition.entity.Statistics;
+import org.springblade.composition.vo.AnnotationCompositionErrataVO;
+import org.springblade.composition.vo.StatisticsTaskVO;
 import org.springblade.core.mp.base.BaseService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 服务类
@@ -65,4 +69,22 @@ public interface IStatisticsService extends BaseService<Statistics> {
 	 * @return
 	 */
 	boolean calcReliabilityRate(Long userId);
+
+	/**
+	 * 获取用户错误列表
+	 * @param statistics
+	 * @param offset
+	 * @param pageSize
+	 *
+	 * @return
+	 */
+	List<StatisticsTaskVO> getUserWrongList(Map<String, Object> statistics, @Param("offset")Integer offset, @Param("pageSize")Integer pageSize);
+
+	/**
+	 * 获取用户错误总数
+	 * @param statistics
+	 *
+	 * @return
+	 */
+	List<StatisticsTaskVO> getUserWrongListAll(Map<String, Object> statistics);
 }
