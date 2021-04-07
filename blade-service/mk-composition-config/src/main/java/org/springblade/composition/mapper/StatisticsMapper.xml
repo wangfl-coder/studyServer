@@ -426,6 +426,7 @@
     </select>
 
     <select id="getUserWrongList" resultType="org.springblade.composition.vo.StatisticsTaskVO">
+        select * from (
         select s.*,c.name as composition_name,tl.expert_id,tl.person_id,tl.person_name,
         if(s.is_wrong=2,
             (select update_time from mk_annotation_data_errata err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1),
@@ -454,6 +455,13 @@
         <if test="personName!=null">
             and tl.person_name=#{personName}
         </if>
+        ) t
+        <if test="isWrong!=null">
+            where is_wrong=#{isWrong}
+        </if>
+        <if test="isWrong==null">
+            where is_wrong>0
+        </if>
         <if test="startTime!=null">
             and label_time &gt; #{startTime}
         </if>
@@ -465,6 +473,7 @@
     </select>
 
     <select id="getUserWrongListAll" resultType="org.springblade.composition.vo.StatisticsTaskVO">
+        select * from (
         select s.*,c.name as composition_name,tl.expert_id,tl.person_id,tl.person_name,
         if(s.is_wrong=2,
         (select update_time from mk_annotation_data_errata err where err.sub_task_id=s.sub_task_id and err.update_user=s.user_id limit 1),
@@ -492,6 +501,13 @@
         </if>
         <if test="personName!=null">
             and tl.person_name=#{personName}
+        </if>
+        ) t
+        <if test="isWrong!=null">
+            where is_wrong=#{isWrong}
+        </if>
+        <if test="isWrong==null">
+            where is_wrong>0
         </if>
         <if test="startTime!=null">
             and label_time &gt; #{startTime}
